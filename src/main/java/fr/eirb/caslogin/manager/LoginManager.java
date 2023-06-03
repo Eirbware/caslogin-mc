@@ -4,11 +4,8 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import fr.eirb.caslogin.exceptions.login.LoginAlreadyTakenException;
-import fr.eirb.caslogin.exceptions.login.LoginException;
-import fr.eirb.caslogin.exceptions.login.NotLoggedInException;
+import fr.eirb.caslogin.exceptions.login.*;
 import fr.eirb.caslogin.CasLogin;
-import fr.eirb.caslogin.exceptions.login.AlreadyLoggedInException;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
@@ -83,12 +80,16 @@ public final class LoginManager {
 		return CasLogin.INSTANCE.getServer().getOfflinePlayer(loggedPlayers.inverse().get(login));
 	}
 
-	public void banUser(String login){
-
+	public void banUser(String login) throws AlreadyBannedException{
+		if(!bannedUsers.add(login))
+			throw new AlreadyBannedException(login);
+		saveBannedPlayersToJson();
 	}
 
-	public void unbanUser(String login){
-
+	public void unbanUser(String login) throws NotBannedException {
+		if(!bannedUsers.remove(login))
+			throw new NotBannedException(login);
+		saveBannedPlayersToJson();
 	}
 
 	public Set<String> getBannedUsers(){

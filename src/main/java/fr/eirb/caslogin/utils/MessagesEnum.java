@@ -5,7 +5,7 @@ public enum MessagesEnum {
 
 	LOGOUT_SUCCESS("<green>You have been successfully logged out</green>"),
 
-	PLAYER_NOT_LOGGED_IN("<red>This user is not logged in!</red>"),
+	USER_NOT_LOGGED_IN("<red>This user is not logged in!</red>"),
 
 	NOT_LOGGED_IN("<red>You are not logged in!</red>"),
 
@@ -20,6 +20,12 @@ public enum MessagesEnum {
 	ASK_LOGIN("<red>Veuillez vous connecter avec la commande</red> <gold>/cas login</gold>"),
 
 	NOT_ENOUGH_PERMISSION("<red>Not enough permission</red>"),
+
+	BANNED("<red>You have been banned by an administrator.</red>"),
+
+	BAN_USER("<green>You have successfully banned the user</green> <gold><user></gold> <green>!</green>"),
+
+	ALREADY_BANNED("<red>The user</red> <gold><user></gold> <red>is already banned.</red>"),
 
 	NOT_AN_ADMIN("<red>The user</red> <gold><user></gold> <red>is not an administrator.</red>"),
 

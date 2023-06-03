@@ -2,16 +2,10 @@ package fr.eirb.caslogin.commands;
 
 import fr.eirb.caslogin.exceptions.configuration.AlreadyAdminException;
 import fr.eirb.caslogin.exceptions.configuration.NotAdminException;
-import fr.eirb.caslogin.exceptions.login.LoginAlreadyTakenException;
-import fr.eirb.caslogin.exceptions.login.LoginException;
+import fr.eirb.caslogin.exceptions.login.*;
 import fr.eirb.caslogin.manager.ConfigurationManager;
 import fr.eirb.caslogin.utils.MessagesEnum;
-import fr.eirb.caslogin.exceptions.login.AlreadyLoggedInException;
-import fr.eirb.caslogin.exceptions.login.NotLoggedInException;
 import fr.eirb.caslogin.manager.LoginManager;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.OfflinePlayer;
@@ -39,18 +33,33 @@ public class CasCommand implements CommandExecutor {
 		};
 	}
 
-	private boolean unbanSubCommand(CommandSender commandSender, String[] args) {
+	private boolean unbanSubCommand(CommandSender sender, String[] args) {
 		return false;
 	}
 
-	private boolean banSubCommand(CommandSender commandSender, String[] args) {
-		return false;
+	private boolean banSubCommand(CommandSender sender, String[] args) {
+		if (args.length < 2)
+			return false;
+		String userToBan = args[1];
+		try {
+			LoginManager.INSTANCE.banUser(userToBan);
+			sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.BAN_USER.str, Placeholder.unparsed("user", userToBan)));
+		} catch (AlreadyBannedException e) {
+			sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.ALREADY_BANNED.str, Placeholder.unparsed("user", userToBan)));
+		}
+		try {
+			OfflinePlayer playerFromLogin = LoginManager.INSTANCE.getLoggedPlayer(userToBan);
+			if(playerFromLogin.isOnline())
+				((Player) playerFromLogin).kick(MiniMessage.miniMessage().deserialize(MessagesEnum.BANNED.str));
+		} catch (NotLoggedInException ignored) {
+		}
+		return true;
 	}
 
 	private boolean adminSubCommand(CommandSender sender, String[] args) {
-		if(args.length != 3)
+		if (args.length != 3)
 			return false;
-		switch(args[1]){
+		switch (args[1]) {
 			case "add" -> addAdmin(sender, args);
 			case "remove" -> removeAdmin(sender, args);
 		}
@@ -59,13 +68,13 @@ public class CasCommand implements CommandExecutor {
 
 	private void addAdmin(CommandSender sender, String[] args) {
 		String adminToAdd = args[2];
-		try{
+		try {
 			ConfigurationManager.INSTANCE.addAdmin(adminToAdd);
 			sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.ADD_ADMIN_SUCCESS.str, Placeholder.unparsed("user", adminToAdd)));
 			OfflinePlayer playerToOp = LoginManager.INSTANCE.getLoggedPlayer(adminToAdd);
-			if(playerToOp.isOnline())
+			if (playerToOp.isOnline())
 				playerToOp.setOp(true);
-		}catch(AlreadyAdminException ex){
+		} catch (AlreadyAdminException ex) {
 			sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.ALREADY_ADMIN.str, Placeholder.unparsed("user", adminToAdd)));
 		} catch (NotLoggedInException ignored) {
 		}
@@ -73,19 +82,19 @@ public class CasCommand implements CommandExecutor {
 
 	private void removeAdmin(CommandSender sender, String[] args) {
 		String adminToRemove = args[2];
-		try{
+		try {
 			ConfigurationManager.INSTANCE.removeAdmin(adminToRemove);
 			sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.REMOVE_ADMIN_SUCCESS.str, Placeholder.unparsed("user", adminToRemove)));
 			OfflinePlayer playerToOp = LoginManager.INSTANCE.getLoggedPlayer(adminToRemove);
-			if(playerToOp.isOnline())
+			if (playerToOp.isOnline())
 				playerToOp.setOp(false);
-		}catch(NotAdminException ex){
+		} catch (NotAdminException ex) {
 			sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.NOT_AN_ADMIN.str, Placeholder.unparsed("user", adminToRemove)));
 		} catch (NotLoggedInException ignored) {
 		}
 	}
 
-	private boolean loginSubCommand(CommandSender sender, String[] args){
+	private boolean loginSubCommand(CommandSender sender, String[] args) {
 		if (sender instanceof Player player) {
 			if (args.length < 2)
 				return false;
@@ -105,14 +114,14 @@ public class CasCommand implements CommandExecutor {
 			} catch (LoginException e) {
 				throw new RuntimeException(e);
 			}
-		}else{
+		} else {
 			sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.PLAYER_EXCLUSIVE_COMMAND.str));
 		}
 		return true;
 	}
 
-	private boolean logoutSubCommand(CommandSender sender, String[] args){
-		if(args.length == 1) {
+	private boolean logoutSubCommand(CommandSender sender, String[] args) {
+		if (args.length == 1) {
 			if (sender instanceof Player player) {
 				try {
 					LoginManager.INSTANCE.logout(player);
@@ -123,27 +132,27 @@ public class CasCommand implements CommandExecutor {
 			} else {
 				sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.PLAYER_EXCLUSIVE_COMMAND.str));
 			}
-		}else{
-			if(!sender.isOp()) {
+		} else {
+			if (!sender.isOp()) {
 				sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.NOT_ENOUGH_PERMISSION.str));
 				return true;
 			}
-			try{
+			try {
 				String userToKick = args[1];
 				OfflinePlayer playerToKick = LoginManager.INSTANCE.getLoggedPlayer(userToKick);
-				if(playerToKick.isOnline())
+				if (playerToKick.isOnline())
 					((Player) playerToKick).kick(MiniMessage.miniMessage().deserialize(MessagesEnum.FORCE_LOGGED_OUT.str));
 				LoginManager.INSTANCE.logout(userToKick);
 				sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.LOGOUT_PLAYER.str, Placeholder.unparsed("user", userToKick)));
 			} catch (NotLoggedInException e) {
-				sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.PLAYER_NOT_LOGGED_IN.str));
+				sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.USER_NOT_LOGGED_IN.str));
 			}
 		}
 		return true;
 	}
 
 	private boolean configSubCommand(CommandSender sender, String[] args) {
-		if(!sender.isOp())
+		if (!sender.isOp())
 			sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.NOT_ENOUGH_PERMISSION.str));
 		return false;
 	}
