@@ -4,11 +4,11 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import fr.eirb.caslogin.exceptions.LoginAlreadyTakenException;
-import fr.eirb.caslogin.exceptions.LoginException;
-import fr.eirb.caslogin.exceptions.NotLoggedInException;
+import fr.eirb.caslogin.exceptions.login.LoginAlreadyTakenException;
+import fr.eirb.caslogin.exceptions.login.LoginException;
+import fr.eirb.caslogin.exceptions.login.NotLoggedInException;
 import fr.eirb.caslogin.CasLogin;
-import fr.eirb.caslogin.exceptions.AlreadyLoggedInException;
+import fr.eirb.caslogin.exceptions.login.AlreadyLoggedInException;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 

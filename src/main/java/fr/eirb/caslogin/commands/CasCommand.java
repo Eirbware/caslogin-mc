@@ -1,10 +1,10 @@
 package fr.eirb.caslogin.commands;
 
-import fr.eirb.caslogin.exceptions.LoginAlreadyTakenException;
-import fr.eirb.caslogin.exceptions.LoginException;
+import fr.eirb.caslogin.exceptions.login.LoginAlreadyTakenException;
+import fr.eirb.caslogin.exceptions.login.LoginException;
 import fr.eirb.caslogin.utils.MessagesEnum;
-import fr.eirb.caslogin.exceptions.AlreadyLoggedInException;
-import fr.eirb.caslogin.exceptions.NotLoggedInException;
+import fr.eirb.caslogin.exceptions.login.AlreadyLoggedInException;
+import fr.eirb.caslogin.exceptions.login.NotLoggedInException;
 import fr.eirb.caslogin.manager.LoginManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;

@@ -1,4 +1,4 @@
-package fr.eirb.caslogin.exceptions;
+package fr.eirb.caslogin.exceptions.login;
 
 public class LoginAlreadyTakenException extends LoginException{
 
