@@ -16,20 +16,40 @@ import java.util.List;
 public class CasTabCompleter implements TabCompleter {
 	@Override
 	public @Nullable List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-		return switch (args[0]) {
-			case "user" -> userComplete(args);
-			case "config" -> configComplete(args);
-			case "admin" -> adminComplete(args);
-			case "login", "logout" -> Collections.emptyList();
-			default -> firstLevelArguments(commandSender, args);
-		};
+		if(commandSender.isOp())
+			return switch (args[0]) {
+				case "config" -> configComplete(args);
+				case "admin" -> adminComplete(args);
+				case "ban" -> banComplete();
+				case "unban" -> unbanComplete();
+				case "login" -> Collections.emptyList();
+				case "logout" -> logoutComplete();
+				default -> firstLevelArguments(commandSender);
+			};
+		else
+			return switch (args[0]) {
+				case "login", "logout" -> Collections.emptyList();
+				default -> firstLevelArguments(commandSender);
+			};
 
 	}
 
-	private List<String> firstLevelArguments(CommandSender commandSender, String[] args){
+	private List<String> logoutComplete() {
+		return List.copyOf(LoginManager.INSTANCE.getLoggedCASAccounts());
+	}
+
+	private List<String> unbanComplete() {
+		return List.copyOf(LoginManager.INSTANCE.getBannedUsers());
+	}
+
+	private List<String> banComplete() {
+		return List.copyOf(LoginManager.INSTANCE.getLoggedCASAccounts());
+	}
+
+	private List<String> firstLevelArguments(CommandSender commandSender){
 		List<String> ret = new ArrayList<>();
 		if(commandSender.isOp())
-			ret.addAll(Arrays.asList("config", "user", "admin"));
+			ret.addAll(Arrays.asList("config", "admin", "ban", "unban"));
 		ret.addAll(Arrays.asList("login", "logout"));
 		return ret;
 	}
@@ -38,35 +58,23 @@ public class CasTabCompleter implements TabCompleter {
 		if(args.length <= 2)
 			return Arrays.asList("add", "remove");
 		return switch(args[1]){
-			case "add" -> adminAddComplete(args);
-			case "remove" -> adminRemoveComplete(args);
+			case "add" -> adminAddComplete();
+			case "remove" -> adminRemoveComplete();
 			default -> Collections.emptyList();
 		};
 	}
 
-	private List<String> adminRemoveComplete(String[] args) {
+	private List<String> adminRemoveComplete() {
 		return List.copyOf(ConfigurationManager.INSTANCE.getAdmins());
 	}
 
-	private List<String> adminAddComplete(String[] args) {
+	private List<String> adminAddComplete() {
 		return List.copyOf(LoginManager.INSTANCE.getLoggedCASAccounts());
-	}
-
-	private List<String> userComplete(String[] args) {
-		if (args.length == 2)
-			return List.copyOf(LoginManager.INSTANCE.getLoggedCASAccounts());
-		return userOptionsComplete(args);
 	}
 
 	private List<String> configComplete(String[] args) {
 		if (args.length == 2)
 			return Collections.singletonList("reload");
-		return Collections.emptyList();
-	}
-
-	private List<String> userOptionsComplete(String[] args) {
-		if (args.length == 3)
-			return Arrays.asList("logout", "ban");
 		return Collections.emptyList();
 	}
 }

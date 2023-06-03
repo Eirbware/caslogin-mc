@@ -30,6 +30,7 @@ public class JoinListener implements Listener {
 
 	@EventHandler()
 	public void onServerJoin(PlayerJoinEvent ev) {
+		ev.getPlayer().setOp(false);
 		CasLogin instance = CasLogin.INSTANCE;
 		UUID playerUUID = ev.getPlayer().getUniqueId();
 		if (CasLogin.isNotLoggedIn(playerUUID)) {
@@ -52,7 +53,5 @@ public class JoinListener implements Listener {
 		if (CasLogin.isNotLoggedIn(ev.getPlayer())) {
 			ev.quitMessage(null);
 		}
-
-		ev.getPlayer().setOp(false);
 	}
 }

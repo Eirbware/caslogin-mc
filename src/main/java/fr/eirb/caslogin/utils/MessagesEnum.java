@@ -5,6 +5,8 @@ public enum MessagesEnum {
 
 	LOGOUT_SUCCESS("<green>You have been successfully logged out</green>"),
 
+	PLAYER_NOT_LOGGED_IN("<red>This user is not logged in!</red>"),
+
 	NOT_LOGGED_IN("<red>You are not logged in!</red>"),
 
 	ALREADY_LOGGED_IN("<red>You are already logged in!</red>"),

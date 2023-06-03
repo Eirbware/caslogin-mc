@@ -60,7 +60,7 @@ public final class LoginManager {
 			throw new LoginAlreadyTakenException(login);
 		}
 		loggedPlayers.put(p.getUniqueId(), login);
-		saveToJson();
+		saveLoggedPlayersToJson();
 	}
 
 	public void logout(Player p) throws NotLoggedInException {
@@ -70,17 +70,29 @@ public final class LoginManager {
 	public void logout(String login) throws NotLoggedInException {
 		if(!loggedPlayers.values().remove(login))
 			throw new NotLoggedInException(login);
-		saveToJson();
+		saveLoggedPlayersToJson();
 	}
 
 	public Set<String> getLoggedCASAccounts() {
-		return loggedPlayers.values();
+		return Collections.unmodifiableSet(loggedPlayers.values());
 	}
 
 	public OfflinePlayer getLoggedPlayer(String login) throws NotLoggedInException{
 		if(!loggedPlayers.containsValue(login))
 			throw new NotLoggedInException(login);
 		return CasLogin.INSTANCE.getServer().getOfflinePlayer(loggedPlayers.inverse().get(login));
+	}
+
+	public void banUser(String login){
+
+	}
+
+	public void unbanUser(String login){
+
+	}
+
+	public Set<String> getBannedUsers(){
+		return Collections.unmodifiableSet(bannedUsers);
 	}
 
 	public boolean isLoggedIn(Player p) {
@@ -96,16 +108,24 @@ public final class LoginManager {
 	}
 
 	public String getLogin(Player p) {
-		return loggedPlayers.get(p.getUniqueId());
+		return getLogin(p.getUniqueId());
 	}
 
 	public String getLogin(UUID uuid) {
 		return loggedPlayers.get(uuid);
 	}
 
-	private void saveToJson() {
+	private void saveLoggedPlayersToJson() {
 		try (FileWriter writer = new FileWriter(loggedPlayersFile)) {
 			gsonInstance.toJson(loggedPlayers, writer);
+		} catch (IOException exception) {
+			throw new RuntimeException(exception);
+		}
+	}
+
+	private void saveBannedPlayersToJson(){
+		try (FileWriter writer = new FileWriter(bannedUsersFile)) {
+			gsonInstance.toJson(bannedUsers, writer);
 		} catch (IOException exception) {
 			throw new RuntimeException(exception);
 		}

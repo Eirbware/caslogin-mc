@@ -29,13 +29,22 @@ public class CasCommand implements CommandExecutor {
 		if (args.length == 0)
 			return false;
 		return switch (args[0]) {
-			case "user" -> userSubCommand(commandSender, args);
+			case "ban" -> banSubCommand(commandSender, args);
+			case "unban" -> unbanSubCommand(commandSender, args);
 			case "config" -> configSubCommand(commandSender, args);
 			case "admin" -> adminSubCommand(commandSender, args);
 			case "login" -> loginSubCommand(commandSender, args);
 			case "logout" -> logoutSubCommand(commandSender, args);
 			default -> false;
 		};
+	}
+
+	private boolean unbanSubCommand(CommandSender commandSender, String[] args) {
+		return false;
+	}
+
+	private boolean banSubCommand(CommandSender commandSender, String[] args) {
+		return false;
 	}
 
 	private boolean adminSubCommand(CommandSender sender, String[] args) {
@@ -103,42 +112,34 @@ public class CasCommand implements CommandExecutor {
 	}
 
 	private boolean logoutSubCommand(CommandSender sender, String[] args){
-		if (sender instanceof Player player) {
-			try{
-				LoginManager.INSTANCE.logout(player);
-				player.kick(MiniMessage.miniMessage().deserialize(MessagesEnum.LOGOUT_SUCCESS.str));
-			}catch(NotLoggedInException ex){
-				player.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.NOT_LOGGED_IN.str));
+		if(args.length == 1) {
+			if (sender instanceof Player player) {
+				try {
+					LoginManager.INSTANCE.logout(player);
+					player.kick(MiniMessage.miniMessage().deserialize(MessagesEnum.LOGOUT_SUCCESS.str));
+				} catch (NotLoggedInException ex) {
+					player.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.NOT_LOGGED_IN.str));
+				}
+			} else {
+				sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.PLAYER_EXCLUSIVE_COMMAND.str));
 			}
 		}else{
-			sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.PLAYER_EXCLUSIVE_COMMAND.str));
-		}
-		return true;
-	}
-
-	private boolean userSubCommand(CommandSender sender, String[] args) {
-		if(!sender.isOp())
-			sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.NOT_ENOUGH_PERMISSION.str));
-		if (args.length != 3)
-			return false;
-		if (args[2].equals("logout")) {
-			String userToKick = args[1];
-			try {
-				OfflinePlayer playerToKick = LoginManager.INSTANCE.getLoggedPlayer(userToKick);
-				if (playerToKick.isOnline())
-					((Player) playerToKick).kick(MiniMessage
-							.miniMessage()
-							.deserialize(MessagesEnum.FORCE_LOGGED_OUT.str));
-				LoginManager.INSTANCE.logout(userToKick);
-				sender.sendMessage(MiniMessage
-						.miniMessage()
-						.deserialize(MessagesEnum.LOGOUT_PLAYER.str, Placeholder.unparsed("user", userToKick)));
+			if(!sender.isOp()) {
+				sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.NOT_ENOUGH_PERMISSION.str));
 				return true;
-			} catch (NotLoggedInException ex) {
-				sender.sendMessage(Component.text(ex.getMessage(), Style.style(NamedTextColor.RED)));
+			}
+			try{
+				String userToKick = args[1];
+				OfflinePlayer playerToKick = LoginManager.INSTANCE.getLoggedPlayer(userToKick);
+				if(playerToKick.isOnline())
+					((Player) playerToKick).kick(MiniMessage.miniMessage().deserialize(MessagesEnum.FORCE_LOGGED_OUT.str));
+				LoginManager.INSTANCE.logout(userToKick);
+				sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.LOGOUT_PLAYER.str, Placeholder.unparsed("user", userToKick)));
+			} catch (NotLoggedInException e) {
+				sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.PLAYER_NOT_LOGGED_IN.str));
 			}
 		}
-		return false;
+		return true;
 	}
 
 	private boolean configSubCommand(CommandSender sender, String[] args) {
