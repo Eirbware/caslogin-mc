@@ -78,10 +78,10 @@ public class CasCommand implements CommandExecutor {
 
 	private boolean loginSubCommand(CommandSender sender, String[] args){
 		if (sender instanceof Player player) {
-			if (args.length < 1)
+			if (args.length < 2)
 				return false;
 			try {
-				LoginManager.INSTANCE.logPlayer(player, args[0]);
+				LoginManager.INSTANCE.logPlayer(player, args[1]);
 				for (PotionEffectType type : PotionEffectType.values()) {
 					player.removePotionEffect(type);
 				}
