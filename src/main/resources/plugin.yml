@@ -1,6 +1,6 @@
 name: caslogin
 version: '${project.version}'
-main: fr.skhalifa.caslogin.CasLogin
+main: fr.eirb.caslogin.CasLogin
 api-version: 1.19
 depend: [ ProtocolLib ]
 commands:
