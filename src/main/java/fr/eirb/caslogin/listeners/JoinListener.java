@@ -25,8 +25,14 @@ public class JoinListener implements Listener {
 		PlayerProfile profile = ev.getPlayerProfile();
 		if (CasLogin.isNotLoggedIn(profile.getId()))
 			return;
-		profile.setName(LoginManager.INSTANCE.getLogin(profile.getId()));
+		String playerLogin = LoginManager.INSTANCE.getLogin(profile.getId());
+		if(LoginManager.INSTANCE.getBannedUsers().contains(playerLogin)) {
+			ev.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, MiniMessage.miniMessage().deserialize(MessagesEnum.BANNED.str));
+			return;
+		}
+		profile.setName(playerLogin);
 		ev.setPlayerProfile(profile);
+
 	}
 
 	@EventHandler()
@@ -40,11 +46,6 @@ public class JoinListener implements Listener {
 			ev.getPlayer().setCollidable(false);
 		} else {
 			String playerLogin = LoginManager.INSTANCE.getLogin(playerUUID);
-			if(LoginManager.INSTANCE.getBannedUsers().contains(playerLogin)) {
-				ev.joinMessage(null);
-				ev.getPlayer().kick(MiniMessage.miniMessage().deserialize(MessagesEnum.BANNED.str));
-				return;
-			}
 			if (ConfigurationManager.INSTANCE.getAdmins().contains(playerLogin))
 				instance.getServer().getPlayer(playerUUID).setOp(true);
 			TranslatableComponent joinMessage = Component.translatable("multiplayer.player.joined")
