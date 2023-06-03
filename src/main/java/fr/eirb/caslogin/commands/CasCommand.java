@@ -209,10 +209,18 @@ public class CasCommand implements CommandExecutor {
 	}
 
 	private boolean configSubCommand(CommandSender sender, String[] args) {
-		if (!sender.isOp())
+		if (!sender.isOp()) {
 			sender.sendMessage(MiniMessage
 					.miniMessage()
 					.deserialize(ConfigurationManager.getLang("not_enough_permissions")));
-		return false;
+			return true;
+		}
+		if(args.length < 2 || !args[1].equals("reload"))
+			return false;
+		ConfigurationManager.reload();
+		sender.sendMessage(MiniMessage
+				.miniMessage()
+				.deserialize(ConfigurationManager.getLang("admin.config.reload")));
+		return true;
 	}
 }

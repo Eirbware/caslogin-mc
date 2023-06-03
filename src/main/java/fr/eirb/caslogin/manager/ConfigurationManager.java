@@ -16,25 +16,33 @@ public class ConfigurationManager {
 
 	private static final ConfigurationManager INSTANCE = new ConfigurationManager();
 
-	private final FileConfiguration pluginConfig;
+	private FileConfiguration pluginConfig;
 
-	private final FileConfiguration adminConfig;
+	private FileConfiguration adminConfig;
 
-	private final FileConfiguration langConfig;
+	private FileConfiguration langConfig;
 
 	private final File adminConfigFile;
 	private final File pluginConfigFile;
 
-	private final List<String> adminsCache;
+	private List<String> adminsCache;
 
-	private ConfigurationManager(){
+	private ConfigurationManager() {
 		this.adminConfigFile = new File(CasLogin.INSTANCE.getDataFolder(), "admins.yml");
 		this.pluginConfigFile = new File(CasLogin.INSTANCE.getDataFolder(), "config.yml");
 		CasLogin.INSTANCE.saveDefaultConfig();
+		this.reloadConfig();
+	}
+
+	private void reloadConfig(){
 		this.pluginConfig = CasLogin.INSTANCE.getConfig();
 		this.adminConfig = ConfigurationUtils.getOrCreateConfigurationFile(adminConfigFile);
 		this.langConfig = ConfigurationUtils.getOrCreateConfigurationFile("lang.yml");
 		this.adminsCache = adminConfig.getStringList("admins");
+	}
+
+	public static void reload(){
+		INSTANCE.reloadConfig();
 	}
 
 	public static List<String> getAdmins(){

@@ -18,6 +18,8 @@ admin:
   unban: "<green>You have successfully unbanned the user</green> <gold><user></gold> <green>!</green>"
   add_admin: "<green>You successfully added</green> <gold><user></gold> <green>to the administrators' list!</green>"
   remove_admin: "<green>You successfully removed</green> <gold><user></gold> <green>from the administrators' list!</green>"
+  config:
+    reload: "<green>You have successfully reloaded the configuration.</green>"
 
   errors:
     not_logged_in: "<red>This user is not logged in!</red>"
