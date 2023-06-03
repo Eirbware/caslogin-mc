@@ -16,7 +16,10 @@ import java.util.List;
 public class CasTabCompleter implements TabCompleter {
 	@Override
 	public @Nullable List<String> onTabComplete(@NotNull CommandSender commandSender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
-		if(commandSender.isOp())
+		if (args.length == 1)
+			return firstLevelArguments(commandSender);
+		if (commandSender.isOp()) {
+
 			return switch (args[0]) {
 				case "config" -> configComplete(args);
 				case "admin" -> adminComplete(args);
@@ -26,7 +29,7 @@ public class CasTabCompleter implements TabCompleter {
 				case "logout" -> logoutComplete();
 				default -> firstLevelArguments(commandSender);
 			};
-		else
+		} else
 			return switch (args[0]) {
 				case "login", "logout" -> Collections.emptyList();
 				default -> firstLevelArguments(commandSender);
@@ -46,18 +49,18 @@ public class CasTabCompleter implements TabCompleter {
 		return List.copyOf(LoginManager.INSTANCE.getLoggedCASAccounts());
 	}
 
-	private List<String> firstLevelArguments(CommandSender commandSender){
+	private List<String> firstLevelArguments(CommandSender commandSender) {
 		List<String> ret = new ArrayList<>();
-		if(commandSender.isOp())
+		if (commandSender.isOp())
 			ret.addAll(Arrays.asList("config", "admin", "ban", "unban"));
 		ret.addAll(Arrays.asList("login", "logout"));
 		return ret;
 	}
 
-	private List<String> adminComplete(String[] args){
-		if(args.length <= 2)
+	private List<String> adminComplete(String[] args) {
+		if (args.length <= 2)
 			return Arrays.asList("add", "remove");
-		return switch(args[1]){
+		return switch (args[1]) {
 			case "add" -> adminAddComplete();
 			case "remove" -> adminRemoveComplete();
 			default -> Collections.emptyList();
