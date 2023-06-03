@@ -24,9 +24,4 @@ public class ConfigurationUtils {
 
 		return YamlConfiguration.loadConfiguration(customConfigFile);
 	}
-
-	public static Configuration getConfiguration(){
-		CasLogin.INSTANCE.saveDefaultConfig();
-		return new Configuration(CasLogin.INSTANCE.getConfig(), getOrCreateConfigurationFile("admins.yml"));
-	}
 }

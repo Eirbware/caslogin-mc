@@ -1,0 +1,30 @@
+user:
+  login:
+    success: "<green>You have been successfully logged in</green><br><gray>Please log back in</gray>"
+  logout:
+    success: "<green>You have been successfully logged out</green>"
+    force: "<red>You have been logged out by an admin.</red>"
+  errors:
+    not_logged_in: "<red>You are not logged in!</red>"
+    already_logged_in: "<red>You are already logged in!</red>"
+    login_taken: "<red>This user is already logged in!</red>"
+    ask_login: "<red>Veuillez vous connecter avec la commande</red> <gold>/cas login</gold>"
+  banned: "<red>You have been banned by an administrator.</red>"
+
+
+admin:
+  logout: "<green>You have successfully logged out the player</green> <gold><user></gold>"
+  ban: "<green>You have successfully banned the user</green> <gold><user></gold> <green>!</green>"
+  unban: "<green>You have successfully unbanned the user</green> <gold><user></gold> <green>!</green>"
+  add_admin: "<green>You successfully added</green> <gold><user></gold> <green>to the administrators' list!</green>"
+  remove_admin: "<green>You successfully removed</green> <gold><user></gold> <green>from the administrators' list!</green>"
+
+  errors:
+    not_logged_in: "<red>This user is not logged in!</red>"
+    already_banned: "<red>The user</red> <gold><user></gold> <red>is already banned.</red>"
+    not_banned: "<red>The user</red> <gold><user></gold> <red>is not banned.</red>"
+    not_admin: "<red>The user</red> <gold><user></gold> <red>is not an administrator.</red>"
+    already_admin: "<red>The user</red> <gold><user></gold> <red>is already an administrator.</red>"
+
+not_enough_permissions: "<red>Not enough permissions.</red>"
+player_exclusive: "<red>This command can only be executed by a player.</red>"

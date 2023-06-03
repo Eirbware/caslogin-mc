@@ -1,7 +1,6 @@
 package fr.eirb.caslogin.manager;
 
 import fr.eirb.caslogin.CasLogin;
-import fr.eirb.caslogin.configuration.Configuration;
 import fr.eirb.caslogin.configuration.ConfigurationUtils;
 import fr.eirb.caslogin.exceptions.configuration.AlreadyAdminException;
 import fr.eirb.caslogin.exceptions.configuration.NotAdminException;
@@ -15,11 +14,13 @@ import java.util.logging.Level;
 
 public class ConfigurationManager {
 
-	public static final ConfigurationManager INSTANCE = new ConfigurationManager();
+	private static final ConfigurationManager INSTANCE = new ConfigurationManager();
 
 	private final FileConfiguration pluginConfig;
 
 	private final FileConfiguration adminConfig;
+
+	private final FileConfiguration langConfig;
 
 	private final File adminConfigFile;
 	private final File pluginConfigFile;
@@ -32,37 +33,42 @@ public class ConfigurationManager {
 		CasLogin.INSTANCE.saveDefaultConfig();
 		this.pluginConfig = CasLogin.INSTANCE.getConfig();
 		this.adminConfig = ConfigurationUtils.getOrCreateConfigurationFile(adminConfigFile);
+		this.langConfig = ConfigurationUtils.getOrCreateConfigurationFile("lang.yml");
 		this.adminsCache = adminConfig.getStringList("admins");
 	}
 
-	public List<String> getAdmins(){
-		return Collections.unmodifiableList(adminsCache);
+	public static List<String> getAdmins(){
+		return Collections.unmodifiableList(INSTANCE.adminsCache);
 	}
 
-	public void addAdmin(String login) throws AlreadyAdminException {
-		if(adminsCache.contains(login)){
+	public static void addAdmin(String login) throws AlreadyAdminException {
+		if(INSTANCE.adminsCache.contains(login)){
 			throw new AlreadyAdminException(login);
 		}
-		adminsCache.add(login);
-		adminConfig.set("admins", adminsCache);
+		INSTANCE.adminsCache.add(login);
+		INSTANCE.adminConfig.set("admins", INSTANCE.adminsCache);
 		try {
-			adminConfig.save(adminConfigFile);
+			INSTANCE.adminConfig.save(INSTANCE.adminConfigFile);
 		}catch(IOException ex){
 			CasLogin.INSTANCE.getLogger().log(Level.SEVERE, "Cannot save to admin.yml");
 			throw new RuntimeException(ex);
 		}
 	}
 
-	public void removeAdmin(String login) throws NotAdminException {
-		if(!adminsCache.contains(login))
+	public static void removeAdmin(String login) throws NotAdminException {
+		if(!INSTANCE.adminsCache.contains(login))
 			throw new NotAdminException(login);
-		adminsCache.remove(login);
-		adminConfig.set("admins", adminsCache);
+		INSTANCE.adminsCache.remove(login);
+		INSTANCE.adminConfig.set("admins", INSTANCE.adminsCache);
 		try{
-			adminConfig.save(adminConfigFile);
+			INSTANCE.adminConfig.save(INSTANCE.adminConfigFile);
 		}catch(IOException ex){
 			CasLogin.INSTANCE.getLogger().log(Level.SEVERE, "Cannot save to admin.yml");
 			throw new RuntimeException(ex);
 		}
+	}
+
+	public static String getLang(String path){
+		return INSTANCE.langConfig.getString(path);
 	}
 }

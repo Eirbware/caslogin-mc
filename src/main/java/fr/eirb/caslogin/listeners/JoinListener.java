@@ -4,7 +4,6 @@ import com.destroystokyo.paper.profile.PlayerProfile;
 import fr.eirb.caslogin.CasLogin;
 import fr.eirb.caslogin.manager.ConfigurationManager;
 import fr.eirb.caslogin.manager.LoginManager;
-import fr.eirb.caslogin.utils.MessagesEnum;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -27,7 +26,9 @@ public class JoinListener implements Listener {
 			return;
 		String playerLogin = LoginManager.INSTANCE.getLogin(profile.getId());
 		if(LoginManager.INSTANCE.getBannedUsers().contains(playerLogin)) {
-			ev.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, MiniMessage.miniMessage().deserialize(MessagesEnum.BANNED.str));
+			ev.disallow(AsyncPlayerPreLoginEvent.Result.KICK_BANNED, MiniMessage
+					.miniMessage()
+					.deserialize(ConfigurationManager.getLang("user.banned")));
 			return;
 		}
 		profile.setName(playerLogin);
@@ -46,7 +47,7 @@ public class JoinListener implements Listener {
 			ev.getPlayer().setCollidable(false);
 		} else {
 			String playerLogin = LoginManager.INSTANCE.getLogin(playerUUID);
-			if (ConfigurationManager.INSTANCE.getAdmins().contains(playerLogin))
+			if (ConfigurationManager.getAdmins().contains(playerLogin))
 				instance.getServer().getPlayer(playerUUID).setOp(true);
 			TranslatableComponent joinMessage = Component.translatable("multiplayer.player.joined")
 					.args(Component.text(LoginManager.INSTANCE.getLogin(playerUUID)))

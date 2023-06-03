@@ -4,7 +4,6 @@ import fr.eirb.caslogin.exceptions.configuration.AlreadyAdminException;
 import fr.eirb.caslogin.exceptions.configuration.NotAdminException;
 import fr.eirb.caslogin.exceptions.login.*;
 import fr.eirb.caslogin.manager.ConfigurationManager;
-import fr.eirb.caslogin.utils.MessagesEnum;
 import fr.eirb.caslogin.manager.LoginManager;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -36,12 +35,18 @@ public class CasCommand implements CommandExecutor {
 	private boolean unbanSubCommand(CommandSender sender, String[] args) {
 		if (args.length < 2)
 			return false;
-		String userToBan = args[1];
+		String userToUnban = args[1];
 		try {
-			LoginManager.INSTANCE.unbanUser(userToBan);
-			sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.UNBAN_USER.str, Placeholder.unparsed("user", userToBan)));
+			LoginManager.INSTANCE.unbanUser(userToUnban);
+			sender.sendMessage(MiniMessage
+					.miniMessage()
+					.deserialize(ConfigurationManager.getLang("admin.unban"),
+							Placeholder.unparsed("user", userToUnban)));
 		} catch (NotBannedException e) {
-			sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.NOT_BANNED.str, Placeholder.unparsed("user", userToBan)));
+			sender.sendMessage(MiniMessage
+					.miniMessage()
+					.deserialize(ConfigurationManager.getLang("admin.errors.not_banned"),
+							Placeholder.unparsed("user", userToUnban)));
 		}
 		return true;
 	}
@@ -52,14 +57,22 @@ public class CasCommand implements CommandExecutor {
 		String userToBan = args[1];
 		try {
 			LoginManager.INSTANCE.banUser(userToBan);
-			sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.BAN_USER.str, Placeholder.unparsed("user", userToBan)));
+			sender.sendMessage(MiniMessage
+					.miniMessage()
+					.deserialize(ConfigurationManager.getLang("admin.ban"),
+							Placeholder.unparsed("user", userToBan)));
 		} catch (AlreadyBannedException e) {
-			sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.ALREADY_BANNED.str, Placeholder.unparsed("user", userToBan)));
+			sender.sendMessage(MiniMessage
+					.miniMessage()
+					.deserialize(ConfigurationManager.getLang("admin.errors.already_banned"),
+							Placeholder.unparsed("user", userToBan)));
 		}
 		try {
 			OfflinePlayer playerFromLogin = LoginManager.INSTANCE.getLoggedPlayer(userToBan);
-			if(playerFromLogin.isOnline())
-				((Player) playerFromLogin).kick(MiniMessage.miniMessage().deserialize(MessagesEnum.BANNED.str));
+			if (playerFromLogin.isOnline())
+				((Player) playerFromLogin).kick(MiniMessage
+						.miniMessage()
+						.deserialize(ConfigurationManager.getLang("user.banned")));
 		} catch (NotLoggedInException ignored) {
 		}
 		return true;
@@ -78,13 +91,19 @@ public class CasCommand implements CommandExecutor {
 	private void addAdmin(CommandSender sender, String[] args) {
 		String adminToAdd = args[2];
 		try {
-			ConfigurationManager.INSTANCE.addAdmin(adminToAdd);
-			sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.ADD_ADMIN_SUCCESS.str, Placeholder.unparsed("user", adminToAdd)));
+			ConfigurationManager.addAdmin(adminToAdd);
+			sender.sendMessage(MiniMessage
+					.miniMessage()
+					.deserialize(ConfigurationManager.getLang("admin.add_admin"),
+							Placeholder.unparsed("user", adminToAdd)));
 			OfflinePlayer playerToOp = LoginManager.INSTANCE.getLoggedPlayer(adminToAdd);
 			if (playerToOp.isOnline())
 				playerToOp.setOp(true);
 		} catch (AlreadyAdminException ex) {
-			sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.ALREADY_ADMIN.str, Placeholder.unparsed("user", adminToAdd)));
+			sender.sendMessage(MiniMessage
+					.miniMessage()
+					.deserialize(ConfigurationManager.getLang("admin.errors.already_admin"),
+							Placeholder.unparsed("user", adminToAdd)));
 		} catch (NotLoggedInException ignored) {
 		}
 	}
@@ -92,13 +111,19 @@ public class CasCommand implements CommandExecutor {
 	private void removeAdmin(CommandSender sender, String[] args) {
 		String adminToRemove = args[2];
 		try {
-			ConfigurationManager.INSTANCE.removeAdmin(adminToRemove);
-			sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.REMOVE_ADMIN_SUCCESS.str, Placeholder.unparsed("user", adminToRemove)));
+			ConfigurationManager.removeAdmin(adminToRemove);
+			sender.sendMessage(MiniMessage
+					.miniMessage()
+					.deserialize(ConfigurationManager.getLang("admin.remove_admin"),
+							Placeholder.unparsed("user", adminToRemove)));
 			OfflinePlayer playerToOp = LoginManager.INSTANCE.getLoggedPlayer(adminToRemove);
 			if (playerToOp.isOnline())
 				playerToOp.setOp(false);
 		} catch (NotAdminException ex) {
-			sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.NOT_AN_ADMIN.str, Placeholder.unparsed("user", adminToRemove)));
+			sender.sendMessage(MiniMessage
+					.miniMessage()
+					.deserialize("admin.errors.not_admin",
+							Placeholder.unparsed("user", adminToRemove)));
 		} catch (NotLoggedInException ignored) {
 		}
 	}
@@ -112,19 +137,27 @@ public class CasCommand implements CommandExecutor {
 				for (PotionEffectType type : PotionEffectType.values()) {
 					player.removePotionEffect(type);
 				}
-				player.kick(MiniMessage.miniMessage().deserialize(MessagesEnum.LOGIN_SUCCESS.str));
+				player.kick(MiniMessage
+						.miniMessage()
+						.deserialize(ConfigurationManager.getLang("user.login.success")));
 
 			} catch (LoginAlreadyTakenException e) {
-				player.kick(MiniMessage.miniMessage().deserialize(MessagesEnum.LOGIN_TAKEN.str));
+				player.kick(MiniMessage
+						.miniMessage()
+						.deserialize(ConfigurationManager.getLang("user.errors.login_taken")));
 				return true;
 			} catch (AlreadyLoggedInException e) {
-				player.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.ALREADY_LOGGED_IN.str));
+				player.sendMessage(MiniMessage
+						.miniMessage()
+						.deserialize(ConfigurationManager.getLang("user.errors.already_logged_in")));
 				return true;
 			} catch (LoginException e) {
 				throw new RuntimeException(e);
 			}
 		} else {
-			sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.PLAYER_EXCLUSIVE_COMMAND.str));
+			sender.sendMessage(MiniMessage
+					.miniMessage()
+					.deserialize("player_exclusive"));
 		}
 		return true;
 	}
@@ -134,27 +167,42 @@ public class CasCommand implements CommandExecutor {
 			if (sender instanceof Player player) {
 				try {
 					LoginManager.INSTANCE.logout(player);
-					player.kick(MiniMessage.miniMessage().deserialize(MessagesEnum.LOGOUT_SUCCESS.str));
+					player.kick(MiniMessage
+							.miniMessage()
+							.deserialize(ConfigurationManager.getLang("user.logout.success")));
 				} catch (NotLoggedInException ex) {
-					player.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.NOT_LOGGED_IN.str));
+					player.sendMessage(MiniMessage
+							.miniMessage()
+							.deserialize(ConfigurationManager.getLang("user.errors.not_logged_in")));
 				}
 			} else {
-				sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.PLAYER_EXCLUSIVE_COMMAND.str));
+				sender.sendMessage(MiniMessage
+						.miniMessage()
+						.deserialize(ConfigurationManager.getLang("player_exclusive")));
 			}
 		} else {
 			if (!sender.isOp()) {
-				sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.NOT_ENOUGH_PERMISSION.str));
+				sender.sendMessage(MiniMessage
+						.miniMessage()
+						.deserialize(ConfigurationManager.getLang("not_enough_permissions")));
 				return true;
 			}
 			try {
 				String userToKick = args[1];
 				OfflinePlayer playerToKick = LoginManager.INSTANCE.getLoggedPlayer(userToKick);
 				if (playerToKick.isOnline())
-					((Player) playerToKick).kick(MiniMessage.miniMessage().deserialize(MessagesEnum.FORCE_LOGGED_OUT.str));
+					((Player) playerToKick).kick(MiniMessage
+							.miniMessage()
+							.deserialize(ConfigurationManager.getLang("user.logout.force")));
 				LoginManager.INSTANCE.logout(userToKick);
-				sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.LOGOUT_PLAYER.str, Placeholder.unparsed("user", userToKick)));
+				sender.sendMessage(MiniMessage
+						.miniMessage()
+						.deserialize(ConfigurationManager.getLang("admin.logout"),
+								Placeholder.unparsed("user", userToKick)));
 			} catch (NotLoggedInException e) {
-				sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.USER_NOT_LOGGED_IN.str));
+				sender.sendMessage(MiniMessage
+						.miniMessage()
+						.deserialize(ConfigurationManager.getLang("admin.not_logged_in")));
 			}
 		}
 		return true;
@@ -162,7 +210,9 @@ public class CasCommand implements CommandExecutor {
 
 	private boolean configSubCommand(CommandSender sender, String[] args) {
 		if (!sender.isOp())
-			sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.NOT_ENOUGH_PERMISSION.str));
+			sender.sendMessage(MiniMessage
+					.miniMessage()
+					.deserialize(ConfigurationManager.getLang("not_enough_permissions")));
 		return false;
 	}
 }

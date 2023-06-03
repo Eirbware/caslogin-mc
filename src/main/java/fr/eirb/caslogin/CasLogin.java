@@ -9,10 +9,8 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.*;
 import fr.eirb.caslogin.commands.CasCommand;
 import fr.eirb.caslogin.commands.CasTabCompleter;
-import fr.eirb.caslogin.configuration.Configuration;
 import fr.eirb.caslogin.manager.LoginManager;
 import fr.eirb.caslogin.utils.ServerUtils;
-import fr.eirb.caslogin.configuration.ConfigurationUtils;
 import fr.eirb.caslogin.listeners.FreezePlayer;
 import fr.eirb.caslogin.listeners.JoinListener;
 import org.bukkit.command.PluginCommand;
@@ -27,12 +25,10 @@ public final class CasLogin extends JavaPlugin {
 	public static CasLogin INSTANCE;
 	private ProtocolManager protocolManager;
 
-	public Configuration pluginConfig;
 
 	@Override
 	public void onEnable() {
 		INSTANCE = this;
-		pluginConfig = ConfigurationUtils.getConfiguration();
 		// Plugin startup logic
 		registerCommands();
 		registerEvents();

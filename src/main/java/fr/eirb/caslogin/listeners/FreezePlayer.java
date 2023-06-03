@@ -2,7 +2,7 @@ package fr.eirb.caslogin.listeners;
 
 import com.destroystokyo.paper.event.player.PlayerPickupExperienceEvent;
 import fr.eirb.caslogin.CasLogin;
-import fr.eirb.caslogin.utils.MessagesEnum;
+import fr.eirb.caslogin.manager.ConfigurationManager;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -76,7 +76,9 @@ public class FreezePlayer implements Listener {
 
 	@EventHandler
 	public void onKick(PlayerKickEvent ev){
-		if(ev.reason().equals(MiniMessage.miniMessage().deserialize(MessagesEnum.LOGIN_SUCCESS.str)))
+		if(ev.reason().equals(MiniMessage
+				.miniMessage()
+				.deserialize(ConfigurationManager.getLang("user.login.success"))))
 			ev.leaveMessage(Component.empty());
 	}
 
@@ -84,7 +86,9 @@ public class FreezePlayer implements Listener {
 	public void onCommand(PlayerCommandPreprocessEvent ev){
 		if(CasLogin.isNotLoggedIn(ev.getPlayer()))
 			if(!ev.getMessage().startsWith("/cas login")) {
-				ev.getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.ASK_LOGIN.str));
+				ev.getPlayer().sendMessage(MiniMessage
+						.miniMessage()
+						.deserialize(ConfigurationManager.getLang("user.errors.ask_login")));
 				ev.setCancelled(true);
 			}
 	}
