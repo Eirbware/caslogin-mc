@@ -83,7 +83,7 @@ public class FreezePlayer implements Listener {
 	@EventHandler
 	public void onCommand(PlayerCommandPreprocessEvent ev){
 		if(CasLogin.isNotLoggedIn(ev.getPlayer()))
-			if(!ev.getMessage().startsWith("/login")) {
+			if(!ev.getMessage().startsWith("/cas login")) {
 				ev.getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.ASK_LOGIN.str));
 				ev.setCancelled(true);
 			}

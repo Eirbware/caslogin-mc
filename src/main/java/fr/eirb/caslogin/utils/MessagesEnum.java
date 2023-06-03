@@ -17,6 +17,16 @@ public enum MessagesEnum {
 
 	ASK_LOGIN("<red>Veuillez vous connecter avec la commande</red> <gold>/cas login</gold>"),
 
+	NOT_ENOUGH_PERMISSION("<red>Not enough permission</red>"),
+
+	NOT_AN_ADMIN("<red>The user</red> <gold><user></gold> <red>is not an administrator.</red>"),
+
+	ALREADY_ADMIN("<red>The user</red> <gold><user></gold> <red>is already an administrator.</red>"),
+
+	ADD_ADMIN_SUCCESS("<green>You successfully added</green> <gold><user></gold> <green>to the administrators' list!</green>"),
+
+	REMOVE_ADMIN_SUCCESS("<green>You successfully removed</green> <gold><user></gold> <green>from the administrators' list!</green>"),
+
 	PLAYER_EXCLUSIVE_COMMAND("<red>This command can only be executed by a player...</red>"),
 	;
 

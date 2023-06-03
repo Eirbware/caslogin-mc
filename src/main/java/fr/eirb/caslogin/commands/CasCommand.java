@@ -1,7 +1,10 @@
 package fr.eirb.caslogin.commands;
 
+import fr.eirb.caslogin.exceptions.configuration.AlreadyAdminException;
+import fr.eirb.caslogin.exceptions.configuration.NotAdminException;
 import fr.eirb.caslogin.exceptions.login.LoginAlreadyTakenException;
 import fr.eirb.caslogin.exceptions.login.LoginException;
+import fr.eirb.caslogin.manager.ConfigurationManager;
 import fr.eirb.caslogin.utils.MessagesEnum;
 import fr.eirb.caslogin.exceptions.login.AlreadyLoggedInException;
 import fr.eirb.caslogin.exceptions.login.NotLoggedInException;
@@ -27,11 +30,50 @@ public class CasCommand implements CommandExecutor {
 			return false;
 		return switch (args[0]) {
 			case "user" -> userSubCommand(commandSender, args);
-			case "config" -> configSubCommand(args);
+			case "config" -> configSubCommand(commandSender, args);
+			case "admin" -> adminSubCommand(commandSender, args);
 			case "login" -> loginSubCommand(commandSender, args);
 			case "logout" -> logoutSubCommand(commandSender, args);
 			default -> false;
 		};
+	}
+
+	private boolean adminSubCommand(CommandSender sender, String[] args) {
+		if(args.length != 3)
+			return false;
+		switch(args[1]){
+			case "add" -> addAdmin(sender, args);
+			case "remove" -> removeAdmin(sender, args);
+		}
+		return true;
+	}
+
+	private void addAdmin(CommandSender sender, String[] args) {
+		String adminToAdd = args[2];
+		try{
+			ConfigurationManager.INSTANCE.addAdmin(adminToAdd);
+			sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.ADD_ADMIN_SUCCESS.str, Placeholder.unparsed("user", adminToAdd)));
+			OfflinePlayer playerToOp = LoginManager.INSTANCE.getLoggedPlayer(adminToAdd);
+			if(playerToOp.isOnline())
+				playerToOp.setOp(true);
+		}catch(AlreadyAdminException ex){
+			sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.ALREADY_ADMIN.str, Placeholder.unparsed("user", adminToAdd)));
+		} catch (NotLoggedInException ignored) {
+		}
+	}
+
+	private void removeAdmin(CommandSender sender, String[] args) {
+		String adminToRemove = args[2];
+		try{
+			ConfigurationManager.INSTANCE.removeAdmin(adminToRemove);
+			sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.REMOVE_ADMIN_SUCCESS.str, Placeholder.unparsed("user", adminToRemove)));
+			OfflinePlayer playerToOp = LoginManager.INSTANCE.getLoggedPlayer(adminToRemove);
+			if(playerToOp.isOnline())
+				playerToOp.setOp(false);
+		}catch(NotAdminException ex){
+			sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.NOT_AN_ADMIN.str, Placeholder.unparsed("user", adminToRemove)));
+		} catch (NotLoggedInException ignored) {
+		}
 	}
 
 	private boolean loginSubCommand(CommandSender sender, String[] args){
@@ -75,6 +117,8 @@ public class CasCommand implements CommandExecutor {
 	}
 
 	private boolean userSubCommand(CommandSender sender, String[] args) {
+		if(!sender.isOp())
+			sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.NOT_ENOUGH_PERMISSION.str));
 		if (args.length != 3)
 			return false;
 		if (args[2].equals("logout")) {
@@ -97,7 +141,9 @@ public class CasCommand implements CommandExecutor {
 		return false;
 	}
 
-	private boolean configSubCommand(String[] args) {
+	private boolean configSubCommand(CommandSender sender, String[] args) {
+		if(!sender.isOp())
+			sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.NOT_ENOUGH_PERMISSION.str));
 		return false;
 	}
 }
