@@ -25,7 +25,11 @@ public enum MessagesEnum {
 
 	BAN_USER("<green>You have successfully banned the user</green> <gold><user></gold> <green>!</green>"),
 
+	UNBAN_USER("<green>You have successfully unbanned the user</green> <gold><user></gold> <green>!</green>"),
+
 	ALREADY_BANNED("<red>The user</red> <gold><user></gold> <red>is already banned.</red>"),
+
+	NOT_BANNED("<red>The user</red> <gold><user></gold> <red>is not banned.</red>"),
 
 	NOT_AN_ADMIN("<red>The user</red> <gold><user></gold> <red>is not an administrator.</red>"),
 

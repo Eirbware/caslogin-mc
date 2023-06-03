@@ -34,7 +34,16 @@ public class CasCommand implements CommandExecutor {
 	}
 
 	private boolean unbanSubCommand(CommandSender sender, String[] args) {
-		return false;
+		if (args.length < 2)
+			return false;
+		String userToBan = args[1];
+		try {
+			LoginManager.INSTANCE.unbanUser(userToBan);
+			sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.UNBAN_USER.str, Placeholder.unparsed("user", userToBan)));
+		} catch (NotBannedException e) {
+			sender.sendMessage(MiniMessage.miniMessage().deserialize(MessagesEnum.NOT_BANNED.str, Placeholder.unparsed("user", userToBan)));
+		}
+		return true;
 	}
 
 	private boolean banSubCommand(CommandSender sender, String[] args) {
