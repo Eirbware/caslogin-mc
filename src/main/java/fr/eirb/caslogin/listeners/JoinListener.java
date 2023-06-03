@@ -2,6 +2,7 @@ package fr.eirb.caslogin.listeners;
 
 import com.destroystokyo.paper.profile.PlayerProfile;
 import fr.eirb.caslogin.CasLogin;
+import fr.eirb.caslogin.manager.ConfigurationManager;
 import fr.eirb.caslogin.manager.LoginManager;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TranslatableComponent;
@@ -36,7 +37,7 @@ public class JoinListener implements Listener {
 
 			ev.getPlayer().setCollidable(false);
 		} else {
-			if (instance.pluginConfig.adminConfig().getStringList("admins").contains(LoginManager.INSTANCE.getLogin(playerUUID)))
+			if (ConfigurationManager.INSTANCE.getAdmins().contains(LoginManager.INSTANCE.getLogin(playerUUID)))
 				instance.getServer().getPlayer(playerUUID).setOp(true);
 			TranslatableComponent joinMessage = Component.translatable("multiplayer.player.joined")
 					.args(Component.text(LoginManager.INSTANCE.getLogin(playerUUID)))

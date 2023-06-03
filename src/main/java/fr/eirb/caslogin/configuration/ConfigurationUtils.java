@@ -16,6 +16,15 @@ public class ConfigurationUtils {
 		return YamlConfiguration.loadConfiguration(customConfigFile);
 	}
 
+	public static YamlConfiguration getOrCreateConfigurationFile(File customConfigFile){
+		if(!customConfigFile.exists()){
+			customConfigFile.getParentFile().mkdirs();
+			CasLogin.INSTANCE.saveResource(customConfigFile.getName(), false);
+		}
+
+		return YamlConfiguration.loadConfiguration(customConfigFile);
+	}
+
 	public static Configuration getConfiguration(){
 		CasLogin.INSTANCE.saveDefaultConfig();
 		return new Configuration(CasLogin.INSTANCE.getConfig(), getOrCreateConfigurationFile("admins.yml"));
