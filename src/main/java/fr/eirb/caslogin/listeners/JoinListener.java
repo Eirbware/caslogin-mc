@@ -20,7 +20,6 @@ public class JoinListener implements Listener {
 
 	@EventHandler
 	public void preLoginEvent(AsyncPlayerPreLoginEvent ev) {
-		CasLogin instance = CasLogin.INSTANCE;
 		PlayerProfile profile = ev.getPlayerProfile();
 		if (CasLogin.isNotLoggedIn(profile.getId()))
 			return;
