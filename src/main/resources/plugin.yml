@@ -1,0 +1,9 @@
+name: caslogin
+version: '${project.version}'
+main: fr.skhalifa.caslogin.CasLogin
+api-version: 1.19
+depend: [ ProtocolLib ]
+commands:
+  cas:
+    description: test cmd
+    usage: /config <login|logout>
