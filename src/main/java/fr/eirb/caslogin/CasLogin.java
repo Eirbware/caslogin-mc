@@ -13,10 +13,12 @@ import fr.eirb.caslogin.manager.LoginManager;
 import fr.eirb.caslogin.utils.ServerUtils;
 import fr.eirb.caslogin.listeners.FreezePlayer;
 import fr.eirb.caslogin.listeners.JoinListener;
+import okhttp3.*;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.IOException;
 import java.util.*;
 
 public final class CasLogin extends JavaPlugin {
@@ -34,6 +36,21 @@ public final class CasLogin extends JavaPlugin {
 		registerEvents();
 		protocolManager = ProtocolLibrary.getProtocolManager();
 		registerPacketListeners();
+
+		OkHttpClient client = new OkHttpClient();
+		Request req = new Request.Builder().url("https://publicobject.com/helloworld.txt").get().build();
+		try(Response response = client.newCall(req).execute()){
+			if (!response.isSuccessful()) throw new IOException("Unexpected code " + response);
+			Headers responseHeaders = response.headers();
+			for (int i = 0; i < responseHeaders.size(); i++) {
+				System.out.println(responseHeaders.name(i) + ": " + responseHeaders.value(i));
+			}
+
+			assert response.body() != null;
+			System.out.println(response.body().string());
+		}catch(IOException ex){
+			ex.printStackTrace();
+		}
 	}
 
 	private void registerCommands(){

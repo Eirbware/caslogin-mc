@@ -18,17 +18,11 @@ public class ConfigurationManager {
 
 	private FileConfiguration pluginConfig;
 
-	private FileConfiguration adminConfig;
-
 	private FileConfiguration langConfig;
 
-	private final File adminConfigFile;
 	private final File pluginConfigFile;
 
-	private List<String> adminsCache;
-
 	private ConfigurationManager() {
-		this.adminConfigFile = new File(CasLogin.INSTANCE.getDataFolder(), "admins.yml");
 		this.pluginConfigFile = new File(CasLogin.INSTANCE.getDataFolder(), "config.yml");
 		CasLogin.INSTANCE.saveDefaultConfig();
 		this.reloadConfig();
@@ -36,44 +30,11 @@ public class ConfigurationManager {
 
 	private void reloadConfig(){
 		this.pluginConfig = CasLogin.INSTANCE.getConfig();
-		this.adminConfig = ConfigurationUtils.getOrCreateConfigurationFile(adminConfigFile);
 		this.langConfig = ConfigurationUtils.getOrCreateConfigurationFile("lang.yml");
-		this.adminsCache = adminConfig.getStringList("admins");
 	}
 
 	public static void reload(){
 		INSTANCE.reloadConfig();
-	}
-
-	public static List<String> getAdmins(){
-		return Collections.unmodifiableList(INSTANCE.adminsCache);
-	}
-
-	public static void addAdmin(String login) throws AlreadyAdminException {
-		if(INSTANCE.adminsCache.contains(login)){
-			throw new AlreadyAdminException(login);
-		}
-		INSTANCE.adminsCache.add(login);
-		INSTANCE.adminConfig.set("admins", INSTANCE.adminsCache);
-		try {
-			INSTANCE.adminConfig.save(INSTANCE.adminConfigFile);
-		}catch(IOException ex){
-			CasLogin.INSTANCE.getLogger().log(Level.SEVERE, "Cannot save to admin.yml");
-			throw new RuntimeException(ex);
-		}
-	}
-
-	public static void removeAdmin(String login) throws NotAdminException {
-		if(!INSTANCE.adminsCache.contains(login))
-			throw new NotAdminException(login);
-		INSTANCE.adminsCache.remove(login);
-		INSTANCE.adminConfig.set("admins", INSTANCE.adminsCache);
-		try{
-			INSTANCE.adminConfig.save(INSTANCE.adminConfigFile);
-		}catch(IOException ex){
-			CasLogin.INSTANCE.getLogger().log(Level.SEVERE, "Cannot save to admin.yml");
-			throw new RuntimeException(ex);
-		}
 	}
 
 	public static String getLang(String path){

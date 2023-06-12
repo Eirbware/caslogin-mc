@@ -13,3 +13,9 @@
 # Comment installer NMS
 - Télécharger [BuildTools](https://www.spigotmc.org/wiki/buildtools/)
 - Exécuter BuildTools.jar **avec l'option --remapped**
+
+# Comment utiliser
+- Avoir un server paper 1.19.4
+- Avoir le .jar
+- Avoir un serveur web d'authentification configuré -> [https://github.com/Eirbware/caslogin-mc-auth](https://github.com/Eirbware/caslogin-mc-auth)
+- 

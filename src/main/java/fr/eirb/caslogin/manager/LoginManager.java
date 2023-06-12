@@ -18,30 +18,14 @@ import java.util.*;
 public final class LoginManager {
 
 	public static final LoginManager INSTANCE = new LoginManager();
-	private static final String LOGGED_PLAYERS_FILENAME = "logged.json";
-	private static final String BANNED_USERS_FILENAME = "banned.json";
 	private final BiMap<UUID, String> loggedPlayers;
 
 	private final Set<String> bannedUsers;
-
-	private final File loggedPlayersFile;
-
-	private final File bannedUsersFile;
 
 	private final Gson gsonInstance;
 
 	private LoginManager() {
 		gsonInstance = new Gson();
-		this.loggedPlayersFile = new File(CasLogin.INSTANCE.getDataFolder(), LOGGED_PLAYERS_FILENAME);
-		this.bannedUsersFile = new File(CasLogin.INSTANCE.getDataFolder(), BANNED_USERS_FILENAME);
-		if (!loggedPlayersFile.exists()) {
-			loggedPlayersFile.getParentFile().mkdirs();
-			CasLogin.INSTANCE.saveResource(LOGGED_PLAYERS_FILENAME, false);
-		}
-		if (!bannedUsersFile.exists()) {
-			bannedUsersFile.getParentFile().mkdirs();
-			CasLogin.INSTANCE.saveResource(BANNED_USERS_FILENAME, false);
-		}
 
 
 		loggedPlayers = loadLoggedPlayers();
