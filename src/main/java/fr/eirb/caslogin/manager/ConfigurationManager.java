@@ -34,4 +34,8 @@ public class ConfigurationManager {
 	public static String getApiKey(){
 		return pluginConfig.getNode("api_key").getString();
 	}
+
+	public static String getLimboServerName() {
+		return pluginConfig.getNode("limbo_server").getString();
+	}
 }
