@@ -40,4 +40,11 @@ public class ConfigurationManager {
 	public static String getLang(String path){
 		return INSTANCE.langConfig.getString(path);
 	}
+	public static String getAuthServer(){
+		return INSTANCE.pluginConfig.getString("auth_server");
+	}
+
+	public static String getApiKey(){
+		return INSTANCE.pluginConfig.getString("api_key");
+	}
 }

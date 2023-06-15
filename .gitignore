@@ -101,4 +101,8 @@ fabric.properties
 hs_err_pid*
 replay_pid*
 
-target
+build
+
+.gradle/
+gradle/
+.idea/

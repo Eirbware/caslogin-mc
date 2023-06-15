@@ -6,6 +6,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import fr.eirb.caslogin.exceptions.login.*;
 import fr.eirb.caslogin.CasLogin;
+import fr.eirb.caslogin.utils.ApiUtils;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.Player;
 
@@ -33,6 +34,14 @@ public final class LoginManager {
 
 	}
 
+	private Set<String> loadBannedPlayers() {
+		return ApiUtils.getBannedUsers();
+	}
+
+	private BiMap<UUID, String> loadLoggedPlayers() {
+		return null;
+	}
+
 	public void logPlayer(Player p, String login) throws LoginException {
 		if (isLoggedIn(p)) {
 			throw new AlreadyLoggedInException(p);
@@ -41,7 +50,6 @@ public final class LoginManager {
 			throw new LoginAlreadyTakenException(login);
 		}
 		loggedPlayers.put(p.getUniqueId(), login);
-		saveLoggedPlayersToJson();
 	}
 
 	public void logout(Player p) throws NotLoggedInException {
@@ -51,7 +59,6 @@ public final class LoginManager {
 	public void logout(String login) throws NotLoggedInException {
 		if(!loggedPlayers.values().remove(login))
 			throw new NotLoggedInException(login);
-		saveLoggedPlayersToJson();
 	}
 
 	public Set<String> getLoggedCASAccounts() {
@@ -67,13 +74,12 @@ public final class LoginManager {
 	public void banUser(String login) throws AlreadyBannedException{
 		if(!bannedUsers.add(login))
 			throw new AlreadyBannedException(login);
-		saveBannedPlayersToJson();
 	}
 
 	public void unbanUser(String login) throws NotBannedException {
 		if(!bannedUsers.remove(login))
 			throw new NotBannedException(login);
-		saveBannedPlayersToJson();
+
 	}
 
 	public Set<String> getBannedUsers(){
@@ -99,40 +105,5 @@ public final class LoginManager {
 	public String getLogin(UUID uuid) {
 		return loggedPlayers.get(uuid);
 	}
-
-	private void saveLoggedPlayersToJson() {
-		try (FileWriter writer = new FileWriter(loggedPlayersFile)) {
-			gsonInstance.toJson(loggedPlayers, writer);
-		} catch (IOException exception) {
-			throw new RuntimeException(exception);
-		}
-	}
-
-	private void saveBannedPlayersToJson(){
-		try (FileWriter writer = new FileWriter(bannedUsersFile)) {
-			gsonInstance.toJson(bannedUsers, writer);
-		} catch (IOException exception) {
-			throw new RuntimeException(exception);
-		}
-	}
-
-	private BiMap<UUID, String> loadLoggedPlayers() {
-		try (FileReader reader = new FileReader(loggedPlayersFile)) {
-
-			Map<UUID, String> map = gsonInstance.fromJson(reader, TypeToken.getParameterized(HashMap.class, UUID.class, String.class).getType());
-			return HashBiMap.create(map);
-		} catch (IOException exception) {
-			throw new RuntimeException(exception);
-		}
-	}
-
-	private Set<String> loadBannedPlayers() {
-		try (FileReader reader = new FileReader(bannedUsersFile)) {
-			return gsonInstance.fromJson(reader, TypeToken.getParameterized(HashSet.class, String.class).getType());
-		} catch (IOException exception) {
-			throw new RuntimeException(exception);
-		}
-	}
-
 
 }

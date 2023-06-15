@@ -68,7 +68,8 @@ public class CasTabCompleter implements TabCompleter {
 	}
 
 	private List<String> adminRemoveComplete() {
-		return List.copyOf(ConfigurationManager.getAdmins());
+//		return List.copyOf(ConfigurationManager.getAdmins());
+		return null;
 	}
 
 	private List<String> adminAddComplete() {

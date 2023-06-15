@@ -90,42 +90,42 @@ public class CasCommand implements CommandExecutor {
 
 	private void addAdmin(CommandSender sender, String[] args) {
 		String adminToAdd = args[2];
-		try {
-			ConfigurationManager.addAdmin(adminToAdd);
-			sender.sendMessage(MiniMessage
-					.miniMessage()
-					.deserialize(ConfigurationManager.getLang("admin.add_admin"),
-							Placeholder.unparsed("user", adminToAdd)));
-			OfflinePlayer playerToOp = LoginManager.INSTANCE.getLoggedPlayer(adminToAdd);
-			if (playerToOp.isOnline())
-				playerToOp.setOp(true);
-		} catch (AlreadyAdminException ex) {
-			sender.sendMessage(MiniMessage
-					.miniMessage()
-					.deserialize(ConfigurationManager.getLang("admin.errors.already_admin"),
-							Placeholder.unparsed("user", adminToAdd)));
-		} catch (NotLoggedInException ignored) {
-		}
+//		try {
+//			ConfigurationManager.addAdmin(adminToAdd);
+//			sender.sendMessage(MiniMessage
+//					.miniMessage()
+//					.deserialize(ConfigurationManager.getLang("admin.add_admin"),
+//							Placeholder.unparsed("user", adminToAdd)));
+//			OfflinePlayer playerToOp = LoginManager.INSTANCE.getLoggedPlayer(adminToAdd);
+//			if (playerToOp.isOnline())
+//				playerToOp.setOp(true);
+//		} catch (AlreadyAdminException ex) {
+//			sender.sendMessage(MiniMessage
+//					.miniMessage()
+//					.deserialize(ConfigurationManager.getLang("admin.errors.already_admin"),
+//							Placeholder.unparsed("user", adminToAdd)));
+//		} catch (NotLoggedInException ignored) {
+//		}
 	}
 
 	private void removeAdmin(CommandSender sender, String[] args) {
-		String adminToRemove = args[2];
-		try {
-			ConfigurationManager.removeAdmin(adminToRemove);
-			sender.sendMessage(MiniMessage
-					.miniMessage()
-					.deserialize(ConfigurationManager.getLang("admin.remove_admin"),
-							Placeholder.unparsed("user", adminToRemove)));
-			OfflinePlayer playerToOp = LoginManager.INSTANCE.getLoggedPlayer(adminToRemove);
-			if (playerToOp.isOnline())
-				playerToOp.setOp(false);
-		} catch (NotAdminException ex) {
-			sender.sendMessage(MiniMessage
-					.miniMessage()
-					.deserialize("admin.errors.not_admin",
-							Placeholder.unparsed("user", adminToRemove)));
-		} catch (NotLoggedInException ignored) {
-		}
+//		String adminToRemove = args[2];
+//		try {
+//			ConfigurationManager.removeAdmin(adminToRemove);
+//			sender.sendMessage(MiniMessage
+//					.miniMessage()
+//					.deserialize(ConfigurationManager.getLang("admin.remove_admin"),
+//							Placeholder.unparsed("user", adminToRemove)));
+//			OfflinePlayer playerToOp = LoginManager.INSTANCE.getLoggedPlayer(adminToRemove);
+//			if (playerToOp.isOnline())
+//				playerToOp.setOp(false);
+//		} catch (NotAdminException ex) {
+//			sender.sendMessage(MiniMessage
+//					.miniMessage()
+//					.deserialize("admin.errors.not_admin",
+//							Placeholder.unparsed("user", adminToRemove)));
+//		} catch (NotLoggedInException ignored) {
+//		}
 	}
 
 	private boolean loginSubCommand(CommandSender sender, String[] args) {

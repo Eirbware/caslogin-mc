@@ -47,8 +47,8 @@ public class JoinListener implements Listener {
 			ev.getPlayer().setCollidable(false);
 		} else {
 			String playerLogin = LoginManager.INSTANCE.getLogin(playerUUID);
-			if (ConfigurationManager.getAdmins().contains(playerLogin))
-				instance.getServer().getPlayer(playerUUID).setOp(true);
+//			if (ConfigurationManager.getAdmins().contains(playerLogin))
+//				instance.getServer().getPlayer(playerUUID).setOp(true);
 			TranslatableComponent joinMessage = Component.translatable("multiplayer.player.joined")
 					.args(Component.text(LoginManager.INSTANCE.getLogin(playerUUID)))
 					.style(Style.style(NamedTextColor.YELLOW));

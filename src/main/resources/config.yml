@@ -1,1 +1,2 @@
-auth-server: The Authentification Server
+auth_server: https://foo
+api_key: YOUR API KEY
