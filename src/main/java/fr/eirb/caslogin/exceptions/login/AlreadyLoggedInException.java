@@ -1,10 +1,11 @@
 package fr.eirb.caslogin.exceptions.login;
 
-import org.bukkit.entity.Player;
+
+import com.velocitypowered.api.proxy.Player;
 
 public class AlreadyLoggedInException extends LoginException {
 
 	public AlreadyLoggedInException(Player cause) {
-		super("Player '" + cause.getName() + "'was already logged in!");
+		super("Player '" + cause.getUsername() + "'was already logged in!");
 	}
 }

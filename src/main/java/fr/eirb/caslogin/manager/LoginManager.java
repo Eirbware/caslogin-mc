@@ -4,11 +4,10 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.velocitypowered.api.proxy.Player;
 import fr.eirb.caslogin.exceptions.login.*;
 import fr.eirb.caslogin.CasLogin;
 import fr.eirb.caslogin.utils.ApiUtils;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 
 import java.io.File;
 import java.io.FileReader;
@@ -21,8 +20,6 @@ public final class LoginManager {
 	public static final LoginManager INSTANCE = new LoginManager();
 	private final BiMap<UUID, String> loggedPlayers;
 
-	private final Set<String> bannedUsers;
-
 	private final Gson gsonInstance;
 
 	private LoginManager() {
@@ -30,12 +27,7 @@ public final class LoginManager {
 
 
 		loggedPlayers = loadLoggedPlayers();
-		bannedUsers = loadBannedPlayers();
 
-	}
-
-	private Set<String> loadBannedPlayers() {
-		return ApiUtils.getBannedUsers();
 	}
 
 	private BiMap<UUID, String> loadLoggedPlayers() {
@@ -63,27 +55,6 @@ public final class LoginManager {
 
 	public Set<String> getLoggedCASAccounts() {
 		return Collections.unmodifiableSet(loggedPlayers.values());
-	}
-
-	public OfflinePlayer getLoggedPlayer(String login) throws NotLoggedInException{
-		if(!loggedPlayers.containsValue(login))
-			throw new NotLoggedInException(login);
-		return CasLogin.INSTANCE.getServer().getOfflinePlayer(loggedPlayers.inverse().get(login));
-	}
-
-	public void banUser(String login) throws AlreadyBannedException{
-		if(!bannedUsers.add(login))
-			throw new AlreadyBannedException(login);
-	}
-
-	public void unbanUser(String login) throws NotBannedException {
-		if(!bannedUsers.remove(login))
-			throw new NotBannedException(login);
-
-	}
-
-	public Set<String> getBannedUsers(){
-		return Collections.unmodifiableSet(bannedUsers);
 	}
 
 	public boolean isLoggedIn(Player p) {

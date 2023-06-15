@@ -1,27 +1,42 @@
 package fr.eirb.caslogin.configuration;
 
 import fr.eirb.caslogin.CasLogin;
-import org.bukkit.configuration.file.YamlConfiguration;
+import ninja.leaping.configurate.ConfigurationNode;
+import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 public class ConfigurationUtils {
-	public static YamlConfiguration getOrCreateConfigurationFile(String filename){
-		File customConfigFile = new File(CasLogin.INSTANCE.getDataFolder(), filename);
-		if(!customConfigFile.exists()){
-			customConfigFile.getParentFile().mkdirs();
-			CasLogin.INSTANCE.saveResource(filename, false);
+	public static void tryCreatePluginConfigDir(Path pluginDir){
+		if(!Files.exists(pluginDir)) {
+			try {
+				Files.createDirectory(pluginDir);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
 		}
-
-		return YamlConfiguration.loadConfiguration(customConfigFile);
 	}
-
-	public static YamlConfiguration getOrCreateConfigurationFile(File customConfigFile){
-		if(!customConfigFile.exists()){
-			customConfigFile.getParentFile().mkdirs();
-			CasLogin.INSTANCE.saveResource(customConfigFile.getName(), false);
+	public static ConfigurationNode getOrCreateConfigurationFile(Path pluginDir, String filename){
+		tryCreatePluginConfigDir(pluginDir);
+		Path configFile = pluginDir.resolve(filename);
+		if(!Files.exists(configFile)) {
+			try(InputStream in = ConfigurationUtils.class.getClassLoader().getResourceAsStream(filename)){
+				Files.createFile(configFile);
+				assert in != null;
+				Files.copy(in, configFile, StandardCopyOption.REPLACE_EXISTING);
+			} catch (IOException e) {
+				throw new RuntimeException(e);
+			}
 		}
-
-		return YamlConfiguration.loadConfiguration(customConfigFile);
+		try {
+			return YAMLConfigurationLoader.builder().setFile(configFile.toFile()).build().load();
+		} catch (IOException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

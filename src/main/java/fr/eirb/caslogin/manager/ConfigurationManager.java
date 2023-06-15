@@ -4,47 +4,34 @@ import fr.eirb.caslogin.CasLogin;
 import fr.eirb.caslogin.configuration.ConfigurationUtils;
 import fr.eirb.caslogin.exceptions.configuration.AlreadyAdminException;
 import fr.eirb.caslogin.exceptions.configuration.NotAdminException;
-import org.bukkit.configuration.file.FileConfiguration;
-
+import ninja.leaping.configurate.ConfigurationNode;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 
 public class ConfigurationManager {
 
-	private static final ConfigurationManager INSTANCE = new ConfigurationManager();
+	private static ConfigurationNode pluginConfig;
 
-	private FileConfiguration pluginConfig;
+	private static ConfigurationNode langConfig;
 
-	private FileConfiguration langConfig;
-
-	private final File pluginConfigFile;
-
-	private ConfigurationManager() {
-		this.pluginConfigFile = new File(CasLogin.INSTANCE.getDataFolder(), "config.yml");
-		CasLogin.INSTANCE.saveDefaultConfig();
-		this.reloadConfig();
+	public static void reloadConfig(Path dataFolder){
+		pluginConfig = ConfigurationUtils.getOrCreateConfigurationFile(dataFolder, "config.yml");
+		langConfig = ConfigurationUtils.getOrCreateConfigurationFile(dataFolder, "lang.yml");
 	}
 
-	private void reloadConfig(){
-		this.pluginConfig = CasLogin.INSTANCE.getConfig();
-		this.langConfig = ConfigurationUtils.getOrCreateConfigurationFile("lang.yml");
-	}
-
-	public static void reload(){
-		INSTANCE.reloadConfig();
-	}
 
 	public static String getLang(String path){
-		return INSTANCE.langConfig.getString(path);
+		return langConfig.getNode((Object[]) path.split("\\.")).getString();
 	}
 	public static String getAuthServer(){
-		return INSTANCE.pluginConfig.getString("auth_server");
+		return pluginConfig.getNode("auth_server").getString();
 	}
 
 	public static String getApiKey(){
-		return INSTANCE.pluginConfig.getString("api_key");
+		return pluginConfig.getNode("api_key").getString();
 	}
 }
