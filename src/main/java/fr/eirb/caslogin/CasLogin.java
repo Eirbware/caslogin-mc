@@ -52,6 +52,15 @@ public class CasLogin {
 		}
 	}
 
+	@Subscribe
+	public void onDisconnect(DisconnectEvent ev){
+		logger.info("Logging out player " + ev.getPlayer().getUsername());
+		try {
+			LoginManager.logout(ev.getPlayer());
+		} catch (NotLoggedInException ignored) {
+		}
+	}
+
 	private void registerCommands() {
 		logger.info("Loading commands...");
 		proxy.getCommandManager().register(CasCommand.createCasCommand(proxy));

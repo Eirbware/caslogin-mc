@@ -81,7 +81,7 @@ public final class CasCommand {
 								GameProfileUtils.setName(prof, user.getUser().getLogin());
 								GameProfileUtils.setUUID(prof, UuidUtils.generateOfflinePlayerUuid(user.getUser().getLogin()));
 								RegisteredServer loggedServer = proxy.getServer(ConfigurationManager.getLoggedServer()).orElseThrow();
-								player.createConnectionRequest(loggedServer).connect().thenRun(() -> GameProfileUtils.setToGameProfile(prof, oldProf));
+								player.createConnectionRequest(loggedServer).connectWithIndication().thenRun(() -> GameProfileUtils.setToGameProfile(prof, oldProf));
 							} catch (LoginAlreadyTakenException e) {
 								player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.login_taken")));
 							} catch (InvalidAuthCodeException e) {
