@@ -16,6 +16,7 @@ public class ApiUtils {
 
 	public static final String API_PATH = "/api";
 	public static final String LOGIN_PATH = API_PATH + "/login.php";
+	public static final String LOGOUT_PATH = API_PATH + "/logout.php";
 	public static final String BAN_PATH = API_PATH + "/ban.php";
 	public static final String VALIDATE_PATH = API_PATH + "/validate.php";
 	public static final String USERS_PATH = API_PATH + "/users.php";
@@ -32,6 +33,10 @@ public class ApiUtils {
 
 	public static String getValidateUrl(Player p, String authCode){
 		return ConfigurationManager.getAuthServer() + VALIDATE_PATH + "?code=" + authCode + "&uuid=" + p.getUniqueId().toString();
+	}
+
+	private static String getLogoutURL(LoggedUser loggedUser) {
+		return ConfigurationManager.getAuthServer() + LOGOUT_PATH;
 	}
 
 	public static LoggedUser validateLogin(Player p, String authCode) throws APIException {
@@ -52,5 +57,21 @@ public class ApiUtils {
 		Gson gsonInstance = new Gson();
 		ErrorBody body = gsonInstance.fromJson(resp.getResponseBody(), ErrorBody.class);
 		throw new APIException(body.getError());
+	}
+
+	public static void logout(LoggedUser loggedUser) throws APIException{
+		try(AsyncHttpClient client = Dsl.asyncHttpClient()){
+			Request req = getAuthorizedRequest()
+					.setUrl(getLogoutURL(loggedUser))
+					.setMethod("POST")
+					.setBody(String.format("{\"user\": \"%s\"}", loggedUser.getUser().getLogin()))
+					.build();
+			Response resp = client.executeRequest(req).get();
+			if(resp.getStatusCode() != 200){
+				handleApiError(resp);
+			}
+		} catch (IOException | ExecutionException | InterruptedException e) {
+			throw new RuntimeException(e);
+		}
 	}
 }

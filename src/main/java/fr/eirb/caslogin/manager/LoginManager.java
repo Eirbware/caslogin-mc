@@ -7,6 +7,7 @@ import com.google.gson.reflect.TypeToken;
 import com.velocitypowered.api.proxy.Player;
 import fr.eirb.caslogin.api.LoggedUser;
 import fr.eirb.caslogin.exceptions.api.APIException;
+import fr.eirb.caslogin.exceptions.api.Errors;
 import fr.eirb.caslogin.exceptions.login.*;
 import fr.eirb.caslogin.CasLogin;
 import fr.eirb.caslogin.utils.ApiUtils;
@@ -19,12 +20,14 @@ import java.util.*;
 
 public final class LoginManager {
 
-	public static BiMap<Player, LoggedUser> loggedUserMap = HashBiMap.create();
+	public static BiMap<UUID, LoggedUser> loggedUserMap = HashBiMap.create();
 
 	public static LoggedUser logPlayer(Player p, String authCode) throws LoginAlreadyTakenException,
 			InvalidAuthCodeException, AuthCodeExpiredException, InvalidTokenException, NoAuthCodeForUuidException {
 		try {
-			return ApiUtils.validateLogin(p, authCode);
+			LoggedUser user = ApiUtils.validateLogin(p, authCode);
+			loggedUserMap.put(p.getUniqueId(), user);
+			return user;
 		} catch (APIException ex) {
 			switch (ex.error) {
 				case USER_ALREADY_LOGGED_IN -> throw new LoginAlreadyTakenException();
@@ -38,7 +41,17 @@ public final class LoginManager {
 	}
 
 	public static void logout(Player p) throws NotLoggedInException {
-
+		if(!loggedUserMap.containsKey(p.getUniqueId())) {
+			throw new NotLoggedInException(p);
+		}
+		try{
+			ApiUtils.logout(loggedUserMap.get(p.getUniqueId()));
+			loggedUserMap.remove(p.getUniqueId());
+		}catch(APIException ex){
+			if(ex.error == Errors.USER_NOT_LOGGED_IN)
+				throw new NotLoggedInException(p);
+			throw new RuntimeException(ex);
+		}
 	}
 
 }
