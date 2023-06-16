@@ -1,3 +1,4 @@
 auth_server: https://foo
 api_key: YOUR API KEY
 limbo_server: lobby
+logged_server: paper

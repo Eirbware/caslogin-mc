@@ -1,16 +1,9 @@
 package fr.eirb.caslogin.manager;
 
-import fr.eirb.caslogin.CasLogin;
 import fr.eirb.caslogin.configuration.ConfigurationUtils;
-import fr.eirb.caslogin.exceptions.configuration.AlreadyAdminException;
-import fr.eirb.caslogin.exceptions.configuration.NotAdminException;
 import ninja.leaping.configurate.ConfigurationNode;
-import java.io.File;
-import java.io.IOException;
+
 import java.nio.file.Path;
-import java.util.Collections;
-import java.util.List;
-import java.util.logging.Level;
 
 public class ConfigurationManager {
 
@@ -18,7 +11,14 @@ public class ConfigurationManager {
 
 	private static ConfigurationNode langConfig;
 
-	public static void reloadConfig(Path dataFolder){
+	private static Path dataFolder;
+
+	public static void loadConfig(Path dataFolder){
+		ConfigurationManager.dataFolder = dataFolder;
+		reloadConfig();
+	}
+
+	public static void reloadConfig(){
 		pluginConfig = ConfigurationUtils.getOrCreateConfigurationFile(dataFolder, "config.yml");
 		langConfig = ConfigurationUtils.getOrCreateConfigurationFile(dataFolder, "lang.yml");
 	}
@@ -37,5 +37,9 @@ public class ConfigurationManager {
 
 	public static String getLimboServerName() {
 		return pluginConfig.getNode("limbo_server").getString();
+	}
+
+	public static String getLoggedServer() {
+		return pluginConfig.getNode("logged_server").getString();
 	}
 }

@@ -1,5 +1,6 @@
 user:
   login:
+    url_message: "<gray>Please login <blue><click:open_url:'%s'>Here</click></blue><br>Then do <gold>/cas login <verification code></gold></gray>"
     success: "<green>You have been successfully logged in</green><br><gray>Please log back in</gray>"
   logout:
     success: "<green>You have been successfully logged out</green>"
