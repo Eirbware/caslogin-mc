@@ -82,14 +82,16 @@ public final class CasCommand {
 								GameProfileUtils.setUUID(prof, UuidUtils.generateOfflinePlayerUuid(user.getUser().getLogin()));
 								RegisteredServer loggedServer = proxy.getServer(ConfigurationManager.getLoggedServer()).orElseThrow();
 								player.createConnectionRequest(loggedServer).connect().thenRun(() -> GameProfileUtils.setToGameProfile(prof, oldProf));
-							} catch (AlreadyLoggedInException e) {
-								player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.already_logged_in")));
 							} catch (LoginAlreadyTakenException e) {
 								player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.login_taken")));
 							} catch (InvalidAuthCodeException e) {
 								player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.invalid_auth_code")));
 							} catch (AuthCodeExpiredException e) {
 								player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.auth_code_expired")));
+							} catch (InvalidTokenException e) {
+								player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.invalid_token")));
+							} catch (NoAuthCodeForUuidException e) {
+								player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.no_auth_code_for_uuid")));
 							}
 							return Command.SINGLE_SUCCESS;
 						})

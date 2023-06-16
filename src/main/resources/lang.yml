@@ -11,7 +11,9 @@ user:
     login_taken: "<red>This user is already logged in!</red>"
     ask_login: "<red>Veuillez vous connecter avec la commande</red> <gold>/cas login</gold>"
     invalid_auth_code: "<red>Invalid auth code</red>"
-    auth_code_expired: "<red>Auth code expired. Please do <gold>/cas login</gold> again.</red>"
+    auth_code_expired: "<red>Auth code expired. Please try again"
+    invalid_token: "<red>Could not authenticate you. Please try again"
+    no_auth_code_for_uuid: "<red>Please do <gold>/cas login</gold> first.</red>"
   banned: "<red>You have been banned by an administrator.</red>"
 
 
