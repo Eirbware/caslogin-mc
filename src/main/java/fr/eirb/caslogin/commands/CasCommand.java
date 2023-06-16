@@ -1,8 +1,10 @@
 package fr.eirb.caslogin.commands;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
@@ -12,9 +14,7 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.util.GameProfile;
 import com.velocitypowered.api.util.UuidUtils;
 import fr.eirb.caslogin.api.LoggedUser;
-import fr.eirb.caslogin.exceptions.login.AlreadyLoggedInException;
-import fr.eirb.caslogin.exceptions.login.LoginAlreadyTakenException;
-import fr.eirb.caslogin.exceptions.login.LoginException;
+import fr.eirb.caslogin.exceptions.login.*;
 import fr.eirb.caslogin.manager.ConfigurationManager;
 import fr.eirb.caslogin.manager.LoginManager;
 import fr.eirb.caslogin.utils.ApiUtils;
@@ -66,7 +66,34 @@ public final class CasCommand {
 							.deserialize(String.format(ConfigurationManager.getLang("user.login.url_message"), ApiUtils.getLoginUrl(player))));
 
 					return Command.SINGLE_SUCCESS;
-				});
+				})
+				.then(RequiredArgumentBuilder
+						.<CommandSource, String>argument("authCode", StringArgumentType.word())
+						.executes(context -> {
+							if(!(context.getSource() instanceof Player player))
+								return -1;
+							String authCode = context.getArgument("authCode", String.class);
+							try {
+								LoggedUser user = LoginManager.logPlayer(player, authCode);
+								assert user != null;
+								GameProfile prof = player.getGameProfile();
+								GameProfile oldProf = GameProfileUtils.cloneGameProfile(prof);
+								GameProfileUtils.setName(prof, user.getUser().getLogin());
+								GameProfileUtils.setUUID(prof, UuidUtils.generateOfflinePlayerUuid(user.getUser().getLogin()));
+								RegisteredServer loggedServer = proxy.getServer(ConfigurationManager.getLoggedServer()).orElseThrow();
+								player.createConnectionRequest(loggedServer).connect().thenRun(() -> GameProfileUtils.setToGameProfile(prof, oldProf));
+							} catch (AlreadyLoggedInException e) {
+								player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.already_logged_in")));
+							} catch (LoginAlreadyTakenException e) {
+								player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.login_taken")));
+							} catch (InvalidAuthCodeException e) {
+								player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.invalid_auth_code")));
+							} catch (AuthCodeExpiredException e) {
+								player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.auth_code_expired")));
+							}
+							return Command.SINGLE_SUCCESS;
+						})
+				);
 	}
 
 

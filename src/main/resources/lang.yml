@@ -10,6 +10,8 @@ user:
     already_logged_in: "<red>You are already logged in!</red>"
     login_taken: "<red>This user is already logged in!</red>"
     ask_login: "<red>Veuillez vous connecter avec la commande</red> <gold>/cas login</gold>"
+    invalid_auth_code: "<red>Invalid auth code</red>"
+    auth_code_expired: "<red>Auth code expired. Please do <gold>/cas login</gold> again.</red>"
   banned: "<red>You have been banned by an administrator.</red>"
 
 
