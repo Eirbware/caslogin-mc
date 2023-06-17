@@ -29,10 +29,6 @@ public final class CasCommand {
 				.<CommandSource>literal("cas")
 				.then(loginCommand(proxy))
 				.then(configCommand())
-				.executes(context -> {
-					context.getSource().sendMessage(MiniMessage.miniMessage().deserialize("OI"));
-					return Command.SINGLE_SUCCESS;
-				})
 				.build();
 		return new BrigadierCommand(rootNode);
 	}
@@ -70,7 +66,7 @@ public final class CasCommand {
 				.then(RequiredArgumentBuilder
 						.<CommandSource, String>argument("authCode", StringArgumentType.word())
 						.executes(context -> {
-							if(!(context.getSource() instanceof Player player))
+							if (!(context.getSource() instanceof Player player))
 								return -1;
 							String authCode = context.getArgument("authCode", String.class);
 							try {
@@ -81,7 +77,22 @@ public final class CasCommand {
 								GameProfileUtils.setName(prof, user.getUser().getLogin());
 								GameProfileUtils.setUUID(prof, UuidUtils.generateOfflinePlayerUuid(user.getUser().getLogin()));
 								RegisteredServer loggedServer = proxy.getServer(ConfigurationManager.getLoggedServer()).orElseThrow();
-								player.createConnectionRequest(loggedServer).connectWithIndication().thenRun(() -> GameProfileUtils.setToGameProfile(prof, oldProf));
+								player.createConnectionRequest(loggedServer).connect()
+										.thenAccept((r) -> {
+											GameProfileUtils.setToGameProfile(prof, oldProf);
+											if(!r.isSuccessful()){
+												if(r.getReasonComponent().isEmpty())
+													player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_banned_no_reason")));
+												else
+													player.sendMessage(MiniMessage
+															.miniMessage()
+															.deserialize(ConfigurationManager.getLang("user.errors.user_banned"))
+															.append(r.getReasonComponent().get()));
+												try {
+													LoginManager.logout(player);
+												} catch (NotLoggedInException ignored) {}
+											}
+										});
 							} catch (LoginAlreadyTakenException e) {
 								player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.login_taken")));
 							} catch (InvalidAuthCodeException e) {

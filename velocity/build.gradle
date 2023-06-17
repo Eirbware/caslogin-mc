@@ -51,6 +51,5 @@ def generateTemplates = tasks.register('generateTemplates', Copy) { task ->
 }
 
 sourceSets.main.java.srcDir(generateTemplates.map { it.outputs })
-
 rootProject.idea.project.settings.taskTriggers.afterSync generateTemplates
 project.eclipse.synchronizationTasks(generateTemplates)
