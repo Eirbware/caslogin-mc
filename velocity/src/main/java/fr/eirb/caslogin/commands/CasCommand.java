@@ -14,6 +14,7 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.util.GameProfile;
 import com.velocitypowered.api.util.UuidUtils;
 import fr.eirb.caslogin.api.LoggedUser;
+import fr.eirb.caslogin.events.LoggedInEvent;
 import fr.eirb.caslogin.exceptions.login.*;
 import fr.eirb.caslogin.manager.ConfigurationManager;
 import fr.eirb.caslogin.manager.LoginManager;
@@ -80,6 +81,7 @@ public final class CasCommand {
 								player.createConnectionRequest(loggedServer).connect()
 										.thenAccept((r) -> {
 											GameProfileUtils.setToGameProfile(prof, oldProf);
+											proxy.getEventManager().fireAndForget(new LoggedInEvent(player));
 											if(!r.isSuccessful()){
 												if(r.getReasonComponent().isEmpty())
 													player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_banned_no_reason")));
