@@ -7,6 +7,7 @@ import com.comphenix.protocol.wrappers.PlayerInfoData;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.WrappedGameProfile;
 import fr.kumakuma215.casloginfix.CasLoginFix;
+import fr.kumakuma215.casloginfix.exceptions.NoFakePlayerException;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
 
@@ -43,11 +44,23 @@ public class FakePlayerEntriesManager {
 	}
 
 	private void sendFakePlayerEntry(Player player) {
-		PacketContainer packetToSend = CasLoginFix.getProtocolManager().createPacket(PacketType.Play.Server.PLAYER_INFO);
-		packetToSend.getPlayerInfoActions().write(0, EnumSet.of(EnumWrappers.PlayerInfoAction.ADD_PLAYER,
-				EnumWrappers.PlayerInfoAction.UPDATE_LISTED, EnumWrappers.PlayerInfoAction.UPDATE_GAME_MODE));
 		PlayerInfoData data = createFakeInfoData(player);
+		sendFakePlayerInfoPacket(player, data, EnumSet.of(EnumWrappers.PlayerInfoAction.ADD_PLAYER, EnumWrappers.PlayerInfoAction.UPDATE_LISTED, EnumWrappers.PlayerInfoAction.UPDATE_GAME_MODE));
+	}
+
+	private void sendFakePlayerInfoPacket(Player player, PlayerInfoData data, EnumSet<EnumWrappers.PlayerInfoAction> actions){
+		PacketContainer packetToSend = CasLoginFix.getProtocolManager().createPacket(PacketType.Play.Server.PLAYER_INFO);
+		packetToSend.getPlayerInfoActions().write(0, actions);
 		packetToSend.getPlayerInfoDataLists().write(1, Collections.singletonList(data));
 		CasLoginFix.getProtocolManager().sendServerPacket(player, packetToSend);
+
+
+	}
+
+	public void updateGamemode(Player player, GameMode newGamemode) throws NoFakePlayerException {
+		if(!falseToTrueUUIDMap.containsKey(player.getUniqueId()))
+			throw new NoFakePlayerException();
+		PlayerInfoData data = createFakeInfoData(player, newGamemode);
+		sendFakePlayerInfoPacket(player, data, EnumSet.of(EnumWrappers.PlayerInfoAction.UPDATE_GAME_MODE));
 	}
 }
