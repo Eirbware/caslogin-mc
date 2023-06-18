@@ -2,8 +2,8 @@ package fr.eirb.caslogin.utils;
 
 import com.google.gson.Gson;
 import com.velocitypowered.api.proxy.Player;
-import fr.eirb.caslogin.api.body.ErrorBody;
 import fr.eirb.caslogin.api.LoggedUser;
+import fr.eirb.caslogin.api.body.ErrorBody;
 import fr.eirb.caslogin.api.body.ValidateBody;
 import fr.eirb.caslogin.exceptions.api.APIException;
 import fr.eirb.caslogin.manager.ConfigurationManager;

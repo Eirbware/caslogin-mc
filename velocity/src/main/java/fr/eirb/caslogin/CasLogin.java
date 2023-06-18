@@ -4,11 +4,7 @@ import com.google.common.base.Charsets;
 import com.google.inject.Inject;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
-import com.velocitypowered.api.event.connection.PluginMessageEvent;
-import com.velocitypowered.api.event.connection.PreLoginEvent;
-import com.velocitypowered.api.event.player.ServerConnectedEvent;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
-import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
@@ -18,18 +14,15 @@ import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import com.velocitypowered.api.util.GameProfile;
 import com.velocitypowered.api.util.UuidUtils;
 import fr.eirb.caslogin.api.LoggedUser;
 import fr.eirb.caslogin.commands.CasCommand;
-import fr.eirb.caslogin.events.LoggedInEvent;
+import fr.eirb.caslogin.events.PostLoginEvent;
 import fr.eirb.caslogin.exceptions.login.NotLoggedInException;
 import fr.eirb.caslogin.manager.ConfigurationManager;
 import fr.eirb.caslogin.manager.LoginManager;
-import fr.eirb.caslogin.utils.GameProfileUtils;
 
 import java.nio.file.Path;
-import java.util.HashMap;
 import java.util.logging.Logger;
 
 @Plugin(
@@ -78,8 +71,8 @@ public class CasLogin {
 
 
 	@Subscribe
-	private void sendPluginMessageForFixes(LoggedInEvent ev) {
-		Player player = ev.getPlayer();
+	private void sendPluginMessageForFixes(PostLoginEvent ev) {
+		Player player = ev.player();
 		if(!LoginManager.loggedUserMap.containsKey(player.getUniqueId()))
 			return;
 		LoggedUser userForPlayer = LoginManager.loggedUserMap.get(player.getUniqueId());

@@ -14,7 +14,7 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.util.GameProfile;
 import com.velocitypowered.api.util.UuidUtils;
 import fr.eirb.caslogin.api.LoggedUser;
-import fr.eirb.caslogin.events.LoggedInEvent;
+import fr.eirb.caslogin.events.PostLoginEvent;
 import fr.eirb.caslogin.exceptions.login.*;
 import fr.eirb.caslogin.manager.ConfigurationManager;
 import fr.eirb.caslogin.manager.LoginManager;
@@ -22,7 +22,6 @@ import fr.eirb.caslogin.utils.ApiUtils;
 import fr.eirb.caslogin.utils.GameProfileUtils;
 import fr.eirb.caslogin.utils.PlayerUtils;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 
 public final class CasCommand {
 	public static BrigadierCommand createCasCommand(final ProxyServer proxy) {
@@ -81,7 +80,7 @@ public final class CasCommand {
 								player.createConnectionRequest(loggedServer).connect()
 										.thenAccept((r) -> {
 											GameProfileUtils.setToGameProfile(prof, oldProf);
-											proxy.getEventManager().fireAndForget(new LoggedInEvent(player));
+											proxy.getEventManager().fireAndForget(new PostLoginEvent(player));
 											if(!r.isSuccessful()){
 												if(r.getReasonComponent().isEmpty())
 													player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_banned_no_reason")));

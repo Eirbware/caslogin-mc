@@ -1,10 +1,8 @@
 package fr.eirb.caslogin.configuration;
 
-import fr.eirb.caslogin.CasLogin;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
