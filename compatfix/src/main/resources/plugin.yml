@@ -1,0 +1,6 @@
+name: casloginfix
+version: '${version}'
+main: fr.kumakuma215.casloginfix.CasLoginFix
+api-version: 1.19
+depend:
+  - ProtocolLib
