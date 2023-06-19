@@ -1,10 +1,12 @@
 package fr.eirb.caslogin.manager.impl;
 
 import com.velocitypowered.api.proxy.ProxyServer;
+import fr.eirb.caslogin.CasLogin;
 import fr.eirb.caslogin.api.LoggedUser;
 import fr.eirb.caslogin.manager.RoleManager;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.model.group.Group;
+import net.luckperms.api.node.types.InheritanceNode;
 import net.luckperms.api.query.QueryMode;
 import net.luckperms.api.query.QueryOptions;
 
@@ -43,9 +45,10 @@ public class LuckPermsRoleManager implements RoleManager {
 						return;
 					// Safe to do because we're already in async :D
 					List<Group> groups = getRolesAsGroupsOfUser(loggedUser);
-
-
-					user.getInheritedGroups(QueryOptions.builder(QueryMode.CONTEXTUAL).build()).addAll(groups);
+					for(Group group : groups){
+						user.data().add(InheritanceNode.builder(group).build());
+					}
+					api.getUserManager().saveUser(user);
 				});
 	}
 
@@ -57,8 +60,10 @@ public class LuckPermsRoleManager implements RoleManager {
 						return;
 					// Safe to do because we're already in async :D
 					List<Group> groups = getRolesAsGroupsOfUser(loggedUser);
-
-					user.getInheritedGroups(QueryOptions.builder(QueryMode.CONTEXTUAL).build()).removeAll(groups);
+					for(Group group : groups){
+						user.data().remove(InheritanceNode.builder(group).build());
+					}
+					api.getUserManager().saveUser(user);
 				});
 	}
 }

@@ -22,6 +22,9 @@ import fr.eirb.caslogin.events.PostLoginEvent;
 import fr.eirb.caslogin.exceptions.login.NotLoggedInException;
 import fr.eirb.caslogin.manager.ConfigurationManager;
 import fr.eirb.caslogin.manager.LoginManager;
+import fr.eirb.caslogin.manager.RoleManager;
+import fr.eirb.caslogin.manager.impl.DummyRoleManager;
+import fr.eirb.caslogin.manager.impl.LuckPermsRoleManager;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 
@@ -40,20 +43,29 @@ public class CasLogin {
 
 	private static final ChannelIdentifier CAS_FIX_CHANNEL = MinecraftChannelIdentifier.create("caslogin", "auth");
 
+	private static CasLogin INSTANCE;
+
 	@Inject
 	private Logger logger;
 
 	@Inject
 	private ProxyServer proxy;
 
+	private RoleManager roleManager;
+
 	@Inject
 	public CasLogin(@DataDirectory Path pluginDir) {
 		ConfigurationManager.loadConfig(pluginDir);
 	}
 
+	public static CasLogin getINSTANCE() {
+		return INSTANCE;
+	}
+
 	@Subscribe
 	public void onProxyInit(ProxyInitializeEvent ev) {
 		logger.info("Loading plugin...");
+		INSTANCE = this;
 		registerCommands();
 		hookLuckperms();
 		logger.info("Plugin successfully loaded!");
@@ -62,9 +74,11 @@ public class CasLogin {
 	private void hookLuckperms() {
 		try{
 			LuckPerms api = LuckPermsProvider.get();
+			this.roleManager = new LuckPermsRoleManager(api, proxy);
 			logger.info("Found LuckPerms. Loading LuckPerms RoleManager...");
 		}catch(IllegalStateException notLoaded){
-			logger.warning("Could not find LuckPerms. RoleManager will be disabled.");
+			logger.warning("Could not find LuckPerms. Using dummy rolemanager that does nothing.");
+			this.roleManager = new DummyRoleManager();
 		}
 	}
 
@@ -84,15 +98,18 @@ public class CasLogin {
 
 	}
 
+	@Subscribe
+	private void updateRolesOnLogin(PostLoginEvent ev){
+		logger.info("Updating roles for user '" + ev.loggedUser().getUser().getLogin() + "'");
+		this.roleManager.updateUserRoles(ev.loggedUser());
+	}
 
 	@Subscribe
 	private void sendPluginMessageForFixes(PostLoginEvent ev) {
 		Player player = ev.player();
-		if(!LoginManager.loggedUserMap.containsKey(player.getUniqueId()))
-			return;
-		LoggedUser userForPlayer = LoginManager.loggedUserMap.get(player.getUniqueId());
+		LoggedUser userForPlayer = ev.loggedUser();
 		ServerConnection conn = player.getCurrentServer().orElseThrow();
-		String message = player.getUniqueId() + ":" + UuidUtils.generateOfflinePlayerUuid(userForPlayer.getUser().getLogin());
+		String message = player.getUniqueId() + ":" + userForPlayer.getFakeUserUUID();
 		logger.info(String.format("Sending '%s' at '%s' to server '%s'", message, CAS_FIX_CHANNEL, conn.getServerInfo().getName()));
 		conn.sendPluginMessage(CAS_FIX_CHANNEL, Charsets.UTF_8.encode(message).array());
 	}
@@ -110,5 +127,13 @@ public class CasLogin {
 		logger.info("Loading commands...");
 		proxy.getCommandManager().register(CasCommand.createCasCommand(proxy));
 		logger.info("Finished loading commands.");
+	}
+
+	public RoleManager getRoleManager() {
+		return roleManager;
+	}
+
+	public Logger getLogger() {
+		return logger;
 	}
 }

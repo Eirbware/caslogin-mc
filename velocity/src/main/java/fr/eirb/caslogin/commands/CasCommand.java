@@ -70,17 +70,16 @@ public final class CasCommand {
 								return -1;
 							String authCode = context.getArgument("authCode", String.class);
 							try {
-								LoggedUser user = LoginManager.logPlayer(player, authCode);
-								assert user != null;
+								LoggedUser loggedUser = LoginManager.logPlayer(player, authCode);
+								assert loggedUser != null;
 								GameProfile prof = player.getGameProfile();
 								GameProfile oldProf = GameProfileUtils.cloneGameProfile(prof);
-								GameProfileUtils.setName(prof, user.getUser().getLogin());
-								GameProfileUtils.setUUID(prof, UuidUtils.generateOfflinePlayerUuid(user.getUser().getLogin()));
+								GameProfileUtils.setName(prof, loggedUser.getUser().getLogin());
+								GameProfileUtils.setUUID(prof, loggedUser.getFakeUserUUID());
 								RegisteredServer loggedServer = proxy.getServer(ConfigurationManager.getLoggedServer()).orElseThrow();
 								player.createConnectionRequest(loggedServer).connect()
 										.thenAccept((r) -> {
 											GameProfileUtils.setToGameProfile(prof, oldProf);
-											proxy.getEventManager().fireAndForget(new PostLoginEvent(player));
 											if(!r.isSuccessful()){
 												if(r.getReasonComponent().isEmpty())
 													player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_banned_no_reason")));
@@ -92,6 +91,8 @@ public final class CasCommand {
 												try {
 													LoginManager.logout(player);
 												} catch (NotLoggedInException ignored) {}
+											}else{
+												proxy.getEventManager().fireAndForget(new PostLoginEvent(player, loggedUser));
 											}
 										});
 							} catch (LoginAlreadyTakenException e) {
