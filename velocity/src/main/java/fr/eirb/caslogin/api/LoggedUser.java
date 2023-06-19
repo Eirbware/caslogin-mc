@@ -1,6 +1,9 @@
 package fr.eirb.caslogin.api;
 
 import com.google.common.base.Objects;
+import com.velocitypowered.api.util.UuidUtils;
+
+import java.util.UUID;
 
 public class LoggedUser {
 	private CasUser user;
@@ -12,6 +15,10 @@ public class LoggedUser {
 
 	public String getUuid(){
 		return uuid;
+	}
+
+	public UUID getFakeUserUUID(){
+		return UuidUtils.generateOfflinePlayerUuid(getUser().getLogin());
 	}
 
 	@Override

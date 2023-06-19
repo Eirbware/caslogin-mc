@@ -6,6 +6,7 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
+import com.velocitypowered.api.plugin.Dependency;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
@@ -21,6 +22,8 @@ import fr.eirb.caslogin.events.PostLoginEvent;
 import fr.eirb.caslogin.exceptions.login.NotLoggedInException;
 import fr.eirb.caslogin.manager.ConfigurationManager;
 import fr.eirb.caslogin.manager.LoginManager;
+import net.luckperms.api.LuckPerms;
+import net.luckperms.api.LuckPermsProvider;
 
 import java.nio.file.Path;
 import java.util.logging.Logger;
@@ -28,8 +31,10 @@ import java.util.logging.Logger;
 @Plugin(
 		id = Constants.PLUGIN_ID,
 		name = Constants.PLUGIN_NAME,
-		version = Constants.VERSION
-
+		version = Constants.VERSION,
+		dependencies = {
+				@Dependency(id = "luckperms", optional = true)
+		}
 )
 public class CasLogin {
 
@@ -50,7 +55,17 @@ public class CasLogin {
 	public void onProxyInit(ProxyInitializeEvent ev) {
 		logger.info("Loading plugin...");
 		registerCommands();
+		hookLuckperms();
 		logger.info("Plugin successfully loaded!");
+	}
+
+	private void hookLuckperms() {
+		try{
+			LuckPerms api = LuckPermsProvider.get();
+			logger.info("Found LuckPerms. Loading LuckPerms RoleManager...");
+		}catch(IllegalStateException notLoaded){
+			logger.warning("Could not find LuckPerms. RoleManager will be disabled.");
+		}
 	}
 
 	@Subscribe
