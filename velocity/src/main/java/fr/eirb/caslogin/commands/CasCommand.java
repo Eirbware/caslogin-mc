@@ -72,6 +72,7 @@ public final class CasCommand {
 							try {
 								LoggedUser loggedUser = LoginManager.logPlayer(player, authCode);
 								assert loggedUser != null;
+								player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.login.success")));
 								GameProfile prof = player.getGameProfile();
 								GameProfile oldProf = GameProfileUtils.cloneGameProfile(prof);
 								GameProfileUtils.setName(prof, loggedUser.getUser().getLogin());
