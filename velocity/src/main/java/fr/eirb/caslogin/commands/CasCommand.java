@@ -107,7 +107,7 @@ public final class CasCommand {
 							else
 								player.sendMessage(MiniMessage
 										.miniMessage()
-										.deserialize(ConfigurationManager.getLang("user.errors.user_banned"))
+										.deserialize(ConfigurationManager.getLang("user.errors.user_disconnected"))
 										.append(r.getReasonComponent().get()));
 							try {
 								LoginManager.logout(player);
