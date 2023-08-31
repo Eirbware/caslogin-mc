@@ -27,6 +27,7 @@ public final class CasCommand {
 		LiteralCommandNode<CommandSource> rootNode = LiteralArgumentBuilder
 				.<CommandSource>literal("cas")
 				.then(loginCommand(proxy))
+				.then(logoutCommand(proxy))
 				.then(configCommand())
 				.build();
 		return new BrigadierCommand(rootNode);
@@ -49,11 +50,7 @@ public final class CasCommand {
 		return LiteralArgumentBuilder
 				.<CommandSource>literal("login")
 				// Requires that the source is a player AND is on the Limbo server! Else no login!!!
-				.requires(source -> {
-					if (!(source instanceof Player player))
-						return false;
-					return PlayerUtils.isPlayerInLimbo(player);
-				})
+				.requires(CasCommand::isSourceAPlayerInLimbo)
 				.executes(context -> {
 					Player player = (Player) context.getSource();
 					player.sendMessage(MiniMessage
@@ -63,6 +60,30 @@ public final class CasCommand {
 							.thenAccept(loginPlayer(player, proxy));
 					return Command.SINGLE_SUCCESS;
 				});
+	}
+
+	private static ArgumentBuilder<CommandSource, ?> logoutCommand(ProxyServer proxy) {
+		return LiteralArgumentBuilder
+				.<CommandSource>literal("logout")
+				.requires(source -> (source instanceof Player) && !isSourceAPlayerInLimbo(source))
+				.executes(context -> {
+					Player player = (Player) context.getSource();
+					try {
+						RegisteredServer limboServer = proxy.getServer(ConfigurationManager.getLimboServerName()).orElseThrow();
+						LoginManager.logout(player);
+						player.createConnectionRequest(limboServer).fireAndForget();
+					} catch (NotLoggedInException e) {
+						throw new RuntimeException(e);
+					}
+					return Command.SINGLE_SUCCESS;
+				});
+	}
+
+	private static boolean isSourceAPlayerInLimbo(CommandSource source) {
+		if (!(source instanceof Player player))
+			return false;
+		return PlayerUtils.isPlayerInLimbo(player);
+
 	}
 
 	private static Consumer<LoggedUser> loginPlayer(Player player, ProxyServer proxy) {

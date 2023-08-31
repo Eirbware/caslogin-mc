@@ -83,7 +83,6 @@ public class ApiUtils {
 	}
 
 	public static LoggedUser getLoggedUser(UUID uuid) throws APIException {
-		System.out.print("DOing resquestiybauhvbda");
 		try(AsyncHttpClient client = Dsl.asyncHttpClient()){
 			Request req = getAuthorizedRequest().setUrl(getGetUserURL(uuid)).setMethod("GET").build();
 			Response resp = client.executeRequest(req).get();
