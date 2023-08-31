@@ -110,7 +110,6 @@ public class CasLogin {
 		Player player = ev.player();
 		LoggedUser userForPlayer = ev.loggedUser();
 		ServerConnection conn = player.getCurrentServer().orElseThrow();
-		UUID playerUUID;
 		String message = UuidUtils.generateOfflinePlayerUuid(player.getUsername()) + ":" + userForPlayer.getFakeUserUUID();
 		logger.info(String.format("Sending '%s' at '%s' to server '%s'", message, CAS_FIX_CHANNEL, conn.getServerInfo().getName()));
 		conn.sendPluginMessage(CAS_FIX_CHANNEL, Charsets.UTF_8.encode(message).array());
