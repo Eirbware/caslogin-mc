@@ -1,15 +1,18 @@
 package fr.eirb.caslogin.utils;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.velocitypowered.api.proxy.Player;
 import fr.eirb.caslogin.api.LoggedUser;
 import fr.eirb.caslogin.api.body.ErrorBody;
+import fr.eirb.caslogin.api.body.GetUserBody;
 import fr.eirb.caslogin.api.body.ValidateBody;
 import fr.eirb.caslogin.exceptions.api.APIException;
 import fr.eirb.caslogin.manager.ConfigurationManager;
 import org.asynchttpclient.*;
 
 import java.io.IOException;
+import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 public class ApiUtils {
@@ -37,6 +40,10 @@ public class ApiUtils {
 
 	private static String getLogoutURL(LoggedUser loggedUser) {
 		return ConfigurationManager.getAuthServer() + LOGOUT_PATH;
+	}
+
+	private static String getGetUserURL(UUID uuid) {
+		return ConfigurationManager.getAuthServer() + USERS_PATH + "?uuid=" + uuid.toString();
 	}
 
 	public static LoggedUser validateLogin(Player p, String authCode) throws APIException {
@@ -71,6 +78,21 @@ public class ApiUtils {
 				handleApiError(resp);
 			}
 		} catch (IOException | ExecutionException | InterruptedException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	public static LoggedUser getLoggedUser(UUID uuid) throws APIException {
+		System.out.print("DOing resquestiybauhvbda");
+		try(AsyncHttpClient client = Dsl.asyncHttpClient()){
+			Request req = getAuthorizedRequest().setUrl(getGetUserURL(uuid)).setMethod("GET").build();
+			Response resp = client.executeRequest(req).get();
+			if(resp.getStatusCode() != 200){
+				handleApiError(resp);
+			}
+			Gson gsonInstance = new Gson();
+			return gsonInstance.fromJson(resp.getResponseBody(), GetUserBody.class).getUser();
+		} catch (IOException | ExecutionException | InterruptedException | JsonSyntaxException e) {
 			throw new RuntimeException(e);
 		}
 	}

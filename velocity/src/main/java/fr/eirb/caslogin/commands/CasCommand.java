@@ -1,10 +1,8 @@
 package fr.eirb.caslogin.commands;
 
 import com.mojang.brigadier.Command;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
@@ -12,8 +10,6 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.util.GameProfile;
-import com.velocitypowered.api.util.UuidUtils;
-import fr.eirb.caslogin.api.LoggedUser;
 import fr.eirb.caslogin.events.PostLoginEvent;
 import fr.eirb.caslogin.exceptions.login.*;
 import fr.eirb.caslogin.manager.ConfigurationManager;
@@ -60,18 +56,12 @@ public final class CasCommand {
 					player.sendMessage(MiniMessage
 							.miniMessage()
 							.deserialize(String.format(ConfigurationManager.getLang("user.login.url_message"), ApiUtils.getLoginUrl(player))));
-
-					return Command.SINGLE_SUCCESS;
-				})
-				.then(RequiredArgumentBuilder
-						.<CommandSource, String>argument("authCode", StringArgumentType.word())
-						.executes(context -> {
-							if (!(context.getSource() instanceof Player player))
-								return -1;
-							String authCode = context.getArgument("authCode", String.class);
-							try {
-								LoggedUser loggedUser = LoginManager.logPlayer(player, authCode);
-								assert loggedUser != null;
+					LoginManager.pollLogin(player, 300, 3)
+							.thenAccept((loggedUser) -> {
+								if(loggedUser == null) {
+									player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("errors.login_timeout")));
+									return;
+								}
 								player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.login.success")));
 								GameProfile prof = player.getGameProfile();
 								GameProfile oldProf = GameProfileUtils.cloneGameProfile(prof);
@@ -81,8 +71,8 @@ public final class CasCommand {
 								player.createConnectionRequest(loggedServer).connect()
 										.thenAccept((r) -> {
 											GameProfileUtils.setToGameProfile(prof, oldProf);
-											if(!r.isSuccessful()){
-												if(r.getReasonComponent().isEmpty())
+											if (!r.isSuccessful()) {
+												if (r.getReasonComponent().isEmpty())
 													player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_banned_no_reason")));
 												else
 													player.sendMessage(MiniMessage
@@ -91,26 +81,42 @@ public final class CasCommand {
 															.append(r.getReasonComponent().get()));
 												try {
 													LoginManager.logout(player);
-												} catch (NotLoggedInException ignored) {}
-											}else{
+												} catch (NotLoggedInException ignored) {
+												}
+											} else {
 												proxy.getEventManager().fireAndForget(new PostLoginEvent(player, loggedUser));
 											}
+										})
+										.exceptionally((throwable) -> {
+											GameProfileUtils.setToGameProfile(prof, oldProf);
+											return null;
 										});
-							} catch (LoginAlreadyTakenException e) {
-								player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.login_taken")));
-							} catch (InvalidAuthCodeException e) {
-								player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.invalid_auth_code")));
-							} catch (AuthCodeExpiredException e) {
-								player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.auth_code_expired")));
-							} catch (InvalidTokenException e) {
-								player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.invalid_token")));
-							} catch (NoAuthCodeForUuidException e) {
-								player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.no_auth_code_for_uuid")));
-							}
-							return Command.SINGLE_SUCCESS;
-						})
-				);
+							});
+					return Command.SINGLE_SUCCESS;
+				});
 	}
 
+//	.then(RequiredArgumentBuilder
+//				  .<CommandSource, String>argument("authCode", StringArgumentType.word())
+//			.executes(context -> {
+//		if (!(context.getSource() instanceof Player player))
+//			return -1;
+//		String authCode = context.getArgument("authCode", String.class);
+//		try {
+//			LoggedUser loggedUser = LoginManager.logPlayer(player, authCode);
+//			assert loggedUser != null;
+//		} catch (LoginAlreadyTakenException e) {
+//			player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.login_taken")));
+//		} catch (InvalidAuthCodeException e) {
+//			player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.invalid_auth_code")));
+//		} catch (AuthCodeExpiredException e) {
+//			player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.auth_code_expired")));
+//		} catch (InvalidTokenException e) {
+//			player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.invalid_token")));
+//		} catch (NoAuthCodeForUuidException e) {
+//			player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.no_auth_code_for_uuid")));
+//		}
+//		return Command.SINGLE_SUCCESS;
+//	})
 
 }

@@ -2,6 +2,7 @@ package fr.eirb.caslogin;
 
 import com.google.common.base.Charsets;
 import com.google.inject.Inject;
+import com.velocitypowered.api.command.VelocityBrigadierMessage;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
@@ -25,10 +26,12 @@ import fr.eirb.caslogin.manager.LoginManager;
 import fr.eirb.caslogin.manager.RoleManager;
 import fr.eirb.caslogin.manager.impl.DummyRoleManager;
 import fr.eirb.caslogin.manager.impl.LuckPermsRoleManager;
+import fr.eirb.caslogin.utils.PlayerUtils;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 
 import java.nio.file.Path;
+import java.util.UUID;
 import java.util.logging.Logger;
 
 @Plugin(
@@ -109,7 +112,8 @@ public class CasLogin {
 		Player player = ev.player();
 		LoggedUser userForPlayer = ev.loggedUser();
 		ServerConnection conn = player.getCurrentServer().orElseThrow();
-		String message = player.getUniqueId() + ":" + userForPlayer.getFakeUserUUID();
+		UUID playerUUID;
+		String message = UuidUtils.generateOfflinePlayerUuid(player.getUsername()) + ":" + userForPlayer.getFakeUserUUID();
 		logger.info(String.format("Sending '%s' at '%s' to server '%s'", message, CAS_FIX_CHANNEL, conn.getServerInfo().getName()));
 		conn.sendPluginMessage(CAS_FIX_CHANNEL, Charsets.UTF_8.encode(message).array());
 	}
@@ -119,8 +123,10 @@ public class CasLogin {
 		logger.info("Logging out player " + ev.getPlayer().getUsername());
 		try {
 			LoginManager.logout(ev.getPlayer());
+
 		} catch (NotLoggedInException ignored) {
 		}
+
 	}
 
 	private void registerCommands() {

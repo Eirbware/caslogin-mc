@@ -1,6 +1,6 @@
 user:
   login:
-    url_message: "<gray>Please login <blue><click:open_url:'%s'>Here</click></blue><br>Then do <gold>/cas login <verification code></gold></gray>"
+    url_message: "<gray>Please login <blue><click:open_url:'%s'>Here</click></blue><br>You will be automatically authenticated</gray>"
     success: "<green>You have been successfully logged in</green><br><gray>Sending you to the server...</gray>"
   logout:
     success: "<green>You have been successfully logged out</green>"
@@ -9,6 +9,7 @@ user:
     not_logged_in: "<red>You are not logged in!</red>"
     already_logged_in: "<red>You are already logged in!</red>"
     login_taken: "<red>This user is already logged in!</red>"
+    login_timeout: "<red>Timed out. Please try again.<red>"
     ask_login: "<red>Veuillez vous connecter avec la commande</red> <gold>/cas login</gold>"
     invalid_auth_code: "<red>Invalid auth code</red>"
     auth_code_expired: "<red>Auth code expired. Please try again"

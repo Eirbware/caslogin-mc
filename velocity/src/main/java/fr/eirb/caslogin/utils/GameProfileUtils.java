@@ -4,11 +4,12 @@ import com.velocitypowered.api.util.GameProfile;
 import com.velocitypowered.api.util.UuidUtils;
 
 import java.lang.reflect.Field;
+import java.util.Collections;
 import java.util.UUID;
 
 public final class GameProfileUtils {
 	public static GameProfile cloneGameProfile(GameProfile prof){
-		return new GameProfile(prof.getId(), prof.getName(), prof.getProperties());
+		return new GameProfile(prof.getId(), prof.getName(), Collections.emptyList());
 	}
 
 	public static void setName(GameProfile prof, String newName){

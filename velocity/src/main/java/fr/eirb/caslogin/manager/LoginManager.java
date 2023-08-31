@@ -3,17 +3,24 @@ package fr.eirb.caslogin.manager;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.velocitypowered.api.proxy.Player;
+import fr.eirb.caslogin.CasLogin;
 import fr.eirb.caslogin.api.LoggedUser;
 import fr.eirb.caslogin.exceptions.api.APIException;
 import fr.eirb.caslogin.exceptions.api.Errors;
 import fr.eirb.caslogin.exceptions.login.*;
 import fr.eirb.caslogin.utils.ApiUtils;
 
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 public final class LoginManager {
 
 	public static BiMap<UUID, LoggedUser> loggedUserMap = HashBiMap.create();
+
+	private static Set<Player> loggingPlayer = new HashSet<>();
 
 	public static LoggedUser logPlayer(Player p, String authCode) throws LoginAlreadyTakenException,
 			InvalidAuthCodeException, AuthCodeExpiredException, InvalidTokenException, NoAuthCodeForUuidException {
@@ -47,4 +54,38 @@ public final class LoginManager {
 		}
 	}
 
+	public static CompletableFuture<LoggedUser> pollLogin(Player player, int timeoutSeconds, int intervalSeconds) {
+		if(loggingPlayer.contains(player))
+			return CompletableFuture.failedFuture(new AlreadyLoggingInException());
+		loggingPlayer.add(player);
+		return CompletableFuture.supplyAsync(() -> {
+			int counter = 0;
+			while(counter < timeoutSeconds){
+				CasLogin.getINSTANCE().getLogger().info("TRYING TO CHECK FOR player " + player.getUsername());
+				LoggedUser user;
+				try {
+					user = ApiUtils.getLoggedUser(player.getUniqueId());
+					CasLogin.getINSTANCE().getLogger().info("Got '" + user + "'");
+
+				} catch (APIException e) {
+					CasLogin.getINSTANCE().getLogger().severe("API EXCEPTION???");
+					loggingPlayer.remove(player);
+					throw new IllegalStateException(e);
+				}
+				if(user != null) {
+					CasLogin.getINSTANCE().getLogger().info("GOT USER " + user.getUser().getLogin());
+					loggingPlayer.remove(player);
+					return user;
+				}
+				try {
+					TimeUnit.SECONDS.sleep(intervalSeconds);
+				} catch (InterruptedException e) {
+					throw new IllegalStateException(e);
+				}
+				counter += intervalSeconds;
+			}
+			loggingPlayer.remove(player);
+			return null;
+		});
+	}
 }
