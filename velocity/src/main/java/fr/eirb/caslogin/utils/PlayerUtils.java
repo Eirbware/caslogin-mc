@@ -14,14 +14,4 @@ public class PlayerUtils {
 		return player.getCurrentServer().get().getServerInfo().getName().equals(ConfigurationManager.getLimboServerName());
 	}
 
-	public static void removePlayerKey(Player player){
-		try {
-			Field playerKeyField = player.getClass().getDeclaredField("playerKey");
-			playerKeyField.setAccessible(true);
-			playerKeyField.set(player, null);
-		} catch (NoSuchFieldException | IllegalAccessException e) {
-			throw new RuntimeException(e);
-		}
-	}
-
 }
