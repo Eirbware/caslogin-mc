@@ -103,7 +103,7 @@ public final class CasCommand {
 						GameProfileUtils.setToGameProfile(prof, oldProf);
 						if (!r.isSuccessful()) {
 							if (r.getReasonComponent().isEmpty())
-								player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_banned_no_reason")));
+								player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_disconnected_no_reason")));
 							else
 								player.sendMessage(MiniMessage
 										.miniMessage()
