@@ -10,6 +10,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.util.GameProfile;
+import fr.eirb.caslogin.CasLogin;
 import fr.eirb.caslogin.api.LoggedUser;
 import fr.eirb.caslogin.events.PostLoginEvent;
 import fr.eirb.caslogin.exceptions.login.*;
@@ -92,36 +93,7 @@ public final class CasCommand {
 				player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("errors.login_timeout")));
 				return;
 			}
-			player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.login.success")));
-			GameProfile prof = player.getGameProfile();
-			GameProfile oldProf = GameProfileUtils.cloneGameProfile(prof);
-			GameProfileUtils.setName(prof, loggedUser.getUser().getLogin());
-			GameProfileUtils.setUUID(prof, loggedUser.getFakeUserUUID());
-			RegisteredServer loggedServer = proxy.getServer(ConfigurationManager.getLoggedServer()).orElseThrow();
-			player.createConnectionRequest(loggedServer).connect()
-					.thenAccept((r) -> {
-						GameProfileUtils.setToGameProfile(prof, oldProf);
-						if (!r.isSuccessful()) {
-							if (r.getReasonComponent().isEmpty())
-								player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_disconnected_no_reason")));
-							else
-								player.sendMessage(MiniMessage
-										.miniMessage()
-										.deserialize(ConfigurationManager.getLang("user.errors.user_disconnected"))
-										.append(r.getReasonComponent().get()));
-							try {
-								LoginManager.logout(player);
-							} catch (NotLoggedInException ignored) {
-							}
-						} else {
-							proxy.getEventManager().fireAndForget(new PostLoginEvent(player, loggedUser));
-						}
-					})
-					.exceptionally((throwable) -> {
-						GameProfileUtils.setToGameProfile(prof, oldProf);
-						return null;
-					});
-			;
+			LoginManager.moveLoggedPlayer(player, proxy, loggedUser);
 		};
 	}
 

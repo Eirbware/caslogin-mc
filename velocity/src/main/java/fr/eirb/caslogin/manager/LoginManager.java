@@ -3,23 +3,28 @@ package fr.eirb.caslogin.manager;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
+import com.velocitypowered.api.util.GameProfile;
 import fr.eirb.caslogin.CasLogin;
 import fr.eirb.caslogin.api.LoggedUser;
+import fr.eirb.caslogin.events.PostLoginEvent;
 import fr.eirb.caslogin.exceptions.api.APIException;
 import fr.eirb.caslogin.exceptions.api.Errors;
 import fr.eirb.caslogin.exceptions.login.*;
 import fr.eirb.caslogin.utils.ApiUtils;
+import fr.eirb.caslogin.utils.GameProfileUtils;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
 public final class LoginManager {
 
-	public static final BiMap<UUID, @NotNull  LoggedUser> loggedUserMap = HashBiMap.create();
+	private static final BiMap<UUID, @NotNull  LoggedUser> loggedUserMap = HashBiMap.create();
 
 	private static final Set<Player> loggingPlayer = new HashSet<>();
 
@@ -88,5 +93,52 @@ public final class LoginManager {
 			loggingPlayer.remove(player);
 			return null;
 		});
+	}
+
+	public static Optional<LoggedUser> getLoggedPlayer(Player p){
+		return Optional.ofNullable(loggedUserMap.get(p.getUniqueId()));
+	}
+
+	public static void moveLoggedPlayer(Player player, ProxyServer proxy, LoggedUser loggedUser){
+		player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.login.success")));
+		GameProfile prof = player.getGameProfile();
+		GameProfile oldProf = GameProfileUtils.cloneGameProfile(prof);
+		GameProfileUtils.setName(prof, loggedUser.getUser().getLogin());
+		GameProfileUtils.setUUID(prof, loggedUser.getFakeUserUUID());
+		RegisteredServer loggedServer = proxy.getServer(ConfigurationManager.getLoggedServer()).orElseThrow();
+		player.createConnectionRequest(loggedServer).connect()
+				.thenAccept((r) -> {
+					GameProfileUtils.setToGameProfile(prof, oldProf);
+					if (!r.isSuccessful()) {
+						if (r.getReasonComponent().isEmpty())
+							player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_disconnected_no_reason")));
+						else
+							player.sendMessage(MiniMessage
+									.miniMessage()
+									.deserialize(ConfigurationManager.getLang("user.errors.user_disconnected"))
+									.append(r.getReasonComponent().get()));
+						try {
+							LoginManager.logout(player);
+						} catch (NotLoggedInException ignored) {
+						}
+					} else {
+						proxy.getEventManager().fireAndForget(new PostLoginEvent(player, loggedUser));
+					}
+				})
+				.exceptionally((throwable) -> {
+					GameProfileUtils.setToGameProfile(prof, oldProf);
+					return null;
+				});
+	}
+
+	public static void cacheLoggedUsers() {
+		try{
+			List<LoggedUser> users = ApiUtils.getLoggedUsers();
+			for(var user : users){
+				loggedUserMap.put(user.getUuid(), user);
+			}
+		} catch (APIException e) {
+			throw new IllegalStateException(e);
+		}
 	}
 }

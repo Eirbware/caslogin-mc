@@ -71,38 +71,36 @@ public class CasLogin {
 		INSTANCE = this;
 		registerCommands();
 		hookLuckperms();
+		LoginManager.cacheLoggedUsers();
 		logger.info("Plugin successfully loaded!");
 	}
 
 	private void hookLuckperms() {
-		try{
+		try {
 			LuckPerms api = LuckPermsProvider.get();
 			this.roleManager = new LuckPermsRoleManager(api, proxy);
 			logger.info("Found LuckPerms. Loading LuckPerms RoleManager...");
-		}catch(IllegalStateException notLoaded){
+		} catch (IllegalStateException notLoaded) {
 			logger.warning("Could not find LuckPerms. Using dummy rolemanager that does nothing.");
 			this.roleManager = new DummyRoleManager();
 		}
 	}
 
-//	@Subscribe
-//	public void onServerChange(ServerPostConnectEvent ev) {
-//		if(ev.getPlayer().getCurrentServer().isEmpty())
-//			return;
-//		RegisteredServer currentServer = ev.getPlayer().getCurrentServer().get().getServer();
-//		if (!currentServer.getServerInfo().getName().equals(ConfigurationManager.getLimboServerName())) {
-//			return;
-//		}
-//		logger.info("Logging out player " + ev.getPlayer().getUsername());
-//		try {
-//			LoginManager.logout(ev.getPlayer());
-//		} catch (NotLoggedInException ignored) {
-//		}
-//
-//	}
+	@Subscribe
+	public void onServerChange(ServerPostConnectEvent ev) {
+		Player player = ev.getPlayer();
+		if (player.getCurrentServer().isEmpty())
+			return;
+		RegisteredServer currentServer = player.getCurrentServer().get().getServer();
+		if (!currentServer.getServerInfo().getName().equals(ConfigurationManager.getLimboServerName())) {
+			return;
+		}
+		LoginManager.getLoggedPlayer(player)
+				.ifPresent((loggedUser) -> LoginManager.moveLoggedPlayer(player, proxy, loggedUser));
+	}
 
 	@Subscribe
-	private void updateRolesOnLogin(PostLoginEvent ev){
+	private void updateRolesOnLogin(PostLoginEvent ev) {
 		logger.info("Updating roles for user '" + ev.loggedUser().getUser().getLogin() + "'");
 		this.roleManager.updateUserRoles(ev.loggedUser());
 	}
@@ -118,16 +116,17 @@ public class CasLogin {
 		conn.sendPluginMessage(CAS_FIX_CHANNEL, Charsets.UTF_8.encode(message).array());
 	}
 
-	@Subscribe
-	public void onDisconnect(DisconnectEvent ev) {
-		logger.info("Logging out player " + ev.getPlayer().getUsername());
-		try {
-			LoginManager.logout(ev.getPlayer());
+//	@Subscribe
+//	public void onDisconnect(DisconnectEvent ev) {
+//		logger.info("Logging out player " + ev.getPlayer().getUsername());
+//		try {
+//			LoginManager.logout(ev.getPlayer());
+//
+//		} catch (NotLoggedInException ignored) {
+//		}
+//
+//	}
 
-		} catch (NotLoggedInException ignored) {
-		}
-
-	}
 
 	private void registerCommands() {
 		logger.info("Loading commands...");

@@ -13,8 +13,8 @@ public class LoggedUser {
 		return user;
 	}
 
-	public String getUuid(){
-		return uuid;
+	public UUID getUuid(){
+		return UUID.fromString(uuid);
 	}
 
 	public UUID getFakeUserUUID(){
