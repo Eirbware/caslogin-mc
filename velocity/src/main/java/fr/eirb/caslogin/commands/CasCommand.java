@@ -10,6 +10,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.util.GameProfile;
+import fr.eirb.caslogin.api.LoggedUser;
 import fr.eirb.caslogin.events.PostLoginEvent;
 import fr.eirb.caslogin.exceptions.login.*;
 import fr.eirb.caslogin.manager.ConfigurationManager;
@@ -18,6 +19,8 @@ import fr.eirb.caslogin.utils.ApiUtils;
 import fr.eirb.caslogin.utils.GameProfileUtils;
 import fr.eirb.caslogin.utils.PlayerUtils;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+
+import java.util.function.Consumer;
 
 public final class CasCommand {
 	public static BrigadierCommand createCasCommand(final ProxyServer proxy) {
@@ -57,43 +60,48 @@ public final class CasCommand {
 							.miniMessage()
 							.deserialize(String.format(ConfigurationManager.getLang("user.login.url_message"), ApiUtils.getLoginUrl(player))));
 					LoginManager.pollLogin(player, 300, 3)
-							.thenAccept((loggedUser) -> {
-								if(loggedUser == null) {
-									player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("errors.login_timeout")));
-									return;
-								}
-								player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.login.success")));
-								GameProfile prof = player.getGameProfile();
-								GameProfile oldProf = GameProfileUtils.cloneGameProfile(prof);
-								GameProfileUtils.setName(prof, loggedUser.getUser().getLogin());
-								GameProfileUtils.setUUID(prof, loggedUser.getFakeUserUUID());
-								RegisteredServer loggedServer = proxy.getServer(ConfigurationManager.getLoggedServer()).orElseThrow();
-								player.createConnectionRequest(loggedServer).connect()
-										.thenAccept((r) -> {
-											GameProfileUtils.setToGameProfile(prof, oldProf);
-											if (!r.isSuccessful()) {
-												if (r.getReasonComponent().isEmpty())
-													player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_banned_no_reason")));
-												else
-													player.sendMessage(MiniMessage
-															.miniMessage()
-															.deserialize(ConfigurationManager.getLang("user.errors.user_banned"))
-															.append(r.getReasonComponent().get()));
-												try {
-													LoginManager.logout(player);
-												} catch (NotLoggedInException ignored) {
-												}
-											} else {
-												proxy.getEventManager().fireAndForget(new PostLoginEvent(player, loggedUser));
-											}
-										})
-										.exceptionally((throwable) -> {
-											GameProfileUtils.setToGameProfile(prof, oldProf);
-											return null;
-										});
-							});
+							.thenAccept(loginPlayer(player, proxy));
 					return Command.SINGLE_SUCCESS;
 				});
+	}
+
+	private static Consumer<LoggedUser> loginPlayer(Player player, ProxyServer proxy) {
+		return (loggedUser) -> {
+			if (loggedUser == null) {
+				player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("errors.login_timeout")));
+				return;
+			}
+			player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.login.success")));
+			GameProfile prof = player.getGameProfile();
+			GameProfile oldProf = GameProfileUtils.cloneGameProfile(prof);
+			GameProfileUtils.setName(prof, loggedUser.getUser().getLogin());
+			GameProfileUtils.setUUID(prof, loggedUser.getFakeUserUUID());
+			RegisteredServer loggedServer = proxy.getServer(ConfigurationManager.getLoggedServer()).orElseThrow();
+			player.createConnectionRequest(loggedServer).connect()
+					.thenAccept((r) -> {
+						GameProfileUtils.setToGameProfile(prof, oldProf);
+						if (!r.isSuccessful()) {
+							if (r.getReasonComponent().isEmpty())
+								player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_banned_no_reason")));
+							else
+								player.sendMessage(MiniMessage
+										.miniMessage()
+										.deserialize(ConfigurationManager.getLang("user.errors.user_banned"))
+										.append(r.getReasonComponent().get()));
+							try {
+								LoginManager.logout(player);
+							} catch (NotLoggedInException ignored) {
+							}
+						} else {
+							proxy.getEventManager().fireAndForget(new PostLoginEvent(player, loggedUser));
+						}
+					})
+					.exceptionally((throwable) -> {
+						GameProfileUtils.setToGameProfile(prof, oldProf);
+						return null;
+					});
+			;
+		};
 	}
 
 //	.then(RequiredArgumentBuilder

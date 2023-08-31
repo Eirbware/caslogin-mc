@@ -85,21 +85,21 @@ public class CasLogin {
 		}
 	}
 
-	@Subscribe
-	public void onServerChange(ServerPostConnectEvent ev) {
-		if(ev.getPlayer().getCurrentServer().isEmpty())
-			return;
-		RegisteredServer currentServer = ev.getPlayer().getCurrentServer().get().getServer();
-		if (!currentServer.getServerInfo().getName().equals(ConfigurationManager.getLimboServerName())) {
-			return;
-		}
-		logger.info("Logging out player " + ev.getPlayer().getUsername());
-		try {
-			LoginManager.logout(ev.getPlayer());
-		} catch (NotLoggedInException ignored) {
-		}
-
-	}
+//	@Subscribe
+//	public void onServerChange(ServerPostConnectEvent ev) {
+//		if(ev.getPlayer().getCurrentServer().isEmpty())
+//			return;
+//		RegisteredServer currentServer = ev.getPlayer().getCurrentServer().get().getServer();
+//		if (!currentServer.getServerInfo().getName().equals(ConfigurationManager.getLimboServerName())) {
+//			return;
+//		}
+//		logger.info("Logging out player " + ev.getPlayer().getUsername());
+//		try {
+//			LoginManager.logout(ev.getPlayer());
+//		} catch (NotLoggedInException ignored) {
+//		}
+//
+//	}
 
 	@Subscribe
 	private void updateRolesOnLogin(PostLoginEvent ev){
