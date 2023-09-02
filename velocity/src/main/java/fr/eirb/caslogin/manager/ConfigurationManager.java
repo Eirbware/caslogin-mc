@@ -39,10 +39,10 @@ public class ConfigurationManager {
 	}
 
 	public static String getEntrypointServerName() {
-		return pluginConfig.getNode("limbo_server").getString();
+		return pluginConfig.getNode("entrypoint_server").getString();
 	}
 
 	public static String getLoggedEntrypointServer() {
-		return pluginConfig.getNode("logged_server").getString();
+		return pluginConfig.getNode("logged_entrypoint_server").getString();
 	}
 }
