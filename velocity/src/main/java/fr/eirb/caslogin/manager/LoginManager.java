@@ -113,7 +113,7 @@ public final class LoginManager {
 		GameProfile oldProf = GameProfileUtils.cloneGameProfile(prof);
 		GameProfileUtils.setName(prof, loggedUser.getUser().getLogin());
 		GameProfileUtils.setUUID(prof, loggedUser.getFakeUserUUID());
-		RegisteredServer loggedServer = proxy.getServer(ConfigurationManager.getLoggedServer()).orElseThrow();
+		RegisteredServer loggedServer = CasLogin.getLoggedEntrypointServer();
 		player.createConnectionRequest(loggedServer).connect()
 				.thenAccept((r) -> {
 					GameProfileUtils.setToGameProfile(prof, oldProf);

@@ -1,5 +1,6 @@
 package fr.eirb.caslogin.manager;
 
+import fr.eirb.caslogin.CasLogin;
 import fr.eirb.caslogin.configuration.ConfigurationUtils;
 import ninja.leaping.configurate.ConfigurationNode;
 
@@ -21,6 +22,8 @@ public class ConfigurationManager {
 	public static void reloadConfig(){
 		pluginConfig = ConfigurationUtils.getOrCreateConfigurationFile(dataFolder, "config.yml");
 		langConfig = ConfigurationUtils.getOrCreateConfigurationFile(dataFolder, "lang.yml");
+		LoginManager.resetLoggedUsers();
+		CasLogin.resetEntrypoints();
 	}
 
 
@@ -35,11 +38,11 @@ public class ConfigurationManager {
 		return pluginConfig.getNode("api_key").getString();
 	}
 
-	public static String getLimboServerName() {
+	public static String getEntrypointServerName() {
 		return pluginConfig.getNode("limbo_server").getString();
 	}
 
-	public static String getLoggedServer() {
+	public static String getLoggedEntrypointServer() {
 		return pluginConfig.getNode("logged_server").getString();
 	}
 }

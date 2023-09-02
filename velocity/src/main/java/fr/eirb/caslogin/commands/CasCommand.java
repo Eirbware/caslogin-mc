@@ -9,15 +9,12 @@ import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import com.velocitypowered.api.util.GameProfile;
 import fr.eirb.caslogin.CasLogin;
 import fr.eirb.caslogin.api.LoggedUser;
-import fr.eirb.caslogin.events.PostLoginEvent;
 import fr.eirb.caslogin.exceptions.login.*;
 import fr.eirb.caslogin.manager.ConfigurationManager;
 import fr.eirb.caslogin.manager.LoginManager;
 import fr.eirb.caslogin.utils.ApiUtils;
-import fr.eirb.caslogin.utils.GameProfileUtils;
 import fr.eirb.caslogin.utils.PlayerUtils;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
@@ -28,7 +25,7 @@ public final class CasCommand {
 		LiteralCommandNode<CommandSource> rootNode = LiteralArgumentBuilder
 				.<CommandSource>literal("cas")
 				.then(loginCommand(proxy))
-				.then(logoutCommand(proxy))
+				.then(logoutCommand())
 				.then(configCommand())
 				.build();
 		return new BrigadierCommand(rootNode);
@@ -42,7 +39,6 @@ public final class CasCommand {
 						.requires(source -> source.hasPermission("cas.config.reload"))
 						.executes(context -> {
 							ConfigurationManager.reloadConfig();
-							LoginManager.resetLoggedUsers();
 							return Command.SINGLE_SUCCESS;
 						})
 				);
@@ -73,16 +69,16 @@ public final class CasCommand {
 				});
 	}
 
-	private static ArgumentBuilder<CommandSource, ?> logoutCommand(ProxyServer proxy) {
+	private static ArgumentBuilder<CommandSource, ?> logoutCommand() {
 		return LiteralArgumentBuilder
 				.<CommandSource>literal("logout")
 				.requires(source -> (source instanceof Player) && !isSourceAPlayerInLimbo(source))
 				.executes(context -> {
 					Player player = (Player) context.getSource();
 					try {
-						RegisteredServer limboServer = proxy.getServer(ConfigurationManager.getLimboServerName()).orElseThrow();
+						RegisteredServer entrypointServer = CasLogin.getEntrypointServer();
 						LoginManager.logout(player);
-						player.createConnectionRequest(limboServer).fireAndForget();
+						player.createConnectionRequest(entrypointServer).fireAndForget();
 					} catch (NotLoggedInException e) {
 						throw new RuntimeException(e);
 					}

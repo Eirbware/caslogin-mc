@@ -23,6 +23,7 @@ import fr.eirb.caslogin.manager.LoginManager;
 import fr.eirb.caslogin.manager.RoleManager;
 import fr.eirb.caslogin.manager.impl.DummyRoleManager;
 import fr.eirb.caslogin.manager.impl.LuckPermsRoleManager;
+import fr.eirb.caslogin.utils.PlayerUtils;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 
@@ -51,6 +52,9 @@ public class CasLogin {
 
 	private RoleManager roleManager;
 
+	private static RegisteredServer entrypointServer;
+	private static RegisteredServer loggedEntrypointServer;
+
 	@Inject
 	public CasLogin(@DataDirectory Path pluginDir) {
 		ConfigurationManager.loadConfig(pluginDir);
@@ -64,10 +68,16 @@ public class CasLogin {
 	public void onProxyInit(ProxyInitializeEvent ev) {
 		logger.info("Loading plugin...");
 		INSTANCE = this;
+		resetEntrypoints();
 		registerCommands();
 		hookLuckperms();
 		LoginManager.resetLoggedUsers();
 		logger.info("Plugin successfully loaded!");
+	}
+
+	public static void resetEntrypoints() {
+		entrypointServer = INSTANCE.proxy.getServer(ConfigurationManager.getEntrypointServerName()).orElseThrow();
+		loggedEntrypointServer = INSTANCE.proxy.getServer(ConfigurationManager.getLoggedEntrypointServer()).orElseThrow();
 	}
 
 	private void hookLuckperms() {
@@ -86,8 +96,7 @@ public class CasLogin {
 		Player player = ev.getPlayer();
 		if (player.getCurrentServer().isEmpty())
 			return;
-		RegisteredServer currentServer = player.getCurrentServer().get().getServer();
-		if (!currentServer.getServerInfo().getName().equals(ConfigurationManager.getLimboServerName())) {
+		if(!PlayerUtils.isPlayerInLimbo(player)){
 			return;
 		}
 		LoginManager.getLoggedPlayer(player)
@@ -137,5 +146,13 @@ public class CasLogin {
 
 	public Logger getLogger() {
 		return logger;
+	}
+
+	public static RegisteredServer getEntrypointServer() {
+		return entrypointServer;
+	}
+
+	public static RegisteredServer getLoggedEntrypointServer() {
+		return loggedEntrypointServer;
 	}
 }
