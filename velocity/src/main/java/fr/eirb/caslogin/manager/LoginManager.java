@@ -16,7 +16,6 @@ import fr.eirb.caslogin.utils.ApiUtils;
 import fr.eirb.caslogin.utils.GameProfileUtils;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
@@ -54,8 +53,9 @@ public final class LoginManager {
 		}
 		try{
 			CasLogin.getINSTANCE().getLogger().info(String.format("Logging out player '%s'", p.getUsername()));
+			LoggedUser userToLogOut = loggedUserMap.get(p.getUniqueId());
 			loggedUserMap.remove(p.getUniqueId());
-			ApiUtils.logout(loggedUserMap.get(p.getUniqueId()));
+			ApiUtils.logout(userToLogOut);
 		}catch(APIException ex){
 			CasLogin.getINSTANCE().getLogger().warning(String.format("Got exception '%s'", ex.getClass().getName()));
 			if(ex.error == Errors.USER_NOT_LOGGED_IN)
@@ -139,7 +139,8 @@ public final class LoginManager {
 				});
 	}
 
-	public static void cacheLoggedUsers() {
+	public static void resetLoggedUsers() {
+		loggedUserMap.clear();
 		try{
 			List<LoggedUser> users = ApiUtils.getLoggedUsers();
 			for(var user : users){
