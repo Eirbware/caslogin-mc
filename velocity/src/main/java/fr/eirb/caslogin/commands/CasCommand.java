@@ -54,9 +54,18 @@ public final class CasCommand {
 				.requires(CasCommand::isSourceAPlayerInLimbo)
 				.executes(context -> {
 					Player player = (Player) context.getSource();
+					String loginUrl = null;
+					try {
+						loginUrl = ApiUtils.getLoginUrl(player);
+					} catch (CouldNotGenerateCSRFTokenException e) {
+						player.sendMessage(MiniMessage
+								.miniMessage()
+								.deserialize(ConfigurationManager.getLang("user.errors.could_not_generate_csrf")));
+						return 0;
+					}
 					player.sendMessage(MiniMessage
 							.miniMessage()
-							.deserialize(String.format(ConfigurationManager.getLang("user.login.url_message"), ApiUtils.getLoginUrl(player))));
+							.deserialize(String.format(ConfigurationManager.getLang("user.login.url_message"), loginUrl)));
 					LoginManager.pollLogin(player, 300, 3)
 							.thenAccept(loginPlayer(player, proxy));
 					return Command.SINGLE_SUCCESS;

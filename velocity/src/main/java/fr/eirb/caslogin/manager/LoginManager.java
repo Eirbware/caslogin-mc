@@ -47,13 +47,17 @@ public final class LoginManager {
 //	}
 
 	public static void logout(Player p) throws NotLoggedInException {
+		CasLogin.getINSTANCE().getLogger().info(String.format("Trying to logout player '%s'", p.getUsername()));
 		if(!loggedUserMap.containsKey(p.getUniqueId())) {
+			CasLogin.getINSTANCE().getLogger().info(String.format("Player '%s' is not logged in.", p.getUsername()));
 			throw new NotLoggedInException(p);
 		}
 		try{
-			ApiUtils.logout(loggedUserMap.get(p.getUniqueId()));
+			CasLogin.getINSTANCE().getLogger().info(String.format("Logging out player '%s'", p.getUsername()));
 			loggedUserMap.remove(p.getUniqueId());
+			ApiUtils.logout(loggedUserMap.get(p.getUniqueId()));
 		}catch(APIException ex){
+			CasLogin.getINSTANCE().getLogger().warning(String.format("Got exception '%s'", ex.getClass().getName()));
 			if(ex.error == Errors.USER_NOT_LOGGED_IN)
 				throw new NotLoggedInException(p);
 			throw new RuntimeException(ex);
@@ -66,6 +70,7 @@ public final class LoginManager {
 		if(loggedUserMap.containsKey(player.getUniqueId()))
 			return CompletableFuture.completedFuture(loggedUserMap.get(player.getUniqueId()));
 		loggingPlayer.add(player);
+		CasLogin.getINSTANCE().getLogger().info(String.format("Starting logging poll for player '%s'", player.getUsername()));
 		return CompletableFuture.supplyAsync(() -> {
 			int counter = 0;
 			while(counter < timeoutSeconds){
@@ -74,11 +79,12 @@ public final class LoginManager {
 					user = ApiUtils.getLoggedUser(player.getUniqueId());
 
 				} catch (APIException e) {
-					CasLogin.getINSTANCE().getLogger().severe("API EXCEPTION???");
+					CasLogin.getINSTANCE().getLogger().severe("API EXCEPTION ON LOGIN POLL! Something is really wrong.");
 					loggingPlayer.remove(player);
 					throw new IllegalStateException(e);
 				}
 				if(user != null) {
+					CasLogin.getINSTANCE().getLogger().info(String.format("Player '%s' logged as '%s'.", player.getUsername(), user.getUser().getLogin()));
 					loggedUserMap.put(player.getUniqueId(), user);
 					loggingPlayer.remove(player);
 					return user;
@@ -90,7 +96,9 @@ public final class LoginManager {
 				}
 				counter += intervalSeconds;
 			}
+			CasLogin.getINSTANCE().getLogger().info(String.format("Polling timed out for player '%s'", player.getUsername()));
 			loggingPlayer.remove(player);
+			player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("errors.login_timeout")));
 			return null;
 		});
 	}

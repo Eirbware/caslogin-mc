@@ -96,13 +96,16 @@ public class CasLogin {
 			return;
 		}
 		LoginManager.getLoggedPlayer(player)
-				.ifPresent((loggedUser) -> LoginManager.moveLoggedPlayer(player, proxy, loggedUser));
+				.ifPresent((loggedUser) -> {
+					logger.info(String.format("Player '%s' is logged in as '%s'. Moving them.", player.getUsername(), loggedUser.getUser().getLogin()));
+					LoginManager.moveLoggedPlayer(player, proxy, loggedUser);
+				});
 	}
 
 	@Subscribe
 	private void updateRolesOnLogin(PostLoginEvent ev) {
 		logger.info("Updating roles for user '" + ev.loggedUser().getUser().getLogin() + "'");
-		this.roleManager.updateUserRoles(ev.loggedUser());
+		roleManager.updateUserRoles(ev.loggedUser());
 	}
 
 	@Subscribe

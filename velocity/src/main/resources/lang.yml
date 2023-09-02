@@ -17,6 +17,7 @@ user:
     no_auth_code_for_uuid: "<red>Please do <gold>/cas login</gold> first.</red>"
     user_disconnected_no_reason: "<red>You have been banned from the server</red>"
     user_disconnected: "<red>You have been disconnected from the server for : </red>"
+    could_not_generate_csrf: "<red>Could not generate a valid CSRF token. Please try again later...</red>"
   banned: "<red>You have been banned by an administrator.</red>"
 
 
