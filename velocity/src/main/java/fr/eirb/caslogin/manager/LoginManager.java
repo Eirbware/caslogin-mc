@@ -9,9 +9,11 @@ import com.velocitypowered.api.util.GameProfile;
 import fr.eirb.caslogin.CasLogin;
 import fr.eirb.caslogin.api.LoggedUser;
 import fr.eirb.caslogin.events.PostLoginEvent;
+import fr.eirb.caslogin.events.PostLogoutEvent;
 import fr.eirb.caslogin.exceptions.api.APIException;
 import fr.eirb.caslogin.exceptions.api.Errors;
 import fr.eirb.caslogin.exceptions.login.*;
+import fr.eirb.caslogin.handlers.ChangeGameProfileHandler;
 import fr.eirb.caslogin.utils.ApiUtils;
 import fr.eirb.caslogin.utils.GameProfileUtils;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -56,6 +58,7 @@ public final class LoginManager {
 			LoggedUser userToLogOut = loggedUserMap.get(p.getUniqueId());
 			loggedUserMap.remove(p.getUniqueId());
 			ApiUtils.logout(userToLogOut);
+			CasLogin.getINSTANCE().getProxy().getEventManager().fire(new PostLogoutEvent(p));
 		}catch(APIException ex){
 			CasLogin.getINSTANCE().getLogger().warning(String.format("Got exception '%s'", ex.getClass().getName()));
 			if(ex.error == Errors.USER_NOT_LOGGED_IN)
@@ -109,15 +112,11 @@ public final class LoginManager {
 
 	public static void moveLoggedPlayer(Player player, ProxyServer proxy, LoggedUser loggedUser){
 		player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.login.success")));
-		GameProfile prof = player.getGameProfile();
-		GameProfile oldProf = GameProfileUtils.cloneGameProfile(prof);
-		GameProfileUtils.setName(prof, loggedUser.getUser().getLogin());
-		GameProfileUtils.setUUID(prof, loggedUser.getFakeUserUUID());
 		RegisteredServer loggedServer = CasLogin.getLoggedEntrypointServer();
 		player.createConnectionRequest(loggedServer).connect()
 				.thenAccept((r) -> {
-					GameProfileUtils.setToGameProfile(prof, oldProf);
 					if (!r.isSuccessful()) {
+						CasLogin.getINSTANCE().getLogger().info("Player got disconnected...");
 						if (r.getReasonComponent().isEmpty())
 							player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_disconnected_no_reason")));
 						else
@@ -126,16 +125,13 @@ public final class LoginManager {
 									.deserialize(ConfigurationManager.getLang("user.errors.user_disconnected"))
 									.append(r.getReasonComponent().get()));
 						try {
+							ChangeGameProfileHandler.getINSTANCE().restoreGameProfile(player);
 							LoginManager.logout(player);
 						} catch (NotLoggedInException ignored) {
 						}
 					} else {
 						proxy.getEventManager().fireAndForget(new PostLoginEvent(player, loggedUser));
 					}
-				})
-				.exceptionally((throwable) -> {
-					GameProfileUtils.setToGameProfile(prof, oldProf);
-					return null;
 				});
 	}
 

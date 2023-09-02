@@ -51,7 +51,7 @@ public final class CasCommand {
 				.requires(CasCommand::isSourceAPlayerInLimbo)
 				.executes(context -> {
 					Player player = (Player) context.getSource();
-					String loginUrl = null;
+					String loginUrl;
 					try {
 						loginUrl = ApiUtils.getLoginUrl(player);
 					} catch (CouldNotGenerateCSRFTokenException e) {

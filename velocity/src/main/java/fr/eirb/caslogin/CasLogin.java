@@ -2,8 +2,10 @@ package fr.eirb.caslogin;
 
 import com.google.common.base.Charsets;
 import com.google.inject.Inject;
+import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
+import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Dependency;
 import com.velocitypowered.api.plugin.Plugin;
@@ -18,6 +20,7 @@ import com.velocitypowered.api.util.UuidUtils;
 import fr.eirb.caslogin.api.LoggedUser;
 import fr.eirb.caslogin.commands.CasCommand;
 import fr.eirb.caslogin.events.PostLoginEvent;
+import fr.eirb.caslogin.handlers.ChangeGameProfileHandler;
 import fr.eirb.caslogin.manager.ConfigurationManager;
 import fr.eirb.caslogin.manager.LoginManager;
 import fr.eirb.caslogin.manager.RoleManager;
@@ -43,6 +46,7 @@ public class CasLogin {
 	private static final ChannelIdentifier CAS_FIX_CHANNEL = MinecraftChannelIdentifier.create("caslogin", "auth");
 
 	private static CasLogin INSTANCE;
+	private final Path pluginDir;
 
 	@Inject
 	private Logger logger;
@@ -57,21 +61,27 @@ public class CasLogin {
 
 	@Inject
 	public CasLogin(@DataDirectory Path pluginDir) {
-		ConfigurationManager.loadConfig(pluginDir);
+		this.pluginDir = pluginDir;
 	}
 
 	public static CasLogin getINSTANCE() {
 		return INSTANCE;
 	}
 
+	public ProxyServer getProxy() {
+		return proxy;
+	}
+
 	@Subscribe
 	public void onProxyInit(ProxyInitializeEvent ev) {
 		logger.info("Loading plugin...");
 		INSTANCE = this;
+		ConfigurationManager.loadConfig(pluginDir);
 		resetEntrypoints();
 		registerCommands();
 		hookLuckperms();
 		LoginManager.resetLoggedUsers();
+		proxy.getEventManager().register(this, new ChangeGameProfileHandler());
 		logger.info("Plugin successfully loaded!");
 	}
 
@@ -91,12 +101,12 @@ public class CasLogin {
 		}
 	}
 
-	@Subscribe
+	@Subscribe(order = PostOrder.FIRST)
 	public void onServerChange(ServerPostConnectEvent ev) {
 		Player player = ev.getPlayer();
 		if (player.getCurrentServer().isEmpty())
 			return;
-		if(!PlayerUtils.isPlayerInLimbo(player)){
+		if (!PlayerUtils.isPlayerInLimbo(player)) {
 			return;
 		}
 		LoginManager.getLoggedPlayer(player)
