@@ -46,7 +46,7 @@ public class ApiUtils {
 			Request req = getAuthorizedRequest()
 					.setUrl(getGenCsrfPath())
 					.setMethod("POST")
-					.setBody(String.format("{\"uuid\": \"%s\"", p.getUniqueId().toString()))
+					.setBody(String.format("{\"uuid\": \"%s\"}", p.getUniqueId().toString()))
 					.build();
 			Response resp = client.executeRequest(req).get();
 			if (resp.getStatusCode() != 200) {

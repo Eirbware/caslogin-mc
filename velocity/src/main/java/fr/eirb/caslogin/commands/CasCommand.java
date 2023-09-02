@@ -42,6 +42,7 @@ public final class CasCommand {
 						.requires(source -> source.hasPermission("cas.config.reload"))
 						.executes(context -> {
 							ConfigurationManager.reloadConfig();
+							LoginManager.resetLoggedUsers();
 							return Command.SINGLE_SUCCESS;
 						})
 				);

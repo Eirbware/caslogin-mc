@@ -2,9 +2,7 @@ package fr.eirb.caslogin;
 
 import com.google.common.base.Charsets;
 import com.google.inject.Inject;
-import com.velocitypowered.api.command.VelocityBrigadierMessage;
 import com.velocitypowered.api.event.Subscribe;
-import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Dependency;
@@ -20,18 +18,15 @@ import com.velocitypowered.api.util.UuidUtils;
 import fr.eirb.caslogin.api.LoggedUser;
 import fr.eirb.caslogin.commands.CasCommand;
 import fr.eirb.caslogin.events.PostLoginEvent;
-import fr.eirb.caslogin.exceptions.login.NotLoggedInException;
 import fr.eirb.caslogin.manager.ConfigurationManager;
 import fr.eirb.caslogin.manager.LoginManager;
 import fr.eirb.caslogin.manager.RoleManager;
 import fr.eirb.caslogin.manager.impl.DummyRoleManager;
 import fr.eirb.caslogin.manager.impl.LuckPermsRoleManager;
-import fr.eirb.caslogin.utils.PlayerUtils;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 
 import java.nio.file.Path;
-import java.util.UUID;
 import java.util.logging.Logger;
 
 @Plugin(
@@ -71,7 +66,7 @@ public class CasLogin {
 		INSTANCE = this;
 		registerCommands();
 		hookLuckperms();
-		LoginManager.cacheLoggedUsers();
+		LoginManager.resetLoggedUsers();
 		logger.info("Plugin successfully loaded!");
 	}
 
