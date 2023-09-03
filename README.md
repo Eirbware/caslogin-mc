@@ -3,19 +3,39 @@
 # Prérequis
 - Avoir java 17
 - Avoir maven
-- Avoir NMS sur son dépôt local
+- Un serveur [caslogin-auth](https://github.com/Eirbware/caslogin-mc-auth)
 - (Eventuellement avoir un serveur minecraft)
 
-# Comment build
-- lancer la tâche `package` de maven.
-- target/caslogin*.jar -> le .jar a mettre dans le dossier plugins du serveur minecraft
+# Structure
+- /velocity
+  - Le plugin qui tourne sur le proxy. Il s'occupe d'authentifier les utilisateurs afin de les transférer sur les serveurs avec l'identité authentifiée du CAS
+- /compatfix
+  - Le plugin qui tourne sur **les** serveurs qui sont censés récupérer l'utilisateur authentifié par le CAS. Ce plugin est nécessaire pour que le mode spectateur fonctionne correctement. (Il peut y avoir d'autres disfonctionnements liés à l'authentification, donc ce plugin est **impératif**). Ce plugin nécessite [Paper](https://papermc.io/software/paper)
 
-# Comment installer NMS
-- Télécharger [BuildTools](https://www.spigotmc.org/wiki/buildtools/)
-- Exécuter BuildTools.jar **avec l'option --remapped**
+# Build
+- ./gradlew build
+- velocity/build/libs/velocity*.jar pour le plugin velocity
+- compatfix/build/libs/compatfix*.jar pour le plugin compatfix
 
-# Comment utiliser
-- Avoir un server paper 1.19.4
-- Avoir le .jar
-- Avoir un serveur web d'authentification configuré -> [https://github.com/Eirbware/caslogin-mc-auth](https://github.com/Eirbware/caslogin-mc-auth)
-- 
+# Config
+- config.yml
+  - auth_server
+    - L'adresse du serveur [caslogin-auth](https://github.com/Eirbware/caslogin-mc-auth)
+  - api_key
+    - la clé API du serveur [caslogin-auth](https://github.com/Eirbware/caslogin-mc-auth)
+  - entrypoint_server
+    - Le serveur où les joueurs non authentifiés seront dirigés.
+  - logged_entrypoint_server
+    - Le serveur où les joueurs authentifiés seront dirigés après authentification.
+- lang.yml
+  - Les messages envoyés au joueur.
+
+# Commandes
+- /cas login
+  - Permet de se connecter
+  - Accessible uniquement sur le serveur `entrypoint_server`
+- /cas logout
+  - Permet de se déconnecter
+  - Accessible uniquement sur les serveurs autres que `entrypoint_server`
+- /cas config reload
+  - Recharge la configuration.
