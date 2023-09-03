@@ -21,6 +21,7 @@ import fr.eirb.caslogin.api.LoggedUser;
 import fr.eirb.caslogin.commands.CasCommand;
 import fr.eirb.caslogin.events.PostLoginEvent;
 import fr.eirb.caslogin.handlers.ChangeGameProfileHandler;
+import fr.eirb.caslogin.handlers.SendForCompatFixPluginMessageHandler;
 import fr.eirb.caslogin.manager.ConfigurationManager;
 import fr.eirb.caslogin.manager.LoginManager;
 import fr.eirb.caslogin.manager.RoleManager;
@@ -43,7 +44,7 @@ import java.util.logging.Logger;
 )
 public class CasLogin {
 
-	private static final ChannelIdentifier CAS_FIX_CHANNEL = MinecraftChannelIdentifier.create("caslogin", "auth");
+	public static final ChannelIdentifier CAS_FIX_CHANNEL = MinecraftChannelIdentifier.create("caslogin", "auth");
 
 	private static CasLogin INSTANCE;
 	private final Path pluginDir;
@@ -81,8 +82,13 @@ public class CasLogin {
 		registerCommands();
 		hookLuckperms();
 		LoginManager.resetLoggedUsers();
-		proxy.getEventManager().register(this, new ChangeGameProfileHandler());
+		registerHandlers();
 		logger.info("Plugin successfully loaded!");
+	}
+
+	private void registerHandlers() {
+		proxy.getEventManager().register(this, new ChangeGameProfileHandler());
+		proxy.getEventManager().register(this, new SendForCompatFixPluginMessageHandler());
 	}
 
 	public static void resetEntrypoints() {
@@ -122,15 +128,15 @@ public class CasLogin {
 		roleManager.updateUserRoles(ev.loggedUser());
 	}
 
-	@Subscribe
-	private void sendPluginMessageForFixes(PostLoginEvent ev) {
-		Player player = ev.player();
-		LoggedUser userForPlayer = ev.loggedUser();
-		ServerConnection conn = player.getCurrentServer().orElseThrow();
-		String message = UuidUtils.generateOfflinePlayerUuid(player.getUsername()) + ":" + userForPlayer.getFakeUserUUID();
-		logger.info(String.format("Sending '%s' at '%s' to server '%s'", message, CAS_FIX_CHANNEL, conn.getServerInfo().getName()));
-		conn.sendPluginMessage(CAS_FIX_CHANNEL, Charsets.UTF_8.encode(message).array());
-	}
+//	@Subscribe
+//	private void sendPluginMessageForFixes(PostLoginEvent ev) {
+//		Player player = ev.player();
+//		LoggedUser userForPlayer = ev.loggedUser();
+//		ServerConnection conn = player.getCurrentServer().orElseThrow();
+//		String message = UuidUtils.generateOfflinePlayerUuid(player.getUsername()) + ":" + userForPlayer.getFakeUserUUID();
+//		logger.info(String.format("Sending '%s' at '%s' to server '%s'", message, CAS_FIX_CHANNEL, conn.getServerInfo().getName()));
+//		conn.sendPluginMessage(CAS_FIX_CHANNEL, Charsets.UTF_8.encode(message).array());
+//	}
 
 //	@Subscribe
 //	public void onDisconnect(DisconnectEvent ev) {
