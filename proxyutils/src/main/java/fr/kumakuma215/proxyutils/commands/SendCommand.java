@@ -65,7 +65,9 @@ public final class SendCommand {
 							RegisteredServer server = optionalServer.get();
 							Player loggedPlayer = proxy.getPlayer(user.getUuid()).orElseThrow();
 							loggedPlayer.createConnectionRequest(server).fireAndForget();
-							ctx.getSource().sendMessage(MiniMessage.miniMessage().deserialize("<green>Tried to send user <gold>%s</gold> to server <gold>%s</gold></green>"));
+							ctx.getSource().sendMessage(MiniMessage
+									.miniMessage()
+									.deserialize(String.format("<green>Tried to send user <gold>%s</gold> to server <gold>%s</gold></green>", providedLogin, providedServerName)));
 							return Command.SINGLE_SUCCESS;
 						})
 						.build()
