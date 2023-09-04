@@ -67,6 +67,10 @@ public final class LoginManager {
 		}
 	}
 
+	public static Set<LoggedUser> getLoggedUsers(){
+		return loggedUserMap.values();
+	}
+
 	public static CompletableFuture<LoggedUser> pollLogin(Player player, int timeoutSeconds, int intervalSeconds) {
 		if(loggingPlayer.contains(player))
 			return CompletableFuture.failedFuture(new AlreadyLoggingInException());
