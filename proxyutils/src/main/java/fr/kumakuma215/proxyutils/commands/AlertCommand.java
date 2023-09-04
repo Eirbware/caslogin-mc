@@ -50,6 +50,7 @@ public final class AlertCommand {
 						.executes(context -> {
 							String message = context.getArgument("message", String.class);
 							sendMessageIfPredicate(server.getAllPlayers(), message, predicate);
+							context.getSource().sendMessage(MiniMessage.miniMessage().deserialize("<green>Message sent</green>"));
 							return Command.SINGLE_SUCCESS;
 						})
 				);
