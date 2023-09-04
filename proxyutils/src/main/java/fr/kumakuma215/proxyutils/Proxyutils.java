@@ -9,6 +9,7 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import fr.eirb.caslogin.CasLogin;
 import fr.eirb.caslogin.Constants;
 import fr.kumakuma215.proxyutils.commands.AlertCommand;
+import fr.kumakuma215.proxyutils.commands.SendCommand;
 import org.slf4j.Logger;
 
 @Plugin(
@@ -30,5 +31,6 @@ public class Proxyutils {
 	@Subscribe
 	public void onProxyInitialization(ProxyInitializeEvent event) {
 		server.getCommandManager().register(AlertCommand.createAlertCommand(server));
+		server.getCommandManager().register(SendCommand.createSendCommand(server));
 	}
 }
