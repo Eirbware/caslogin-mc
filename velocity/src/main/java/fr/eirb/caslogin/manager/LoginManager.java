@@ -71,6 +71,14 @@ public final class LoginManager {
 		return loggedUserMap.values();
 	}
 
+	public static Optional<LoggedUser> getLoggedUserByLogin(String login){
+		for(var user : loggedUserMap.values()){
+			if(user.getUser().getLogin().equals(login))
+				return Optional.of(user);
+		}
+		return Optional.empty();
+	}
+
 	public static CompletableFuture<LoggedUser> pollLogin(Player player, int timeoutSeconds, int intervalSeconds) {
 		if(loggingPlayer.contains(player))
 			return CompletableFuture.failedFuture(new AlreadyLoggingInException());
