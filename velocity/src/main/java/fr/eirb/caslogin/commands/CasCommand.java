@@ -39,6 +39,7 @@ public final class CasCommand {
 						.requires(source -> source.hasPermission("cas.config.reload"))
 						.executes(context -> {
 							ConfigurationManager.reloadConfig();
+							context.getSource().sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("admin.config.reload")));
 							return Command.SINGLE_SUCCESS;
 						})
 				);
