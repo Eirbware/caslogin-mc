@@ -62,6 +62,7 @@ public final class LoginManager {
 			CasLogin.getINSTANCE().getLogger().info(String.format("Logging out user '%s'", user.getUser().getLogin()));
 			loggedUserMap.inverse().remove(user);
 			ApiUtils.logout(user);
+			CasLogin.getINSTANCE().getRoleManager().removeUserRoles(user);
 			CasLogin.getINSTANCE().getProxy().getEventManager().fire(new PostLogoutEvent(user));
 		} catch (APIException ex) {
 			CasLogin.getINSTANCE().getLogger().warning(String.format("Got exception '%s'", ex.getClass().getName()));
