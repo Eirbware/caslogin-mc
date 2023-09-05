@@ -63,7 +63,7 @@ public final class CasCommand {
 					}
 					player.sendMessage(MiniMessage
 							.miniMessage()
-							.deserialize(String.format(ConfigurationManager.getLang("user.login.url_message"), loginUrl)));
+							.deserialize(String.format(ConfigurationManager.getLang("user.login.url_message"), loginUrl, loginUrl)));
 					LoginManager.pollLogin(player, 300, 3)
 							.thenAccept(loginPlayer(player, proxy));
 					return Command.SINGLE_SUCCESS;

@@ -1,6 +1,6 @@
 user:
   login:
-    url_message: "<gray>Please login <blue><click:open_url:'%s'>Here</click></blue><br>You will be automatically authenticated</gray>"
+    url_message: "<gray>Please login <blue><click:open_url:'%s'>Here</click></blue><br><gray>(%s)</gray><br>You will be automatically authenticated</gray>"
     success: "<green>You have been successfully logged in</green><br><gray>Sending you to the server...</gray>"
   logout:
     success: "<green>You have been successfully logged out</green>"
