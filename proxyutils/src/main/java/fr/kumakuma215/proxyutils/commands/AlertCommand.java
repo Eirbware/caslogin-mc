@@ -23,6 +23,7 @@ public final class AlertCommand {
 	public static BrigadierCommand createAlertCommand(final ProxyServer server) {
 		LiteralCommandNode<CommandSource> rootNode = LiteralArgumentBuilder
 				.<CommandSource>literal("alert")
+				.requires(source -> source.hasPermission("proxyutils.alert"))
 				.then(alertLogged(server))
 				.then(alertNotLogged(server))
 				.then(alertAll(server))

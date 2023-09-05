@@ -22,6 +22,7 @@ public final class SendCommand {
 	public static BrigadierCommand createSendCommand(ProxyServer proxy) {
 		LiteralCommandNode<CommandSource> rootNode = LiteralArgumentBuilder
 				.<CommandSource>literal("send")
+				.requires(source -> source.hasPermission("proxyutils.send"))
 				.then(sendPlayer(proxy))
 				.build();
 		return new BrigadierCommand(rootNode);
