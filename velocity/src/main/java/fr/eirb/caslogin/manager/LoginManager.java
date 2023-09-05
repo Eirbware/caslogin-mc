@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 
 public final class LoginManager {
 
-	private static final BiMap<UUID, @NotNull  LoggedUser> loggedUserMap = HashBiMap.create();
+	private static final BiMap<UUID, @NotNull LoggedUser> loggedUserMap = HashBiMap.create();
 
 	private static final Set<Player> loggingPlayer = new HashSet<>();
 
@@ -49,46 +49,50 @@ public final class LoginManager {
 
 	public static void logout(Player p) throws NotLoggedInException {
 		CasLogin.getINSTANCE().getLogger().info(String.format("Trying to logout player '%s'", p.getUsername()));
-		if(!loggedUserMap.containsKey(p.getUniqueId())) {
+		if (!loggedUserMap.containsKey(p.getUniqueId())) {
 			CasLogin.getINSTANCE().getLogger().info(String.format("Player '%s' is not logged in.", p.getUsername()));
 			throw new NotLoggedInException(p);
 		}
-		try{
-			CasLogin.getINSTANCE().getLogger().info(String.format("Logging out player '%s'", p.getUsername()));
-			LoggedUser userToLogOut = loggedUserMap.get(p.getUniqueId());
-			loggedUserMap.remove(p.getUniqueId());
-			ApiUtils.logout(userToLogOut);
-			CasLogin.getINSTANCE().getProxy().getEventManager().fire(new PostLogoutEvent(p));
-		}catch(APIException ex){
+		LoggedUser userToLogOut = loggedUserMap.get(p.getUniqueId());
+		logout(userToLogOut);
+	}
+
+	public static void logout(LoggedUser user) throws NotLoggedInException {
+		try {
+			CasLogin.getINSTANCE().getLogger().info(String.format("Logging out user '%s'", user.getUser().getLogin()));
+			loggedUserMap.inverse().remove(user);
+			ApiUtils.logout(user);
+			CasLogin.getINSTANCE().getProxy().getEventManager().fire(new PostLogoutEvent(user));
+		} catch (APIException ex) {
 			CasLogin.getINSTANCE().getLogger().warning(String.format("Got exception '%s'", ex.getClass().getName()));
-			if(ex.error == Errors.USER_NOT_LOGGED_IN)
-				throw new NotLoggedInException(p);
+			if (ex.error == Errors.USER_NOT_LOGGED_IN)
+				throw new NotLoggedInException(user);
 			throw new RuntimeException(ex);
 		}
 	}
 
-	public static Set<LoggedUser> getLoggedUsers(){
+	public static Set<LoggedUser> getLoggedUsers() {
 		return loggedUserMap.values();
 	}
 
-	public static Optional<LoggedUser> getLoggedUserByLogin(String login){
-		for(var user : loggedUserMap.values()){
-			if(user.getUser().getLogin().equals(login))
+	public static Optional<LoggedUser> getLoggedUserByLogin(String login) {
+		for (var user : loggedUserMap.values()) {
+			if (user.getUser().getLogin().equals(login))
 				return Optional.of(user);
 		}
 		return Optional.empty();
 	}
 
 	public static CompletableFuture<LoggedUser> pollLogin(Player player, int timeoutSeconds, int intervalSeconds) {
-		if(loggingPlayer.contains(player))
+		if (loggingPlayer.contains(player))
 			return CompletableFuture.failedFuture(new AlreadyLoggingInException());
-		if(loggedUserMap.containsKey(player.getUniqueId()))
+		if (loggedUserMap.containsKey(player.getUniqueId()))
 			return CompletableFuture.completedFuture(loggedUserMap.get(player.getUniqueId()));
 		loggingPlayer.add(player);
 		CasLogin.getINSTANCE().getLogger().info(String.format("Starting logging poll for player '%s'", player.getUsername()));
 		return CompletableFuture.supplyAsync(() -> {
 			int counter = 0;
-			while(counter < timeoutSeconds){
+			while (counter < timeoutSeconds) {
 				LoggedUser user;
 				try {
 					user = ApiUtils.getLoggedUser(player.getUniqueId());
@@ -98,7 +102,7 @@ public final class LoginManager {
 					loggingPlayer.remove(player);
 					throw new IllegalStateException(e);
 				}
-				if(user != null) {
+				if (user != null) {
 					CasLogin.getINSTANCE().getLogger().info(String.format("Player '%s' logged as '%s'.", player.getUsername(), user.getUser().getLogin()));
 					loggedUserMap.put(player.getUniqueId(), user);
 					loggingPlayer.remove(player);
@@ -118,11 +122,11 @@ public final class LoginManager {
 		});
 	}
 
-	public static Optional<LoggedUser> getLoggedPlayer(Player p){
+	public static Optional<LoggedUser> getLoggedPlayer(Player p) {
 		return Optional.ofNullable(loggedUserMap.get(p.getUniqueId()));
 	}
 
-	public static void moveLoggedPlayer(Player player, ProxyServer proxy, LoggedUser loggedUser){
+	public static void moveLoggedPlayer(Player player, ProxyServer proxy, LoggedUser loggedUser) {
 		player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.login.success")));
 		RegisteredServer loggedServer = CasLogin.getLoggedEntrypointServer();
 		player.createConnectionRequest(loggedServer).connect()
@@ -149,9 +153,9 @@ public final class LoginManager {
 
 	public static void resetLoggedUsers() {
 		loggedUserMap.clear();
-		try{
+		try {
 			List<LoggedUser> users = ApiUtils.getLoggedUsers();
-			for(var user : users){
+			for (var user : users) {
 				loggedUserMap.put(user.getUuid(), user);
 			}
 		} catch (APIException e) {

@@ -2,6 +2,7 @@ package fr.eirb.caslogin.exceptions.login;
 
 
 import com.velocitypowered.api.proxy.Player;
+import fr.eirb.caslogin.api.LoggedUser;
 
 public class NotLoggedInException extends LoginException{
 
@@ -9,8 +10,8 @@ public class NotLoggedInException extends LoginException{
 		super("Player '" + cause.getUsername() + "'is not logged in!");
 	}
 
-	public NotLoggedInException(String cause){
-		super("User '" + cause + "'is not logged in!");
+	public NotLoggedInException(LoggedUser cause){
+		super("User '" + cause.getUser().getLogin() + "'is not logged in!");
 	}
 
 }
