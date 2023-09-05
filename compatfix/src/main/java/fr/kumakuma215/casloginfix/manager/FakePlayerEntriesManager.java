@@ -38,8 +38,8 @@ public class FakePlayerEntriesManager {
 				0,
 				false,
 				EnumWrappers.NativeGameMode.fromBukkit(newGamemode),
-				new WrappedGameProfile(trueUUID, "FAKE"),
-				WrappedChatComponent.fromText("FAKE")
+				new WrappedGameProfile(trueUUID, player.getName()),
+				WrappedChatComponent.fromText(player.getName())
 		);
 	}
 
