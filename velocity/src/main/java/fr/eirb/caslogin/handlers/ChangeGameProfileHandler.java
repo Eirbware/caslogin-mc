@@ -34,9 +34,10 @@ public class ChangeGameProfileHandler {
 			restoreGameProfile(ev.getPlayer());
 			return;
 		}
-		CasLogin.getINSTANCE().getLogger().info(String.format("Changing game profile of player '%s'", ev.getPlayer().getUsername()));
+
 		Player player = ev.getPlayer();
 		LoginManager.getLoggedPlayer(player).ifPresent((loggedUser -> {
+			CasLogin.getINSTANCE().getLogger().info(String.format("Changing game profile of player '%s'", ev.getPlayer().getUsername()));
 			GameProfile prof = player.getGameProfile();
 			GameProfile oldProf = GameProfileUtils.cloneGameProfile(prof);
 			oldProfiles.put(player, oldProf);

@@ -143,7 +143,6 @@ public final class CasCommand {
 	private static Consumer<LoggedUser> loginPlayer(Player player, ProxyServer proxy) {
 		return (loggedUser) -> {
 			if (loggedUser == null) {
-				player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("errors.login_timeout")));
 				return;
 			}
 			LoginManager.moveLoggedPlayer(player, proxy, loggedUser);
