@@ -45,7 +45,7 @@ import java.util.logging.Logger;
 )
 public class CasLogin {
 
-	public static final ChannelIdentifier CAS_FIX_CHANNEL = MinecraftChannelIdentifier.create("caslogin", "auth");
+	public static final ChannelIdentifier CAS_FIX_CHANNEL = MinecraftChannelIdentifier.from(fr.eirb.common.compatfix.Constants.CAS_FIX_CHANNEL);
 
 	private static CasLogin INSTANCE;
 	private final Path pluginDir;

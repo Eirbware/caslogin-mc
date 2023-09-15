@@ -12,6 +12,7 @@ import fr.eirb.caslogin.CasLogin;
 import fr.eirb.caslogin.api.LoggedUser;
 import fr.eirb.caslogin.events.PostLoginEvent;
 import fr.eirb.caslogin.manager.LoginManager;
+import fr.eirb.common.compatfix.CasFixMessage;
 
 public class SendForCompatFixPluginMessageHandler {
 	@Subscribe(order = PostOrder.LAST)
@@ -19,7 +20,7 @@ public class SendForCompatFixPluginMessageHandler {
 		Player player = ev.getPlayer();
 		LoginManager.getLoggedPlayer(player).ifPresent(loggedUser -> {
 			ServerConnection conn = player.getCurrentServer().orElseThrow();
-			String message = UuidUtils.generateOfflinePlayerUuid(player.getUsername()) + ":" + loggedUser.getFakeUserUUID();
+			String message = new CasFixMessage(UuidUtils.generateOfflinePlayerUuid(player.getUsername()), loggedUser.getFakeUserUUID()).toString();
 			CasLogin.getINSTANCE().getLogger().info(String.format("Sending '%s' at '%s' to server '%s'", message, CasLogin.CAS_FIX_CHANNEL, conn.getServerInfo().getName()));
 			conn.sendPluginMessage(CasLogin.CAS_FIX_CHANNEL, Charsets.UTF_8.encode(message).array());
 		});

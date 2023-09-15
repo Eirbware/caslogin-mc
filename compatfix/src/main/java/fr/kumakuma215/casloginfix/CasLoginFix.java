@@ -2,6 +2,7 @@ package fr.kumakuma215.casloginfix;
 
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.ProtocolManager;
+import fr.eirb.common.compatfix.Constants;
 import fr.kumakuma215.casloginfix.listeners.PluginMessageListener;
 import fr.kumakuma215.casloginfix.listeners.UpdateFakePlayer;
 import fr.kumakuma215.casloginfix.manager.FakePlayerEntriesManager;
@@ -23,7 +24,7 @@ public final class CasLoginFix extends JavaPlugin {
         protocolManager = ProtocolLibrary.getProtocolManager();
         fakePlayerEntriesManager = new FakePlayerEntriesManager();
         getLogger().info("Registering plugin channel caslogin:auth");
-        getServer().getMessenger().registerIncomingPluginChannel(this, "caslogin:auth", new PluginMessageListener());
+        getServer().getMessenger().registerIncomingPluginChannel(this, Constants.CAS_FIX_CHANNEL, new PluginMessageListener());
         getServer().getPluginManager().registerEvents(new UpdateFakePlayer(), this);
     }
 

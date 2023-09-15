@@ -21,6 +21,7 @@ dependencies {
     annotationProcessor "com.velocitypowered:velocity-api:3.2.0-SNAPSHOT"
     compileOnly "org.asynchttpclient:async-http-client:2.12.3"
     compileOnly 'net.luckperms:api:5.4'
+    implementation project(":common")
 }
 
 def targetJavaVersion = 17
@@ -55,3 +56,7 @@ def generateTemplates = tasks.register('generateTemplates', Copy) { task ->
 sourceSets.main.java.srcDir(generateTemplates.map { it.outputs })
 rootProject.idea.project.settings.taskTriggers.afterSync generateTemplates
 project.eclipse.synchronizationTasks(generateTemplates)
+
+jar {
+    from project(":common").sourceSets.main.output
+}
