@@ -1,5 +1,6 @@
 package fr.eirb.caslogin.handlers;
 
+import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.player.KickedFromServerEvent;
@@ -28,7 +29,7 @@ public class ChangeGameProfileHandler {
 		INSTANCE = this;
 	}
 
-	@Subscribe
+	@Subscribe(order = PostOrder.LAST)
 	public void changeGameProfile(ServerPreConnectEvent ev){
 		if(ev.getResult().getServer().get().getServerInfo().equals(CasLogin.getEntrypointServer().getServerInfo())) {
 			restoreGameProfile(ev.getPlayer());
