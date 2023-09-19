@@ -19,8 +19,8 @@ public class FakePlayerEntriesManager {
 		playerToFakePlayer = new HashMap<>();
 	}
 
-	public void registerPlayer(UUID trueUUID, UUID falseUUID, String textureValue, String textureSignature) {
-		playerToFakePlayer.put(falseUUID, new FakePlayer(trueUUID, SkinManager.VALUE, SkinManager.SIGNATURE));
+	public void registerPlayer(UUID trueUUID, UUID falseUUID) {
+		playerToFakePlayer.put(falseUUID, new FakePlayer(trueUUID, null, null));
 		sendFakePlayerEntry(Objects.requireNonNull(CasLoginFix.INSTANCE.getServer().getPlayer(falseUUID)));
 	}
 
@@ -33,7 +33,8 @@ public class FakePlayerEntriesManager {
 			throw new RuntimeException("DIDNT CHECK PLAYER CONTAIN BEFORE CREATEINFODATA");
 		FakePlayer fakePlayer = playerToFakePlayer.get(player.getUniqueId());
 		WrappedGameProfile profile = new WrappedGameProfile(fakePlayer.uuid(), player.getName());
-		profile.getProperties().put("textures", new WrappedSignedProperty("textures", fakePlayer.textureValue(), fakePlayer.textureSignature()));
+		if (fakePlayer.textureSignature() != null && fakePlayer.textureValue() != null)
+			profile.getProperties().put("textures", new WrappedSignedProperty("textures", fakePlayer.textureValue(), fakePlayer.textureSignature()));
 		return new PlayerInfoData(
 				fakePlayer.uuid(),
 				0,
@@ -49,13 +50,11 @@ public class FakePlayerEntriesManager {
 		sendFakePlayerInfoPacket(player, data, EnumSet.of(EnumWrappers.PlayerInfoAction.ADD_PLAYER, EnumWrappers.PlayerInfoAction.UPDATE_LISTED, EnumWrappers.PlayerInfoAction.UPDATE_GAME_MODE));
 	}
 
-	private void sendFakePlayerInfoPacket(Player player, PlayerInfoData data, EnumSet<EnumWrappers.PlayerInfoAction> actions){
+	private void sendFakePlayerInfoPacket(Player player, PlayerInfoData data, EnumSet<EnumWrappers.PlayerInfoAction> actions) {
 		PacketContainer packetToSend = CasLoginFix.getProtocolManager().createPacket(PacketType.Play.Server.PLAYER_INFO);
 		packetToSend.getPlayerInfoActions().write(0, actions);
 		packetToSend.getPlayerInfoDataLists().write(1, Collections.singletonList(data));
 		CasLoginFix.getProtocolManager().sendServerPacket(player, packetToSend);
-
-
 	}
 
 	public void updateGamemode(Player player, GameMode newGamemode) throws NoFakePlayerException {
@@ -65,7 +64,20 @@ public class FakePlayerEntriesManager {
 		sendFakePlayerInfoPacket(player, data, EnumSet.of(EnumWrappers.PlayerInfoAction.UPDATE_GAME_MODE));
 	}
 
-	public HashMap<UUID, FakePlayer> getPlayerToFakePlayer() {
-		return playerToFakePlayer;
+	public void refreshSkin(Player player) throws NoFakePlayerException {
+		if (!playerToFakePlayer.containsKey(player.getUniqueId()))
+			throw new NoFakePlayerException();
+		removeFakePlayerEntry(player);
+		sendFakePlayerEntry(player);
+	}
+
+	private void removeFakePlayerEntry(Player player) {
+		PacketContainer packet = CasLoginFix.getProtocolManager().createPacket(PacketType.Play.Server.PLAYER_INFO_REMOVE);
+		packet.getUUIDLists().write(0, Collections.singletonList(playerToFakePlayer.get(player.getUniqueId()).uuid()));
+		CasLoginFix.getProtocolManager().sendServerPacket(player, packet);
+	}
+
+	public FakePlayer getFakePlayer(Player p) {
+		return playerToFakePlayer.get(p.getUniqueId());
 	}
 }
