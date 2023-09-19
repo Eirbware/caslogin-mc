@@ -18,7 +18,7 @@ import fr.eirb.common.compatfix.CasFixMessage;
 
 public class SendForCompatFixPluginMessageHandler {
 	@Subscribe(order = PostOrder.LAST)
-	private void sendPluginMessageForFixes(ServerPostConnectEvent ev) {
+	private void sendPluginMessageForFixes(ServerPostConnectEvent ev) {;
 		Player player = ev.getPlayer();
 		LoginManager.getLoggedPlayer(player).ifPresent(loggedUser -> {
 			ServerConnection conn = player.getCurrentServer().orElseThrow();

@@ -1,5 +1,6 @@
 package fr.eirb.caslogin.commands;
 
+import com.google.common.base.Charsets;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
@@ -32,6 +33,12 @@ public final class CasCommand {
 				.then(loginCommand(proxy))
 				.then(logoutCommand(proxy))
 				.then(configCommand())
+				.then(LiteralArgumentBuilder
+						.<CommandSource>literal("test")
+						.executes((ctx) -> {
+							System.out.println(CasLogin.getLoggedEntrypointServer().sendPluginMessage(CasLogin.CAS_FIX_CHANNEL, Charsets.UTF_8.encode("a").array()));
+							return Command.SINGLE_SUCCESS;
+						}))
 				.build();
 		return new BrigadierCommand(rootNode);
 	}
