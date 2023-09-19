@@ -23,8 +23,6 @@ public class UpdateFakePlayer implements Listener {
 	public void onPlayerJoin(PlayerJoinEvent ev) throws DataRequestException {
 		if(!CasLoginFix.INSTANCE.hasSkinRestorer())
 			return;
-		SkinsRestorerProvider.get().getPlayerStorage().removeSkinIdOfPlayer(ev.getPlayer().getUniqueId());
-		SkinsRestorerProvider.get().getSkinApplier(Player.class).applySkin(ev.getPlayer());
 		try {
 			CasLoginFix.getFakePlayerEntriesManager().refreshSkin(ev.getPlayer());
 		} catch (NoFakePlayerException ignored) {
