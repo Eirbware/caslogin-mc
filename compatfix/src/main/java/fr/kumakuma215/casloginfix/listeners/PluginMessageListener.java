@@ -12,7 +12,6 @@ public class PluginMessageListener implements org.bukkit.plugin.messaging.Plugin
 
 	@Override
 	public void onPluginMessageReceived(@NotNull String channel, @NotNull Player player, @NotNull byte[] message) {
-		System.out.println("Message");
 		ByteBuffer buff = ByteBuffer.wrap(message);
 		String result = String.valueOf(Charsets.UTF_8.decode(buff));
 		CasFixMessage casFixMessage = new CasFixMessage(result);

@@ -22,13 +22,9 @@ public class SendForCompatFixPluginMessageHandler {
 		Player player = ev.getPlayer();
 		LoginManager.getLoggedPlayer(player).ifPresent(loggedUser -> {
 			ServerConnection conn = player.getCurrentServer().orElseThrow();
-			System.out.println(player.getGameProfileProperties());
-			GameProfile.Property property = player.getGameProfileProperties().get(0);
 			CasFixMessage fixMessage = new CasFixMessage(
 					UuidUtils.generateOfflinePlayerUuid(player.getUsername()),
-					loggedUser.getFakeUserUUID(),
-					property.getValue(),
-					property.getSignature()
+					loggedUser.getFakeUserUUID()
 					);
 			String message = fixMessage.toString();
 			CasLogin.getINSTANCE().getLogger().info(String.format("Sending '%s' at '%s' to server '%s'", message, CasLogin.CAS_FIX_CHANNEL, conn.getServerInfo().getName()));

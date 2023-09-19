@@ -3,26 +3,22 @@ package fr.eirb.common.compatfix;
 import java.util.UUID;
 
 public class CasFixMessage {
+	private static final int MESSAGE_LENGTH = 2;
+	private static final String FORMAT = "%s:".repeat(MESSAGE_LENGTH).substring(0, MESSAGE_LENGTH*3-1);
 	private final UUID falseUUID;
 	private final UUID trueUUID;
-	private final String textureValue;
-	private final String textureSignature;
 
 	public CasFixMessage(String buffer) {
 		String[] split = buffer.split(":");
-		if (split.length != 4)
+		if (split.length != MESSAGE_LENGTH)
 			throw new RuntimeException("INVALID FORMAT FOR PLUGIN MESSAGE");
 		trueUUID = UUID.fromString(split[0].trim());
 		falseUUID = UUID.fromString(split[1].trim());
-		textureValue = split[2];
-		textureSignature = split[3];
 	}
 
-	public CasFixMessage(UUID trueUUID, UUID falseUUID, String texture, String signature) {
+	public CasFixMessage(UUID trueUUID, UUID falseUUID) {
 		this.falseUUID = falseUUID;
 		this.trueUUID = trueUUID;
-		this.textureValue = texture;
-		this.textureSignature = signature;
 	}
 
 	public UUID getFalseUUID() {
@@ -35,18 +31,8 @@ public class CasFixMessage {
 
 	@Override
 	public String toString() {
-		return String.format("%s:%s:%s:%s",
+		return String.format(FORMAT,
 				trueUUID.toString(),
-				falseUUID.toString(),
-				textureValue,
-				textureSignature);
-	}
-
-	public String getTextureValue() {
-		return textureValue;
-	}
-
-	public String getTextureSignature() {
-		return textureSignature;
+				falseUUID.toString());
 	}
 }

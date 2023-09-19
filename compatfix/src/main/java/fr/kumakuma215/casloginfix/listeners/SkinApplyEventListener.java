@@ -16,6 +16,8 @@ public class SkinApplyEventListener implements Consumer<SkinApplyEvent> {
 		if(!player.isOnline())
 			return;
 		FakePlayer fakePlayer = CasLoginFix.getFakePlayerEntriesManager().getFakePlayer(player);
+		if(fakePlayer == null)
+			return;
 		fakePlayer.setTextureSignature(ev.getProperty().getSignature());
 		fakePlayer.setTextureValue(ev.getProperty().getValue());
 		try {
