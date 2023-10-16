@@ -3,6 +3,7 @@ package fr.kumakuma215.casloginfix.listeners;
 import com.google.common.base.Charsets;
 import fr.eirb.common.compatfix.CasFixMessage;
 import fr.kumakuma215.casloginfix.CasLoginFix;
+import fr.kumakuma215.casloginfix.exceptions.NoFakePlayerException;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,6 +17,11 @@ public class PluginMessageListener implements org.bukkit.plugin.messaging.Plugin
 		String result = String.valueOf(Charsets.UTF_8.decode(buff));
 		CasFixMessage casFixMessage = new CasFixMessage(result);
 		CasLoginFix.getFakePlayerEntriesManager().registerPlayer(casFixMessage.getTrueUUID(), casFixMessage.getFalseUUID());
-
+		if(!CasLoginFix.INSTANCE.hasSkinRestorer())
+			return;
+		try {
+			CasLoginFix.getFakePlayerEntriesManager().refreshSkin(casFixMessage.getFalseUUID());
+		} catch (NoFakePlayerException ignored) {
+		}
 	}
 }

@@ -20,7 +20,7 @@ public class UpdateFakePlayer implements Listener {
 	}
 
 	@EventHandler
-	public void onPlayerJoin(PlayerJoinEvent ev) throws DataRequestException {
+	public void onPlayerJoin(PlayerJoinEvent ev) {
 		if(!CasLoginFix.INSTANCE.hasSkinRestorer())
 			return;
 		try {
