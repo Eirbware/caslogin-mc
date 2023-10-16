@@ -65,7 +65,7 @@ public final class CasCommand {
 					CasLogin.get().getLoginHandler()
 							.login(player)
 							.thenAccept(loggedUser -> {
-								Connector.get(player).to(CasLogin.getLoggedEntrypointServer()).as(loggedUser.getFakeGameProfile())
+								Connector.get(player).to(CasLogin.getLoggedEntrypointServer()).as(loggedUser)
 										.connect()
 										.whenComplete((result, throwable) -> {
 											if(throwable != null || !result.isSuccessful()){

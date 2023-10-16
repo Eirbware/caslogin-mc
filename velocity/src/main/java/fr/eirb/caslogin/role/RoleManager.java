@@ -1,4 +1,4 @@
-package fr.eirb.caslogin.manager;
+package fr.eirb.caslogin.role;
 
 import fr.eirb.caslogin.api.model.LoggedUser;
 

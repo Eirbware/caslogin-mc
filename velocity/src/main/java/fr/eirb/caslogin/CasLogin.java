@@ -11,11 +11,13 @@ import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import fr.eirb.caslogin.commands.CasCommand;
+import fr.eirb.caslogin.listeners.GameProfileChangerListener;
 import fr.eirb.caslogin.login.LoginHandler;
 import fr.eirb.caslogin.configuration.ConfigurationManager;
-import fr.eirb.caslogin.manager.RoleManager;
-import fr.eirb.caslogin.manager.impl.DummyRoleManager;
-import fr.eirb.caslogin.manager.impl.LuckPermsRoleManager;
+import fr.eirb.caslogin.login.LoginHandlerFactory;
+import fr.eirb.caslogin.role.RoleManager;
+import fr.eirb.caslogin.role.impl.DummyRoleManager;
+import fr.eirb.caslogin.role.impl.LuckPermsRoleManager;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 
@@ -67,19 +69,21 @@ public class CasLogin {
 		INSTANCE = this;
 		ConfigurationManager.loadConfig(pluginDir);
 		resetEntrypoints();
+		registerHandlers();
 		registerCommands();
 		hookLuckperms();
 		createLoginHandler();
-
 		logger.info("Plugin successfully loaded!");
 	}
 
 	private void createLoginHandler() {
-
+		loginHandler = switch(ConfigurationManager.getLoginHandlerType()){
+			case API -> LoginHandlerFactory.getAPILoginHandler();
+		};
 	}
 
 	private void registerHandlers() {
-
+		proxy.getEventManager().register(this, new GameProfileChangerListener());
 	}
 
 	public static void resetEntrypoints() {

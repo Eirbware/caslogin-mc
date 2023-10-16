@@ -1,7 +1,7 @@
-package fr.eirb.caslogin.manager.impl;
+package fr.eirb.caslogin.role.impl;
 
 import fr.eirb.caslogin.api.model.LoggedUser;
-import fr.eirb.caslogin.manager.RoleManager;
+import fr.eirb.caslogin.role.RoleManager;
 
 public class DummyRoleManager implements RoleManager {
 	@Override

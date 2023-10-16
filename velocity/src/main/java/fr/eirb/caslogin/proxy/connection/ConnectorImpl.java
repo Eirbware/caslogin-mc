@@ -4,7 +4,10 @@ import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.util.GameProfile;
+import fr.eirb.caslogin.CasLogin;
+import fr.eirb.caslogin.api.model.LoggedUser;
 import fr.eirb.caslogin.configuration.ConfigurationManager;
+import fr.eirb.caslogin.events.PostLoginEvent;
 import fr.eirb.caslogin.utils.GameProfileUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -15,7 +18,7 @@ import java.util.concurrent.CompletableFuture;
 class ConnectorImpl implements Connector {
 	private final Player player;
 	private RegisteredServer server;
-	private GameProfile fakeIdentity;
+	private LoggedUser identity;
 
 	public ConnectorImpl(Player p) {
 		this.player = p;
@@ -28,8 +31,8 @@ class ConnectorImpl implements Connector {
 	}
 
 	@Override
-	public Connector as(GameProfile newProfile) {
-		this.fakeIdentity = newProfile;
+	public Connector as(LoggedUser newProfile) {
+		this.identity = newProfile;
 		return this;
 	}
 
@@ -37,13 +40,14 @@ class ConnectorImpl implements Connector {
 	public CompletableFuture<ConnectionRequestBuilder.Result> connect() {
 		if(server == null)
 			return CompletableFuture.failedFuture(new IllegalArgumentException("No server specified"));
-		GameProfile oldGameProfile = GameProfileUtils.cloneGameProfile(player.getGameProfile());
-		if (fakeIdentity != null) {
-			GameProfileUtils.setToGameProfile(player.getGameProfile(), fakeIdentity);
+//		GameProfile oldGameProfile = GameProfileUtils.cloneGameProfile(player.getGameProfile());
+		if (identity != null) {
+			GameProfileUtils.setToGameProfile(player.getGameProfile(), identity.getFakeGameProfile());
 		}
 		return player.createConnectionRequest(server)
 				.connect()
 				.handle((result, throwable) -> {
+//					GameProfileUtils.setToGameProfile(player.getGameProfile(), oldGameProfile);
 					if(throwable != null){
 						player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_disconnected_no_reason")));
 						return new ConnectionRequestBuilder.Result() {
@@ -64,6 +68,12 @@ class ConnectorImpl implements Connector {
 						};
 					}
 					return result;
+				})
+				.whenComplete((result, throwable) -> {
+					if(throwable != null || !result.isSuccessful())
+						return;
+					if(this.identity != null)
+						CasLogin.get().getProxy().getEventManager().fire(new PostLoginEvent(player, this.identity));
 				});
 	}
 }

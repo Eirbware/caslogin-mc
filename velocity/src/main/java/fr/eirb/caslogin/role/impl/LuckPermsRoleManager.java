@@ -1,7 +1,7 @@
-package fr.eirb.caslogin.manager.impl;
+package fr.eirb.caslogin.role.impl;
 
 import fr.eirb.caslogin.api.model.LoggedUser;
-import fr.eirb.caslogin.manager.RoleManager;
+import fr.eirb.caslogin.role.RoleManager;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.model.group.Group;
 import net.luckperms.api.model.user.User;
