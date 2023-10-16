@@ -1,25 +1,20 @@
 package fr.eirb.caslogin;
 
 import com.google.inject.Inject;
-import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
-import com.velocitypowered.api.event.player.ServerPostConnectEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Dependency;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
-import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import fr.eirb.caslogin.commands.CasCommand;
-import fr.eirb.caslogin.events.PostLoginEvent;
 import fr.eirb.caslogin.manager.ConfigurationManager;
 import fr.eirb.caslogin.manager.RoleManager;
 import fr.eirb.caslogin.manager.impl.DummyRoleManager;
 import fr.eirb.caslogin.manager.impl.LuckPermsRoleManager;
-import fr.eirb.caslogin.utils.PlayerUtils;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 
@@ -90,7 +85,7 @@ public class CasLogin {
 	private void hookLuckperms() {
 		try {
 			LuckPerms api = LuckPermsProvider.get();
-			this.roleManager = new LuckPermsRoleManager(api, proxy);
+			this.roleManager = new LuckPermsRoleManager(api);
 			logger.info("Found LuckPerms. Loading LuckPerms RoleManager...");
 		} catch (IllegalStateException notLoaded) {
 			logger.warning("Could not find LuckPerms. Using dummy rolemanager that does nothing.");

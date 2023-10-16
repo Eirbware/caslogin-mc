@@ -1,6 +1,5 @@
 package fr.eirb.caslogin.manager.impl;
 
-import com.velocitypowered.api.proxy.ProxyServer;
 import fr.eirb.caslogin.api.model.LoggedUser;
 import fr.eirb.caslogin.manager.RoleManager;
 import net.luckperms.api.LuckPerms;
@@ -16,11 +15,9 @@ import java.util.function.Consumer;
 
 public class LuckPermsRoleManager implements RoleManager {
 	private final LuckPerms api;
-	private final ProxyServer proxy;
 
-	public LuckPermsRoleManager(LuckPerms api, ProxyServer proxy) {
+	public LuckPermsRoleManager(LuckPerms api) {
 		this.api = api;
-		this.proxy = proxy;
 	}
 
 	// THIS IS BLOCKING! SHOULD NOT BE USED OUTSIDE OF ALREADY ASYNC CALLBACK

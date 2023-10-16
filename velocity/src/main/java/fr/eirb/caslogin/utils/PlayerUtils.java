@@ -2,7 +2,6 @@ package fr.eirb.caslogin.utils;
 
 import com.velocitypowered.api.proxy.Player;
 import fr.eirb.caslogin.CasLogin;
-import fr.eirb.caslogin.manager.ConfigurationManager;
 
 public class PlayerUtils {
 	public static boolean isPlayerInLimbo(Player player){
