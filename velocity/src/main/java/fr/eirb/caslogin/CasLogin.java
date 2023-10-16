@@ -11,7 +11,8 @@ import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import fr.eirb.caslogin.commands.CasCommand;
-import fr.eirb.caslogin.manager.ConfigurationManager;
+import fr.eirb.caslogin.login.LoginHandler;
+import fr.eirb.caslogin.configuration.ConfigurationManager;
 import fr.eirb.caslogin.manager.RoleManager;
 import fr.eirb.caslogin.manager.impl.DummyRoleManager;
 import fr.eirb.caslogin.manager.impl.LuckPermsRoleManager;
@@ -32,32 +33,32 @@ import java.util.logging.Logger;
 public class CasLogin {
 
 	public static final ChannelIdentifier CAS_FIX_CHANNEL = MinecraftChannelIdentifier.from(fr.eirb.common.compatfix.Constants.CAS_FIX_CHANNEL);
-
 	private static CasLogin INSTANCE;
 	private final Path pluginDir;
-
 	@Inject
 	private Logger logger;
-
 	@Inject
 	private ProxyServer proxy;
-
 	private RoleManager roleManager;
-
 	private static RegisteredServer entrypointServer;
 	private static RegisteredServer loggedEntrypointServer;
+	private LoginHandler loginHandler;
 
 	@Inject
 	public CasLogin(@DataDirectory Path pluginDir) {
 		this.pluginDir = pluginDir;
 	}
 
-	public static CasLogin getINSTANCE() {
+	public static CasLogin get() {
 		return INSTANCE;
 	}
 
 	public ProxyServer getProxy() {
 		return proxy;
+	}
+
+	public LoginHandler getLoginHandler() {
+		return loginHandler;
 	}
 
 	@Subscribe
@@ -68,9 +69,13 @@ public class CasLogin {
 		resetEntrypoints();
 		registerCommands();
 		hookLuckperms();
-		// register login handler
-		registerHandlers();
+		createLoginHandler();
+
 		logger.info("Plugin successfully loaded!");
+	}
+
+	private void createLoginHandler() {
+
 	}
 
 	private void registerHandlers() {

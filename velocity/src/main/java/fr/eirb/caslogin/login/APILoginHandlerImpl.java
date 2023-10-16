@@ -13,7 +13,7 @@ import fr.eirb.caslogin.exceptions.api.Errors;
 import fr.eirb.caslogin.exceptions.login.AlreadyLoggingInException;
 import fr.eirb.caslogin.exceptions.login.CouldNotGenerateCSRFTokenException;
 import fr.eirb.caslogin.exceptions.login.NotLoggedInException;
-import fr.eirb.caslogin.manager.ConfigurationManager;
+import fr.eirb.caslogin.configuration.ConfigurationManager;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.asynchttpclient.*;
 import org.jetbrains.annotations.NotNull;
@@ -61,7 +61,7 @@ class APILoginHandlerImpl implements LoginHandler {
 		if (loggedUserMap.containsKey(player.getUniqueId()))
 			return CompletableFuture.completedFuture(loggedUserMap.get(player.getUniqueId()));
 		loggingPlayer.add(player);
-		CasLogin.getINSTANCE().getLogger().info(String.format("Starting logging poll for player '%s'", player.getUsername()));
+		CasLogin.get().getLogger().info(String.format("Starting logging poll for player '%s'", player.getUsername()));
 		return CompletableFuture.supplyAsync(() -> {
 			long counter = 0;
 			while (counter < timeoutSeconds) {
@@ -70,12 +70,12 @@ class APILoginHandlerImpl implements LoginHandler {
 					user = ApiUtils.getLoggedUser(player.getUniqueId());
 
 				} catch (APIException e) {
-					CasLogin.getINSTANCE().getLogger().severe("API EXCEPTION ON LOGIN POLL! Something is really wrong.");
+					CasLogin.get().getLogger().severe("API EXCEPTION ON LOGIN POLL! Something is really wrong.");
 					loggingPlayer.remove(player);
 					throw new IllegalStateException(e);
 				}
 				if (user != null) {
-					CasLogin.getINSTANCE().getLogger().info(String.format("Player '%s' logged as '%s'.", player.getUsername(), user.getUser().getLogin()));
+					CasLogin.get().getLogger().info(String.format("Player '%s' logged as '%s'.", player.getUsername(), user.getUser().getLogin()));
 					loggedUserMap.put(player.getUniqueId(), user);
 					loggingPlayer.remove(player);
 					return user;
@@ -87,7 +87,7 @@ class APILoginHandlerImpl implements LoginHandler {
 				}
 				counter += intervalSeconds;
 			}
-			CasLogin.getINSTANCE().getLogger().info(String.format("Polling timed out for player '%s'", player.getUsername()));
+			CasLogin.get().getLogger().info(String.format("Polling timed out for player '%s'", player.getUsername()));
 			loggingPlayer.remove(player);
 			player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("errors.login_timeout")));
 			return null;

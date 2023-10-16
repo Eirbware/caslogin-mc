@@ -1,6 +1,7 @@
-package fr.eirb.caslogin.manager;
+package fr.eirb.caslogin.configuration;
 
 import fr.eirb.caslogin.CasLogin;
+import fr.eirb.caslogin.exceptions.configuration.NoSuchLoginHandler;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
 
@@ -9,6 +10,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 
 public class ConfigurationManager {
 
@@ -49,6 +51,14 @@ public class ConfigurationManager {
 	}
 	public static long getLoginPollIntervalMS(){
 		return pluginConfig.getNode("loginPollIntervalMS").getLong();
+	}
+	public static LoginHandlerTypes getLoginHandlerType() throws NoSuchLoginHandler{
+		String type = pluginConfig.getNode("loginHandlerType").getString();
+		try {
+			return LoginHandlerTypes.valueOf(type);
+		}catch(IllegalArgumentException ex){
+			throw new NoSuchLoginHandler(type);
+		}
 	}
 
 	private static class ConfigurationUtils {

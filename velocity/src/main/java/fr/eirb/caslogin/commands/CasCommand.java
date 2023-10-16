@@ -13,7 +13,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import fr.eirb.caslogin.CasLogin;
 import fr.eirb.caslogin.api.model.LoggedUser;
-import fr.eirb.caslogin.manager.ConfigurationManager;
+import fr.eirb.caslogin.configuration.ConfigurationManager;
 import fr.eirb.caslogin.utils.PlayerUtils;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
