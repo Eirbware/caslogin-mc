@@ -2,3 +2,5 @@ auth_server: https://foo
 api_key: YOUR API KEY
 entrypoint_server: lobby
 logged_entrypoint_server: paper
+loginPollTimeoutSeconds: 300
+loginPollIntervalMS: 1000

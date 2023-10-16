@@ -1,30 +1,21 @@
 package fr.eirb.caslogin;
 
-import com.google.common.base.Charsets;
 import com.google.inject.Inject;
 import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.player.ServerPostConnectEvent;
-import com.velocitypowered.api.event.player.ServerPreConnectEvent;
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Dependency;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import com.velocitypowered.api.proxy.ServerConnection;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import com.velocitypowered.api.util.GameProfile;
-import com.velocitypowered.api.util.UuidUtils;
-import fr.eirb.caslogin.api.LoggedUser;
 import fr.eirb.caslogin.commands.CasCommand;
 import fr.eirb.caslogin.events.PostLoginEvent;
-import fr.eirb.caslogin.handlers.ChangeGameProfileHandler;
-import fr.eirb.caslogin.handlers.SendForCompatFixPluginMessageHandler;
 import fr.eirb.caslogin.manager.ConfigurationManager;
-import fr.eirb.caslogin.manager.LoginManager;
 import fr.eirb.caslogin.manager.RoleManager;
 import fr.eirb.caslogin.manager.impl.DummyRoleManager;
 import fr.eirb.caslogin.manager.impl.LuckPermsRoleManager;
@@ -82,14 +73,13 @@ public class CasLogin {
 		resetEntrypoints();
 		registerCommands();
 		hookLuckperms();
-		LoginManager.resetLoggedUsers();
+		// register login handler
 		registerHandlers();
 		logger.info("Plugin successfully loaded!");
 	}
 
 	private void registerHandlers() {
-		proxy.getEventManager().register(this, new ChangeGameProfileHandler());
-		proxy.getEventManager().register(this, new SendForCompatFixPluginMessageHandler());
+
 	}
 
 	public static void resetEntrypoints() {
@@ -107,48 +97,6 @@ public class CasLogin {
 			this.roleManager = new DummyRoleManager();
 		}
 	}
-
-	@Subscribe(order = PostOrder.FIRST)
-	public void onServerChange(ServerPostConnectEvent ev) {
-		Player player = ev.getPlayer();
-		if (player.getCurrentServer().isEmpty())
-			return;
-		if (!PlayerUtils.isPlayerInLimbo(player)) {
-			return;
-		}
-		LoginManager.getLoggedPlayer(player)
-				.ifPresent((loggedUser) -> {
-					logger.info(String.format("Player '%s' is logged in as '%s'. Moving them.", player.getUsername(), loggedUser.getUser().getLogin()));
-					LoginManager.moveLoggedPlayer(player, proxy, loggedUser);
-				});
-	}
-
-	@Subscribe
-	private void updateRolesOnLogin(PostLoginEvent ev) {
-		logger.info("Updating roles for user '" + ev.loggedUser().getUser().getLogin() + "'");
-		roleManager.updateUserRoles(ev.loggedUser());
-	}
-
-//	@Subscribe
-//	private void sendPluginMessageForFixes(PostLoginEvent ev) {
-//		Player player = ev.player();
-//		LoggedUser userForPlayer = ev.loggedUser();
-//		ServerConnection conn = player.getCurrentServer().orElseThrow();
-//		String message = UuidUtils.generateOfflinePlayerUuid(player.getUsername()) + ":" + userForPlayer.getFakeUserUUID();
-//		logger.info(String.format("Sending '%s' at '%s' to server '%s'", message, CAS_FIX_CHANNEL, conn.getServerInfo().getName()));
-//		conn.sendPluginMessage(CAS_FIX_CHANNEL, Charsets.UTF_8.encode(message).array());
-//	}
-
-//	@Subscribe
-//	public void onDisconnect(DisconnectEvent ev) {
-//		logger.info("Logging out player " + ev.getPlayer().getUsername());
-//		try {
-//			LoginManager.logout(ev.getPlayer());
-//
-//		} catch (NotLoggedInException ignored) {
-//		}
-//
-//	}
 
 
 	private void registerCommands() {

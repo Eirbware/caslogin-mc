@@ -1,4 +1,4 @@
-package fr.eirb.caslogin.api;
+package fr.eirb.caslogin.api.model;
 
 import com.google.common.base.Objects;
 

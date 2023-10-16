@@ -1,4 +1,4 @@
-package fr.eirb.caslogin.api;
+package fr.eirb.caslogin.api.model;
 
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.model.group.Group;

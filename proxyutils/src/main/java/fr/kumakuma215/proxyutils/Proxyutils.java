@@ -6,8 +6,6 @@ import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.plugin.Dependency;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.proxy.ProxyServer;
-import fr.eirb.caslogin.CasLogin;
-import fr.eirb.caslogin.Constants;
 import fr.kumakuma215.proxyutils.commands.AlertCommand;
 import fr.kumakuma215.proxyutils.commands.SendCommand;
 import org.slf4j.Logger;

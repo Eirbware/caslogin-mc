@@ -1,4 +1,4 @@
-package fr.eirb.caslogin.api;
+package fr.eirb.caslogin.api.model;
 
 import javax.annotation.Nullable;
 import java.sql.Date;

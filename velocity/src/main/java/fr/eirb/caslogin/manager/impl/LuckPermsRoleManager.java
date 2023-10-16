@@ -1,24 +1,18 @@
 package fr.eirb.caslogin.manager.impl;
 
 import com.velocitypowered.api.proxy.ProxyServer;
-import fr.eirb.caslogin.CasLogin;
-import fr.eirb.caslogin.api.LoggedUser;
+import fr.eirb.caslogin.api.model.LoggedUser;
 import fr.eirb.caslogin.manager.RoleManager;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.model.group.Group;
 import net.luckperms.api.model.user.User;
 import net.luckperms.api.node.types.InheritanceNode;
-import net.luckperms.api.query.QueryMode;
-import net.luckperms.api.query.QueryOptions;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class LuckPermsRoleManager implements RoleManager {
 	private final LuckPerms api;

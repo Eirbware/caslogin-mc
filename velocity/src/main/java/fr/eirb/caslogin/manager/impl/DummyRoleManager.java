@@ -1,6 +1,6 @@
 package fr.eirb.caslogin.manager.impl;
 
-import fr.eirb.caslogin.api.LoggedUser;
+import fr.eirb.caslogin.api.model.LoggedUser;
 import fr.eirb.caslogin.manager.RoleManager;
 
 public class DummyRoleManager implements RoleManager {
