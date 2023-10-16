@@ -1,8 +1,10 @@
 package fr.eirb.caslogin.api.model;
 
 import com.google.common.base.Objects;
+import com.velocitypowered.api.util.GameProfile;
 import com.velocitypowered.api.util.UuidUtils;
 
+import java.util.Collections;
 import java.util.UUID;
 
 public class LoggedUser {
@@ -19,6 +21,10 @@ public class LoggedUser {
 
 	public UUID getFakeUserUUID(){
 		return UuidUtils.generateOfflinePlayerUuid(getUser().getLogin());
+	}
+
+	public GameProfile getFakeGameProfile(){
+		return new GameProfile(getFakeUserUUID(), user.getLogin(), Collections.emptyList());
 	}
 
 	@Override

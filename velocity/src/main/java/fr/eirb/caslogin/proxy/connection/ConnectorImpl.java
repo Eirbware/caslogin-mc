@@ -35,20 +35,35 @@ class ConnectorImpl implements Connector {
 
 	@Override
 	public CompletableFuture<ConnectionRequestBuilder.Result> connect() {
+		if(server == null)
+			return CompletableFuture.failedFuture(new IllegalArgumentException("No server specified"));
 		GameProfile oldGameProfile = GameProfileUtils.cloneGameProfile(player.getGameProfile());
 		if (fakeIdentity != null) {
 			GameProfileUtils.setToGameProfile(player.getGameProfile(), fakeIdentity);
 		}
-		ConnectionRequestBuilder req = player.createConnectionRequest(server);
-		return req
+		return player.createConnectionRequest(server)
 				.connect()
-				.whenComplete((result, throwable) -> {
-					GameProfileUtils.setToGameProfile(player.getGameProfile(), oldGameProfile);
+				.handle((result, throwable) -> {
 					if(throwable != null){
 						player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_disconnected_no_reason")));
-						return;
+						return new ConnectionRequestBuilder.Result() {
+							@Override
+							public ConnectionRequestBuilder.Status getStatus() {
+								return result == null ? ConnectionRequestBuilder.Status.CONNECTION_CANCELLED : result.getStatus();
+							}
+
+							@Override
+							public Optional<Component> getReasonComponent() {
+								return result == null ? Optional.empty() : result.getReasonComponent();
+							}
+
+							@Override
+							public RegisteredServer getAttemptedConnection() {
+								return server;
+							}
+						};
 					}
-					player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.login.success")));
+					return result;
 				});
 	}
 }

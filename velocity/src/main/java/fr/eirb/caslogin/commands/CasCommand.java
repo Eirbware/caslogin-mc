@@ -11,10 +11,14 @@ import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.proxy.server.RegisteredServer;
 import fr.eirb.caslogin.CasLogin;
 import fr.eirb.caslogin.api.model.LoggedUser;
 import fr.eirb.caslogin.configuration.ConfigurationManager;
+import fr.eirb.caslogin.exceptions.login.NotLoggedInException;
+import fr.eirb.caslogin.proxy.connection.Connector;
 import fr.eirb.caslogin.utils.PlayerUtils;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
 import java.util.function.Consumer;
@@ -61,7 +65,21 @@ public final class CasCommand {
 					CasLogin.get().getLoginHandler()
 							.login(player)
 							.thenAccept(loggedUser -> {
-
+								Connector.get(player).to(CasLogin.getLoggedEntrypointServer()).as(loggedUser.getFakeGameProfile())
+										.connect()
+										.whenComplete((result, throwable) -> {
+											if(throwable != null || !result.isSuccessful()){
+												Component message = result.getReasonComponent().isEmpty()
+														? MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_disconnected_no_reason"))
+														: MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_disconnected"));
+												if(result.getReasonComponent().isPresent())
+													message = message.append(result.getReasonComponent().get());
+												player.sendMessage(message);
+												return;
+											}
+											Component message = MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.login.success"));
+											player.sendMessage(message);
+										});
 							});
 					return Command.SINGLE_SUCCESS;
 				});
@@ -72,19 +90,19 @@ public final class CasCommand {
 				.<CommandSource>literal("logout")
 				.requires(source -> !isSourceAPlayerInLimbo(source))
 				.executes(context -> {
-//					if (!(context.getSource() instanceof Player player)) {
-//						context.getSource().sendMessage(MiniMessage
-//								.miniMessage()
-//								.deserialize("<red>Console cannot use this command without arguments</red>"));
-//						return 0;
-//					}
-//					try {
-//						RegisteredServer entrypointServer = CasLogin.getEntrypointServer();
-//						LoginManager.logout(player);
-//						player.createConnectionRequest(entrypointServer).fireAndForget();
-//					} catch (NotLoggedInException e) {
-//						throw new RuntimeException(e);
-//					}
+					if (!(context.getSource() instanceof Player player)) {
+						context.getSource().sendMessage(MiniMessage
+								.miniMessage()
+								.deserialize("<red>Console cannot use this command without arguments</red>"));
+						return 0;
+					}
+					try {
+						RegisteredServer entrypointServer = CasLogin.getEntrypointServer();
+						CasLogin.get().getLoginHandler().logout(player);
+						player.createConnectionRequest(entrypointServer).fireAndForget();
+					} catch (NotLoggedInException e) {
+						throw new RuntimeException(e);
+					}
 					return Command.SINGLE_SUCCESS;
 				})
 				.then(logoutPlayerAdminCommand(proxy));
