@@ -56,7 +56,13 @@ public final class CasCommand {
 				// Requires that the source is a player AND is on the Limbo server! Else no login!!!
 				.requires(CasCommand::isSourceAPlayerInLimbo)
 				.executes(context -> {
+					if(!(context instanceof Player player))
+						return 0;
+					CasLogin.get().getLoginHandler()
+							.login(player)
+							.thenAccept(loggedUser -> {
 
+							});
 					return Command.SINGLE_SUCCESS;
 				});
 	}
