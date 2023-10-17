@@ -12,9 +12,13 @@ import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import fr.eirb.caslogin.commands.CasCommand;
 import fr.eirb.caslogin.listeners.GameProfileChangerListener;
+import fr.eirb.caslogin.login.LoginDatabase;
 import fr.eirb.caslogin.login.LoginHandler;
 import fr.eirb.caslogin.configuration.ConfigurationManager;
 import fr.eirb.caslogin.login.LoginHandlerFactory;
+import fr.eirb.caslogin.login.MemoryLoginDatabase;
+import fr.eirb.caslogin.proxy.connection.GameProfileDatabase;
+import fr.eirb.caslogin.proxy.connection.MemoryGameProfileDatabase;
 import fr.eirb.caslogin.role.RoleManager;
 import fr.eirb.caslogin.role.impl.DummyRoleManager;
 import fr.eirb.caslogin.role.impl.LuckPermsRoleManager;
@@ -45,6 +49,8 @@ public class CasLogin {
 	private static RegisteredServer entrypointServer;
 	private static RegisteredServer loggedEntrypointServer;
 	private LoginHandler loginHandler;
+	private LoginDatabase loginDatabase;
+	private GameProfileDatabase gameProfileDatabase;
 
 	@Inject
 	public CasLogin(@DataDirectory Path pluginDir) {
@@ -71,9 +77,15 @@ public class CasLogin {
 		resetEntrypoints();
 		registerHandlers();
 		registerCommands();
+		registerDatabases();
 		hookLuckperms();
 		createLoginHandler();
 		logger.info("Plugin successfully loaded!");
+	}
+
+	private void registerDatabases() {
+		this.loginDatabase = new MemoryLoginDatabase();
+		this.gameProfileDatabase = new MemoryGameProfileDatabase();
 	}
 
 	private void createLoginHandler() {
@@ -123,5 +135,13 @@ public class CasLogin {
 
 	public static RegisteredServer getLoggedEntrypointServer() {
 		return loggedEntrypointServer;
+	}
+
+	public LoginDatabase getLoginDatabase() {
+		return loginDatabase;
+	}
+
+	public GameProfileDatabase getGameProfileDatabase() {
+		return gameProfileDatabase;
 	}
 }

@@ -1,7 +1,6 @@
 package fr.kumakuma215.proxyutils.commands;
 
 import com.mojang.brigadier.Command;
-import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -11,11 +10,10 @@ import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import fr.eirb.caslogin.manager.LoginManager;
+import fr.eirb.caslogin.role.LoginManager;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.jetbrains.annotations.Nullable;
 
-import java.lang.reflect.Proxy;
 import java.util.Collection;
 import java.util.function.Predicate;
 
