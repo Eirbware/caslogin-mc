@@ -15,6 +15,7 @@ import fr.eirb.caslogin.exceptions.login.AlreadyLoggingInException;
 import fr.eirb.caslogin.exceptions.login.CouldNotGenerateCSRFTokenException;
 import fr.eirb.caslogin.exceptions.login.NotLoggedInException;
 import fr.eirb.caslogin.configuration.ConfigurationManager;
+import fr.eirb.caslogin.utils.PlayerUtils;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.asynchttpclient.*;
 import org.jetbrains.annotations.NotNull;
@@ -47,14 +48,8 @@ class APILoginHandlerImpl implements LoginHandler {
 	}
 
 	private CompletableFuture<LoggedUser> getLoggedUserFromPlayerOrThrow(Player player) {
-		return CasLogin.get().getGameProfileDatabase()
-				.get(player)
-				.thenCompose(optionalGameProfile -> {
-					if (optionalGameProfile.isEmpty())
-						return CompletableFuture.failedFuture(new CompletionException(new NotLoggedInException(player)));
-					GameProfile profile = optionalGameProfile.get();
-					return CasLogin.get().getLoginDatabase().get(profile.getId());
-				})
+		return CasLogin.get().getLoginDatabase()
+				.get(PlayerUtils.getTrueIdentity(player).getId())
 				.thenCompose(optionalLoggedUser -> {
 					if (optionalLoggedUser.isEmpty())
 						return CompletableFuture.failedFuture(new CompletionException(new NotLoggedInException(player)));

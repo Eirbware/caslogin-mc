@@ -17,8 +17,6 @@ import fr.eirb.caslogin.login.LoginHandler;
 import fr.eirb.caslogin.configuration.ConfigurationManager;
 import fr.eirb.caslogin.login.LoginHandlerFactory;
 import fr.eirb.caslogin.login.MemoryLoginDatabase;
-import fr.eirb.caslogin.proxy.connection.GameProfileDatabase;
-import fr.eirb.caslogin.proxy.connection.MemoryGameProfileDatabase;
 import fr.eirb.caslogin.role.RoleManager;
 import fr.eirb.caslogin.role.impl.DummyRoleManager;
 import fr.eirb.caslogin.role.impl.LuckPermsRoleManager;
@@ -50,7 +48,6 @@ public class CasLogin {
 	private static RegisteredServer loggedEntrypointServer;
 	private LoginHandler loginHandler;
 	private LoginDatabase loginDatabase;
-	private GameProfileDatabase gameProfileDatabase;
 
 	@Inject
 	public CasLogin(@DataDirectory Path pluginDir) {
@@ -85,7 +82,6 @@ public class CasLogin {
 
 	private void registerDatabases() {
 		this.loginDatabase = new MemoryLoginDatabase();
-		this.gameProfileDatabase = new MemoryGameProfileDatabase();
 	}
 
 	private void createLoginHandler() {
@@ -139,9 +135,5 @@ public class CasLogin {
 
 	public LoginDatabase getLoginDatabase() {
 		return loginDatabase;
-	}
-
-	public GameProfileDatabase getGameProfileDatabase() {
-		return gameProfileDatabase;
 	}
 }
