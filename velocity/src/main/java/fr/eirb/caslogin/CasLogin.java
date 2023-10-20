@@ -20,6 +20,7 @@ import fr.eirb.caslogin.login.MemoryLoginDatabase;
 import fr.eirb.caslogin.role.RoleManager;
 import fr.eirb.caslogin.role.impl.DummyRoleManager;
 import fr.eirb.caslogin.role.impl.LuckPermsRoleManager;
+import fr.eirb.caslogin.utils.PlayerUtils;
 import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 
@@ -75,9 +76,14 @@ public class CasLogin {
 		registerHandlers();
 		registerCommands();
 		registerDatabases();
+		registerListeners();
 		hookLuckperms();
 		createLoginHandler();
 		logger.info("Plugin successfully loaded!");
+	}
+
+	private void registerListeners() {
+		proxy.getEventManager().register(this, new PlayerUtils());
 	}
 
 	private void registerDatabases() {

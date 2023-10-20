@@ -18,6 +18,7 @@ import fr.eirb.caslogin.configuration.ConfigurationManager;
 import fr.eirb.caslogin.exceptions.login.NotLoggedInException;
 import fr.eirb.caslogin.proxy.connection.Connector;
 import fr.eirb.caslogin.utils.PlayerUtils;
+import fr.eirb.caslogin.utils.ProxyUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 
@@ -30,12 +31,6 @@ public final class CasCommand {
 				.then(loginCommand(proxy))
 				.then(logoutCommand(proxy))
 				.then(configCommand())
-				.then(LiteralArgumentBuilder
-						.<CommandSource>literal("test")
-						.executes((ctx) -> {
-							System.out.println(CasLogin.getLoggedEntrypointServer().sendPluginMessage(CasLogin.CAS_FIX_CHANNEL, Charsets.UTF_8.encode("a").array()));
-							return Command.SINGLE_SUCCESS;
-						}))
 				.build();
 		return new BrigadierCommand(rootNode);
 	}
@@ -60,7 +55,7 @@ public final class CasCommand {
 				// Requires that the source is a player AND is on the Limbo server! Else no login!!!
 				.requires(CasCommand::isSourceAPlayerInLimbo)
 				.executes(context -> {
-					if(!(context instanceof Player player))
+					if(!(context.getSource() instanceof Player player))
 						return 0;
 					CasLogin.get().getLoginHandler()
 							.login(player)
@@ -99,6 +94,7 @@ public final class CasCommand {
 					try {
 						RegisteredServer entrypointServer = CasLogin.getEntrypointServer();
 						CasLogin.get().getLoginHandler().logout(player);
+						PlayerUtils.restoreGameProfile(player);
 						player.createConnectionRequest(entrypointServer).fireAndForget();
 					} catch (NotLoggedInException e) {
 						throw new RuntimeException(e);

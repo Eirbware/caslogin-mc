@@ -1,5 +1,6 @@
 package fr.eirb.caslogin.utils;
 
+import com.velocitypowered.api.event.PostOrder;
 import com.velocitypowered.api.event.Subscribe;
 import com.velocitypowered.api.event.connection.DisconnectEvent;
 import com.velocitypowered.api.event.connection.PostLoginEvent;
@@ -14,12 +15,12 @@ import java.util.HashMap;
 public final class PlayerUtils {
 	private static final HashMap<Player, GameProfile> playerToProfileMap = new HashMap<>();
 
-	@Subscribe
+	@Subscribe(order = PostOrder.FIRST)
 	public void onJoin(PostLoginEvent ev) {
 		playerToProfileMap.put(ev.getPlayer(), GameProfileUtils.cloneGameProfile(ev.getPlayer().getGameProfile()));
 	}
 
-	@Subscribe
+	@Subscribe(order = PostOrder.LAST)
 	public void onDisconnect(DisconnectEvent ev) {
 		Player p = ev.getPlayer();
 		restoreGameProfile(p);
@@ -31,7 +32,7 @@ public final class PlayerUtils {
 		return playerToProfileMap.get(player);
 	}
 
-	private void restoreGameProfile(Player player) {
+	public static void restoreGameProfile(Player player) {
 		GameProfileUtils.setToGameProfile(player.getGameProfile(), playerToProfileMap.get(player));
 	}
 

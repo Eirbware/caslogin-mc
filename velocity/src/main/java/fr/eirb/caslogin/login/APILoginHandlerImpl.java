@@ -44,6 +44,14 @@ class APILoginHandlerImpl implements LoginHandler {
 
 	@Override
 	public CompletableFuture<LoggedUser> login(Player player) {
+		try {
+			String loginUrl = ApiUtils.getLoginUrl(player);
+			String message = String.format(ConfigurationManager.getLang("user.login.url_message"), loginUrl, loginUrl);
+			player.sendMessage(MiniMessage.miniMessage().deserialize(message));
+		} catch (CouldNotGenerateCSRFTokenException e) {
+			player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.could_not_generate_csrf")));
+			return CompletableFuture.failedFuture(e);
+		}
 		return pollLogin(player, ConfigurationManager.getLoginPollTimeoutSeconds(), ConfigurationManager.getLoginPollIntervalMS());
 	}
 
@@ -61,9 +69,11 @@ class APILoginHandlerImpl implements LoginHandler {
 	@Override
 	public CompletableFuture<Void> logout(Player player) {
 		return getLoggedUserFromPlayerOrThrow(player)
-				.thenCompose((loggedUser -> CompletableFuture.runAsync(() -> {
+				.thenCompose((loggedUser -> CompletableFuture.supplyAsync(() -> {
+					PlayerUtils.restoreGameProfile(player);
 					try {
 						ApiUtils.logout(loggedUser);
+						return loggedUser;
 					} catch (APIException e) {
 						if (e.error == Errors.USER_NOT_LOGGED_IN) {
 							throw new CompletionException(new NotLoggedInException(player));
@@ -71,52 +81,51 @@ class APILoginHandlerImpl implements LoginHandler {
 							throw new IllegalStateException(e);
 						}
 					}
-				})));
+				})))
+				.thenCompose(loggedUser -> CasLogin.get().getLoginDatabase().remove(player.getUniqueId()));
 	}
 
-	private CompletableFuture<LoggedUser> pollLogin(Player player, int timeoutSeconds, long intervalSeconds) {
+	private CompletableFuture<LoggedUser> pollLogin(Player player, int timeoutSeconds, long intervalMS) {
+		long timeoutMs = timeoutSeconds * 1000L;
 		if (loggingPlayer.contains(player))
 			return CompletableFuture.failedFuture(new AlreadyLoggingInException());
 		return getLoggedUserFromPlayerOrThrow(player)
-				.exceptionallyCompose(throwable -> {
-					loggingPlayer.add(player);
-					CasLogin.get().getLogger().info(String.format("Starting logging poll for player '%s'", player.getUsername()));
-					return CompletableFuture.supplyAsync(() -> {
-								long counter = 0;
-								while (counter < timeoutSeconds) {
-									LoggedUser user;
-									try {
-										user = ApiUtils.getLoggedUser(player.getUniqueId());
-
-									} catch (APIException e) {
-										CasLogin.get().getLogger().severe("API EXCEPTION ON LOGIN POLL! Something is really wrong.");
-										loggingPlayer.remove(player);
-										throw new IllegalStateException(e);
-									}
-									if (user != null) {
-										return user;
-									}
-									try {
-										TimeUnit.SECONDS.sleep(intervalSeconds);
-									} catch (InterruptedException e) {
-										throw new IllegalStateException(e);
-									}
-									counter += intervalSeconds;
+				.exceptionallyCompose(throwable -> CompletableFuture.supplyAsync(() -> {
+							loggingPlayer.add(player);
+							CasLogin.get().getLogger().info(String.format("Starting logging poll for player '%s'", player.getUsername()));
+							long counter = 0;
+							while (counter < timeoutMs) {
+								LoggedUser user;
+								try {
+									user = ApiUtils.getLoggedUser(player.getUniqueId());
+								} catch (APIException e) {
+									CasLogin.get().getLogger().severe("API EXCEPTION ON LOGIN POLL! Something is really wrong.");
+									loggingPlayer.remove(player);
+									throw new IllegalStateException(e);
 								}
-								CasLogin.get().getLogger().info(String.format("Polling timed out for player '%s'", player.getUsername()));
-								loggingPlayer.remove(player);
-								player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("errors.login_timeout")));
-								return null;
-							})
-							.thenCompose(loggedUser -> CasLogin.get().getLoginDatabase()
-									.put(player.getUniqueId(), loggedUser)
-									.thenAccept(ignored -> {
-										CasLogin.get().getLogger().info(String.format("Player '%s' logged as '%s'.", player.getUsername(), loggedUser.getUser().getLogin()));
-										loggingPlayer.remove(player);
-									})
-									.thenApply(unused -> loggedUser)
-							);
-				});
+								if (user != null) {
+									return user;
+								}
+								try {
+									TimeUnit.MILLISECONDS.sleep(intervalMS);
+								} catch (InterruptedException e) {
+									throw new IllegalStateException(e);
+								}
+								counter += intervalMS;
+							}
+							CasLogin.get().getLogger().info(String.format("Polling timed out for player '%s'", player.getUsername()));
+							loggingPlayer.remove(player);
+							player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("errors.login_timeout")));
+							return null;
+						})
+						.thenCompose(loggedUser -> CasLogin.get().getLoginDatabase()
+								.put(player.getUniqueId(), loggedUser)
+								.thenAccept(ignored -> {
+									CasLogin.get().getLogger().info(String.format("Player '%s' logged as '%s'.", player.getUsername(), loggedUser.getUser().getLogin()));
+									loggingPlayer.remove(player);
+								})
+								.thenApply(unused -> loggedUser)
+						));
 	}
 
 	private static class ApiUtils {
