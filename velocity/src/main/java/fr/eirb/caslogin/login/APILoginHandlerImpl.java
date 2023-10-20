@@ -5,6 +5,7 @@ import com.google.common.collect.HashBiMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.util.GameProfile;
 import fr.eirb.caslogin.CasLogin;
 import fr.eirb.caslogin.api.body.*;
 import fr.eirb.caslogin.api.model.LoggedUser;
@@ -26,39 +27,63 @@ class APILoginHandlerImpl implements LoginHandler {
 	private static final Set<Player> loggingPlayer = Collections.synchronizedSet(new HashSet<>());
 
 	@Override
+	public CompletableFuture<List<LoggedUser>> getLoggedUsers() {
+		return CompletableFuture.supplyAsync(() -> {
+			try {
+				List<LoggedUser> users = ApiUtils.getLoggedUsers();
+				for (LoggedUser user : users) {
+					CasLogin.get().getLoginDatabase().put(user.getUuid(), user);
+				}
+				return users;
+			} catch (APIException e) {
+				throw new IllegalStateException(e);
+			}
+		});
+	}
+
+	@Override
 	public CompletableFuture<LoggedUser> login(Player player) {
 		return pollLogin(player, ConfigurationManager.getLoginPollTimeoutSeconds(), ConfigurationManager.getLoginPollIntervalMS());
 	}
 
-	@Override
-	public CompletableFuture<Void> logout(Player player) {
-		return CasLogin.get().getLoginDatabase()
+	private CompletableFuture<LoggedUser> getLoggedUserFromPlayerOrThrow(Player player) {
+		return CasLogin.get().getGameProfileDatabase()
 				.get(player)
+				.thenCompose(optionalGameProfile -> {
+					if (optionalGameProfile.isEmpty())
+						return CompletableFuture.failedFuture(new CompletionException(new NotLoggedInException(player)));
+					GameProfile profile = optionalGameProfile.get();
+					return CasLogin.get().getLoginDatabase().get(profile.getId());
+				})
 				.thenCompose(optionalLoggedUser -> {
 					if (optionalLoggedUser.isEmpty())
-						return CompletableFuture.failedFuture(new NotLoggedInException(player));
+						return CompletableFuture.failedFuture(new CompletionException(new NotLoggedInException(player)));
 					LoggedUser loggedUser = optionalLoggedUser.get();
-					return CompletableFuture.runAsync(() -> {
-						try {
-							ApiUtils.logout(loggedUser);
-						} catch (APIException e) {
-							if (e.error == Errors.USER_NOT_LOGGED_IN) {
-								throw new CompletionException(new NotLoggedInException(player));
-							} else {
-								throw new IllegalStateException(e);
-							}
-						}
-					});
+					return CompletableFuture.completedFuture(loggedUser);
 				});
+	}
+
+	@Override
+	public CompletableFuture<Void> logout(Player player) {
+		return getLoggedUserFromPlayerOrThrow(player)
+				.thenCompose((loggedUser -> CompletableFuture.runAsync(() -> {
+					try {
+						ApiUtils.logout(loggedUser);
+					} catch (APIException e) {
+						if (e.error == Errors.USER_NOT_LOGGED_IN) {
+							throw new CompletionException(new NotLoggedInException(player));
+						} else {
+							throw new IllegalStateException(e);
+						}
+					}
+				})));
 	}
 
 	private CompletableFuture<LoggedUser> pollLogin(Player player, int timeoutSeconds, long intervalSeconds) {
 		if (loggingPlayer.contains(player))
 			return CompletableFuture.failedFuture(new AlreadyLoggingInException());
-		return CasLogin.get().getLoginDatabase().get(player)
-				.thenCompose(optionalLoggedUser -> {
-					if (optionalLoggedUser.isPresent())
-						return CompletableFuture.completedFuture(optionalLoggedUser.get());
+		return getLoggedUserFromPlayerOrThrow(player)
+				.exceptionallyCompose(throwable -> {
 					loggingPlayer.add(player);
 					CasLogin.get().getLogger().info(String.format("Starting logging poll for player '%s'", player.getUsername()));
 					return CompletableFuture.supplyAsync(() -> {
@@ -88,12 +113,13 @@ class APILoginHandlerImpl implements LoginHandler {
 								player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("errors.login_timeout")));
 								return null;
 							})
-							.thenCompose(loggedUser -> CasLogin.get().getLoginDatabase().put(player, loggedUser)
+							.thenCompose(loggedUser -> CasLogin.get().getLoginDatabase()
+									.put(player.getUniqueId(), loggedUser)
 									.thenAccept(ignored -> {
 										CasLogin.get().getLogger().info(String.format("Player '%s' logged as '%s'.", player.getUsername(), loggedUser.getUser().getLogin()));
 										loggingPlayer.remove(player);
 									})
-									.thenCompose(ignored -> CompletableFuture.completedFuture(loggedUser))
+									.thenApply(unused -> loggedUser)
 							);
 				});
 	}
