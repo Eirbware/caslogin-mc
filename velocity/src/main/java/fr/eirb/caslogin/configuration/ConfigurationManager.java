@@ -29,6 +29,7 @@ public class ConfigurationManager {
 		pluginConfig = ConfigurationUtils.getOrCreateConfigurationFile(dataFolder, "config.yml");
 		langConfig = ConfigurationUtils.getOrCreateConfigurationFile(dataFolder, "lang.yml");
 		CasLogin.resetEntrypoints();
+
 	}
 
 	public static String getLang(String path){

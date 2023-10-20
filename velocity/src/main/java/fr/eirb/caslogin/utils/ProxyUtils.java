@@ -7,30 +7,32 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 public final class ProxyUtils {
-
-	private static final Class<?> velocityClass;
-	private static final Class<?> connectedPlayerClass;
-	private static final Method unregisterConnectionMethod;
+	private static Class<?> velocityClass = null;
+	private static Class<?> connectedPlayerClass = null;
+	private static Method unregisterConnectionMethod = null;
 
 	public static void unregisterConnection(ProxyServer server, Player player) {
+		if (velocityClass == null)
+			velocityClass = server.getClass();
+
+		if (connectedPlayerClass == null)
+			connectedPlayerClass = player.getClass();
+
+		if (unregisterConnectionMethod == null) {
+			try {
+				unregisterConnectionMethod = velocityClass.getDeclaredMethod("unregisterConnection", connectedPlayerClass);
+			} catch (NoSuchMethodException e) {
+				throw new RuntimeException(e);
+			}
+		}
+
 		unregisterConnectionMethod.setAccessible(true);
 		try {
 			unregisterConnectionMethod.invoke(server, connectedPlayerClass.cast(player));
 		} catch (IllegalAccessException | InvocationTargetException e) {
 			throw new RuntimeException(e);
-		}finally {
+		} finally {
 			unregisterConnectionMethod.setAccessible(false);
-		}
-	}
-
-	static {
-
-		try {
-			velocityClass = Class.forName("com.velocitypowered.proxy.VelocityServer");
-			connectedPlayerClass = Class.forName("com.velocitypowered.proxy.connection.client.ConnectedPlayer");
-			unregisterConnectionMethod = velocityClass.getDeclaredMethod("unregisterConnection", connectedPlayerClass);
-		} catch (ClassNotFoundException | NoSuchMethodException e) {
-			throw new RuntimeException(e);
 		}
 	}
 }
