@@ -10,6 +10,7 @@ import com.velocitypowered.api.util.GameProfile;
 import fr.eirb.caslogin.CasLogin;
 import fr.eirb.caslogin.api.model.LoggedUser;
 import fr.eirb.caslogin.configuration.ConfigurationManager;
+import fr.eirb.caslogin.events.LoginEvent;
 import fr.eirb.caslogin.proxy.connection.Connector;
 import io.netty.handler.proxy.ProxyConnectionEvent;
 import net.kyori.adventure.text.Component;
@@ -36,20 +37,25 @@ public final class PlayerUtils {
 
 	public static Consumer<LoggedUser> logPlayer(Player player) {
 		return (loggedUser) -> {
-			Component message = MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.login.success"));
-			player.sendMessage(message);
-			Connector.get(player).to(CasLogin.getLoggedEntrypointServer()).as(loggedUser)
-					.connect()
-					.whenComplete((result, throwable) -> {
-						if (throwable != null || !result.isSuccessful()) {
-							Component disconnectMessage = result.getReasonComponent().isEmpty()
-									? MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_disconnected_no_reason"))
-									: MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_disconnected"));
-							if (result.getReasonComponent().isPresent())
-								disconnectMessage = disconnectMessage.append(result.getReasonComponent().get());
-							player.sendMessage(disconnectMessage);
-						}
+			CasLogin.get().getProxy().getEventManager()
+					.fire(new LoginEvent(player, loggedUser))
+					.thenAccept(loginEvent -> {
+						Component message = MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.login.success"));
+						player.sendMessage(message);
+						Connector.get(player).to(loginEvent.getServer()).as(loggedUser)
+								.connect()
+								.whenComplete((result, throwable) -> {
+									if (throwable != null || !result.isSuccessful()) {
+										Component disconnectMessage = result.getReasonComponent().isEmpty()
+												? MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_disconnected_no_reason"))
+												: MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_disconnected"));
+										if (result.getReasonComponent().isPresent())
+											disconnectMessage = disconnectMessage.append(result.getReasonComponent().get());
+										player.sendMessage(disconnectMessage);
+									}
+								});
 					});
+
 		};
 	}
 

@@ -11,7 +11,7 @@ import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import fr.eirb.caslogin.commands.CasCommand;
-import fr.eirb.caslogin.listeners.GameProfileChangerListener;
+import fr.eirb.caslogin.listeners.AutoLoginListener;
 import fr.eirb.caslogin.login.LoginDatabase;
 import fr.eirb.caslogin.login.LoginHandler;
 import fr.eirb.caslogin.configuration.ConfigurationManager;
@@ -97,7 +97,7 @@ public class CasLogin {
 	}
 
 	private void registerHandlers() {
-		proxy.getEventManager().register(this, new GameProfileChangerListener());
+		proxy.getEventManager().register(this, new AutoLoginListener());
 	}
 
 	public static void resetEntrypoints() {

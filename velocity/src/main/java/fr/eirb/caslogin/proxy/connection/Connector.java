@@ -5,15 +5,16 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import com.velocitypowered.api.util.GameProfile;
 import fr.eirb.caslogin.api.model.LoggedUser;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 
 public interface Connector {
-	Connector to(RegisteredServer server);
+	Connector to(@NotNull  RegisteredServer server);
 	Connector as(LoggedUser newProfile);
 	CompletableFuture<ConnectionRequestBuilder.Result> connect();
 
-	public static Connector get(Player p){
+	static Connector get(Player p){
 		return new ConnectorImpl(p);
 	}
 }

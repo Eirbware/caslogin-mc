@@ -3,14 +3,14 @@ package fr.eirb.caslogin.proxy.connection;
 import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import com.velocitypowered.api.util.GameProfile;
 import fr.eirb.caslogin.CasLogin;
 import fr.eirb.caslogin.api.model.LoggedUser;
 import fr.eirb.caslogin.configuration.ConfigurationManager;
-import fr.eirb.caslogin.events.PostLoginEvent;
+import fr.eirb.caslogin.events.LoginEvent;
 import fr.eirb.caslogin.utils.GameProfileUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
@@ -25,7 +25,7 @@ class ConnectorImpl implements Connector {
 	}
 
 	@Override
-	public Connector to(RegisteredServer server) {
+	public Connector to(@NotNull RegisteredServer server) {
 		this.server = server;
 		return this;
 	}
@@ -40,14 +40,12 @@ class ConnectorImpl implements Connector {
 	public CompletableFuture<ConnectionRequestBuilder.Result> connect() {
 		if(server == null)
 			return CompletableFuture.failedFuture(new IllegalArgumentException("No server specified"));
-//		GameProfile oldGameProfile = GameProfileUtils.cloneGameProfile(player.getGameProfile());
 		if (identity != null) {
 			GameProfileUtils.setToGameProfile(player.getGameProfile(), identity.getFakeGameProfile());
 		}
 		return player.createConnectionRequest(server)
 				.connect()
 				.handle((result, throwable) -> {
-//					GameProfileUtils.setToGameProfile(player.getGameProfile(), oldGameProfile);
 					if(throwable != null){
 						player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_disconnected_no_reason")));
 						return new ConnectionRequestBuilder.Result() {
@@ -73,7 +71,7 @@ class ConnectorImpl implements Connector {
 					if(throwable != null || !result.isSuccessful())
 						return;
 					if(this.identity != null)
-						CasLogin.get().getProxy().getEventManager().fire(new PostLoginEvent(player, this.identity));
+						CasLogin.get().getProxy().getEventManager().fire(new LoginEvent(player, this.identity));
 				});
 	}
 }
