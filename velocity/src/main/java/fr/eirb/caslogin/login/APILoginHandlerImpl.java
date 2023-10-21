@@ -1,11 +1,8 @@
 package fr.eirb.caslogin.login;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.velocitypowered.api.proxy.Player;
-import com.velocitypowered.api.util.GameProfile;
 import fr.eirb.caslogin.CasLogin;
 import fr.eirb.caslogin.api.body.*;
 import fr.eirb.caslogin.api.model.LoggedUser;
@@ -13,12 +10,12 @@ import fr.eirb.caslogin.exceptions.api.APIException;
 import fr.eirb.caslogin.exceptions.api.Errors;
 import fr.eirb.caslogin.exceptions.login.AlreadyLoggingInException;
 import fr.eirb.caslogin.exceptions.login.CouldNotGenerateCSRFTokenException;
+import fr.eirb.caslogin.exceptions.login.LoginTimeoutException;
 import fr.eirb.caslogin.exceptions.login.NotLoggedInException;
 import fr.eirb.caslogin.configuration.ConfigurationManager;
 import fr.eirb.caslogin.utils.PlayerUtils;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.asynchttpclient.*;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.*;
@@ -116,7 +113,7 @@ class APILoginHandlerImpl implements LoginHandler {
 							CasLogin.get().getLogger().info(String.format("Polling timed out for player '%s'", player.getUsername()));
 							loggingPlayer.remove(player);
 							player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("errors.login_timeout")));
-							return null;
+							throw new CompletionException(new LoginTimeoutException(timeoutSeconds));
 						})
 						.thenCompose(loggedUser -> CasLogin.get().getLoginDatabase()
 								.put(player.getUniqueId(), loggedUser)

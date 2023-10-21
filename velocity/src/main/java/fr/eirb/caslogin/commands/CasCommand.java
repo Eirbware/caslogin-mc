@@ -60,24 +60,7 @@ public final class CasCommand {
 						return 0;
 					CasLogin.get().getLoginHandler()
 							.login(player)
-							.thenAccept(loggedUser -> {
-								Component message = MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.login.success"));
-								player.sendMessage(message);
-								Connector.get(player).to(CasLogin.getLoggedEntrypointServer()).as(loggedUser)
-										.connect()
-										.whenComplete((result, throwable) -> {
-											if(throwable != null || !result.isSuccessful()){
-												Component disconnectMessage = result.getReasonComponent().isEmpty()
-														? MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_disconnected_no_reason"))
-														: MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_disconnected"));
-												if(result.getReasonComponent().isPresent())
-													disconnectMessage = disconnectMessage.append(result.getReasonComponent().get());
-												player.sendMessage(disconnectMessage);
-												return;
-											}
-
-										});
-							});
+							.thenAccept(PlayerUtils.logPlayer(player));
 					return Command.SINGLE_SUCCESS;
 				});
 	}
