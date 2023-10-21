@@ -30,8 +30,8 @@ public final class PlayerUtils {
 	@Subscribe(order = PostOrder.LAST)
 	public void onDisconnect(DisconnectEvent ev) {
 		Player p = ev.getPlayer();
-		restoreGameProfile(p);
-		ProxyUtils.unregisterConnection(CasLogin.get().getProxy(), p);
+//		restoreGameProfile(p);
+//		ProxyUtils.unregisterConnection(CasLogin.get().getProxy(), p);
 		playerToProfileMap.remove(p);
 	}
 

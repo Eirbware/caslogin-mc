@@ -2,6 +2,7 @@ package fr.eirb.caslogin.utils;
 
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
+import com.velocitypowered.api.util.GameProfile;
 import fr.eirb.caslogin.api.model.LoggedUser;
 
 import java.lang.invoke.MethodHandle;
@@ -17,7 +18,6 @@ import java.util.UUID;
 public final class ProxyUtils {
 	private static Class<?> velocityClass = null;
 	private static Class<?> connectedPlayerClass = null;
-	private static Method unregisterConnectionMethod = null;
 	private static Field connectionsByNameField = null;
 	private static Field connectionsByUuidField = null;
 
@@ -68,39 +68,20 @@ public final class ProxyUtils {
 		return ret;
 	}
 
-	public static void unregisterConnection(ProxyServer server, Player player) {
-		initVelocityClass(server);
-		initConnectedPlayerClass(player);
-		initUnregisterConnectionMethod();
-
-		unregisterConnectionMethod.setAccessible(true);
-		try {
-			unregisterConnectionMethod.invoke(server, connectedPlayerClass.cast(player));
-		} catch (IllegalAccessException | InvocationTargetException e) {
-			throw new RuntimeException(e);
-		} finally {
-			unregisterConnectionMethod.setAccessible(false);
-		}
-	}
-
-	private static void initUnregisterConnectionMethod() {
-		if (unregisterConnectionMethod == null && velocityClass != null && connectedPlayerClass != null) {
-			try {
-				unregisterConnectionMethod = velocityClass.getDeclaredMethod("unregisterConnection", connectedPlayerClass);
-			} catch (NoSuchMethodException e) {
-				throw new RuntimeException(e);
-			}
-		}
-	}
-
 	public static void addLoggedUserToProxy(ProxyServer server, Player player, LoggedUser user) {
 		initVelocityClass(server);
 		initConnectedPlayerClass(player);
 		initConnectionsFields();
 
 		Object connectedPlayer = connectedPlayerClass.cast(player);
-		getConnectionsByUuid(server).put(user.getFakeUserUUID(), connectedPlayer);
-		getConnectionsByName(server).put(user.getUser().getLogin(), connectedPlayer);
+		GameProfile trueIdentity = PlayerUtils.getTrueIdentity(player);
+		var connectionsByUuid = getConnectionsByUuid(server);
+		var connectionsByName = getConnectionsByName(server);
+
+		connectionsByUuid.remove(trueIdentity.getId());
+		connectionsByName.remove(trueIdentity.getName());
+		connectionsByUuid.put(user.getFakeUserUUID(), connectedPlayer);
+		connectionsByName.put(user.getUser().getLogin(), connectedPlayer);
 	}
 
 	public static void removeLoggedUserFromProxy(ProxyServer server, Player player, LoggedUser user) {
@@ -109,7 +90,13 @@ public final class ProxyUtils {
 		initConnectionsFields();
 
 		Object connectedPlayer = connectedPlayerClass.cast(player);
-		getConnectionsByUuid(server).remove(user.getFakeUserUUID(), connectedPlayer);
-		getConnectionsByName(server).remove(user.getUser().getLogin(), connectedPlayer);
+		GameProfile trueIdentity = PlayerUtils.getTrueIdentity(player);
+		var connectionsByUuid = getConnectionsByUuid(server);
+		var connectionsByName = getConnectionsByName(server);
+
+		connectionsByUuid.put(trueIdentity.getId(), connectedPlayer);
+		connectionsByName.put(trueIdentity.getName(), connectedPlayer);
+		connectionsByUuid.remove(user.getFakeUserUUID());
+		connectionsByName.remove(user.getUser().getLogin());
 	}
 }

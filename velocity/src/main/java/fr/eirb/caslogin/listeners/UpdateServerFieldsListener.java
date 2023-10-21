@@ -20,18 +20,4 @@ public class UpdateServerFieldsListener {
 	public void onLogout(LogoutEvent ev){
 		ProxyUtils.removeLoggedUserFromProxy(CasLogin.get().getProxy(), ev.player(), ev.loggedUser());
 	}
-
-	@Subscribe
-	public void onDisconnect(DisconnectEvent ev){
-		Player player = ev.getPlayer();
-		CasLogin.get().getLoginDatabase()
-				.get(PlayerUtils.getTrueIdentity(player).getId())
-				.thenAccept(optionalLoggedUser -> {
-					if(optionalLoggedUser.isEmpty())
-						return;
-					LoggedUser loggedUser = optionalLoggedUser.get();
-					ProxyUtils.removeLoggedUserFromProxy(CasLogin.get().getProxy(), player, loggedUser);
-				})
-				.join();
-	}
 }
