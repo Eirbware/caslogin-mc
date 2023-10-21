@@ -13,9 +13,9 @@ public class AutoLoginListener {
 	public void onJoinLimbo(ServerPostConnectEvent ev) {
 		Player p = ev.getPlayer();
 		p.getCurrentServer().ifPresent(serverConnection -> {
-			if (serverConnection.getServer() == CasLogin.getEntrypointServer()) {
+			if (serverConnection.getServer().getServerInfo().equals(CasLogin.getEntrypointServer().getServerInfo())) {
 				CasLogin.get().getLoginDatabase()
-						.get(p.getUniqueId())
+						.get(PlayerUtils.getTrueIdentity(p).getId())
 						.thenAccept(optionalLoggedUser -> {
 							optionalLoggedUser.ifPresent(PlayerUtils.logPlayer(p));
 						});

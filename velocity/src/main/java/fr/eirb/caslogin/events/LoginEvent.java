@@ -22,15 +22,15 @@ public class LoginEvent {
 		this.server = CasLogin.getLoggedEntrypointServer();
 	}
 
-	public LoggedUser getLoggedUser() {
+	public LoggedUser loggedUser() {
 		return loggedUser;
 	}
 
-	public Player getPlayer() {
+	public Player player() {
 		return player;
 	}
 
-	public @NotNull RegisteredServer getServer() {
+	public @NotNull RegisteredServer server() {
 		return server;
 	}
 

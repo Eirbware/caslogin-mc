@@ -14,6 +14,7 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import fr.eirb.caslogin.commands.CasCommand;
 import fr.eirb.caslogin.listeners.AutoLoginListener;
 import fr.eirb.caslogin.listeners.RoleUpdaterListener;
+import fr.eirb.caslogin.listeners.UpdateServerFieldsListener;
 import fr.eirb.caslogin.login.LoginDatabase;
 import fr.eirb.caslogin.login.LoginHandler;
 import fr.eirb.caslogin.configuration.ConfigurationManager;
@@ -77,7 +78,6 @@ public class CasLogin {
 		INSTANCE = this;
 		ConfigurationManager.loadConfig(pluginDir);
 		resetEntrypoints();
-		registerHandlers();
 		registerCommands();
 		registerDatabases();
 		registerListeners();
@@ -90,6 +90,9 @@ public class CasLogin {
 
 	private void registerListeners() {
 		proxy.getEventManager().register(this, new PlayerUtils());
+		proxy.getEventManager().register(this, new AutoLoginListener());
+		proxy.getEventManager().register(this, new RoleUpdaterListener());
+		proxy.getEventManager().register(this, new UpdateServerFieldsListener());
 	}
 
 	private void registerDatabases() {
@@ -100,11 +103,6 @@ public class CasLogin {
 		loginHandler = switch(ConfigurationManager.getLoginHandlerType()){
 			case API -> LoginHandlerFactory.getAPILoginHandler();
 		};
-	}
-
-	private void registerHandlers() {
-		proxy.getEventManager().register(this, new AutoLoginListener());
-		proxy.getEventManager().register(this, new RoleUpdaterListener());
 	}
 
 	public static void resetEntrypoints() {

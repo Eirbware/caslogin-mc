@@ -42,7 +42,7 @@ public final class PlayerUtils {
 					.thenAccept(loginEvent -> {
 						Component message = MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.login.success"));
 						player.sendMessage(message);
-						Connector.get(player).to(loginEvent.getServer()).as(loggedUser)
+						Connector.get(player).to(loginEvent.server()).as(loggedUser)
 								.connect()
 								.whenComplete((result, throwable) -> {
 									if (throwable != null || !result.isSuccessful()) {

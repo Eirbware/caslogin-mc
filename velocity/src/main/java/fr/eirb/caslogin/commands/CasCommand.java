@@ -32,6 +32,12 @@ public final class CasCommand {
 				.then(loginCommand(proxy))
 				.then(logoutCommand(proxy))
 				.then(configCommand())
+				.then(LiteralArgumentBuilder.
+						<CommandSource>literal("test")
+						.executes(context -> {
+							System.out.println(proxy.getPlayer("skhalifa"));
+							return 1;
+						}))
 				.build();
 		return new BrigadierCommand(rootNode);
 	}
@@ -81,7 +87,7 @@ public final class CasCommand {
 					CasLogin.get().getLoginHandler()
 							.logout(player)
 							.thenAccept(loggedUser -> {
-								proxy.getEventManager().fire(new LogoutEvent(loggedUser));
+								proxy.getEventManager().fire(new LogoutEvent(player, loggedUser));
 								PlayerUtils.restoreGameProfile(player);
 								player.createConnectionRequest(entrypointServer).fireAndForget();
 							});

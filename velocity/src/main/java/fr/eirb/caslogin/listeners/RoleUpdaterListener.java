@@ -8,11 +8,11 @@ import fr.eirb.caslogin.events.LogoutEvent;
 public class RoleUpdaterListener {
 	@Subscribe
 	public void onLogin(LoginEvent ev){
-		CasLogin.get().getRoleManager().updateUserRoles(ev.getLoggedUser());
+		CasLogin.get().getRoleManager().updateUserRoles(ev.loggedUser());
 	}
 
 	@Subscribe
 	public void onLogout(LogoutEvent ev){
-		CasLogin.get().getRoleManager().removeUserRoles(ev.getLoggedUser());
+		CasLogin.get().getRoleManager().removeUserRoles(ev.loggedUser());
 	}
 }
