@@ -20,7 +20,7 @@ public class LuckPermsRoleManager implements RoleManager {
 		this.api = api;
 	}
 
-	// THIS IS BLOCKING! SHOULD NOT BE USED OUTSIDE OF ALREADY ASYNC CALLBACK
+	// THIS IS BLOCKING! SHOULD NOT BE USED OUTSIDE ALREADY ASYNC CALLBACK
 	private List<Group> getRolesAsGroupsOfUser(LoggedUser loggedUser) {
 		return Arrays.stream(loggedUser.getUser().getRoles())
 				.map(role -> role.getGroup(api))

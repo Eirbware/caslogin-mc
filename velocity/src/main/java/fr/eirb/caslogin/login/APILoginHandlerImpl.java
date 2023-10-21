@@ -64,7 +64,7 @@ class APILoginHandlerImpl implements LoginHandler {
 	}
 
 	@Override
-	public CompletableFuture<Void> logout(Player player) {
+	public CompletableFuture<LoggedUser> logout(Player player) {
 		return getLoggedUserFromPlayerOrThrow(player)
 				.thenCompose((loggedUser -> CompletableFuture.supplyAsync(() -> {
 					PlayerUtils.restoreGameProfile(player);
@@ -79,7 +79,10 @@ class APILoginHandlerImpl implements LoginHandler {
 						}
 					}
 				})))
-				.thenCompose(loggedUser -> CasLogin.get().getLoginDatabase().remove(player.getUniqueId()));
+				.thenApply(loggedUser -> {
+					CasLogin.get().getLoginDatabase().remove(player.getUniqueId());
+					return loggedUser;
+				});
 	}
 
 	private CompletableFuture<LoggedUser> pollLogin(Player player, int timeoutSeconds, long intervalMS) {

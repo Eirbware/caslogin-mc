@@ -15,6 +15,7 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import fr.eirb.caslogin.CasLogin;
 import fr.eirb.caslogin.api.model.LoggedUser;
 import fr.eirb.caslogin.configuration.ConfigurationManager;
+import fr.eirb.caslogin.events.LogoutEvent;
 import fr.eirb.caslogin.exceptions.login.NotLoggedInException;
 import fr.eirb.caslogin.proxy.connection.Connector;
 import fr.eirb.caslogin.utils.PlayerUtils;
@@ -56,7 +57,7 @@ public final class CasCommand {
 				// Requires that the source is a player AND is on the Limbo server! Else no login!!!
 				.requires(CasCommand::isSourceAPlayerInLimbo)
 				.executes(context -> {
-					if(!(context.getSource() instanceof Player player))
+					if (!(context.getSource() instanceof Player player))
 						return 0;
 					CasLogin.get().getLoginHandler()
 							.login(player)
@@ -76,14 +77,15 @@ public final class CasCommand {
 								.deserialize("<red>Console cannot use this command without arguments</red>"));
 						return 0;
 					}
-					try {
-						RegisteredServer entrypointServer = CasLogin.getEntrypointServer();
-						CasLogin.get().getLoginHandler().logout(player);
-						PlayerUtils.restoreGameProfile(player);
-						player.createConnectionRequest(entrypointServer).fireAndForget();
-					} catch (NotLoggedInException e) {
-						throw new RuntimeException(e);
-					}
+					RegisteredServer entrypointServer = CasLogin.getEntrypointServer();
+					CasLogin.get().getLoginHandler()
+							.logout(player)
+							.thenAccept(loggedUser -> {
+								proxy.getEventManager().fire(new LogoutEvent(loggedUser));
+								PlayerUtils.restoreGameProfile(player);
+								player.createConnectionRequest(entrypointServer).fireAndForget();
+							});
+
 					return Command.SINGLE_SUCCESS;
 				})
 				.then(logoutPlayerAdminCommand(proxy));

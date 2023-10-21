@@ -17,5 +17,11 @@ public interface LoginHandler {
 	 * @return A completable future that will either fail, or returns the LoggedUser
 	 */
 	CompletableFuture<LoggedUser> login(Player player);
-	CompletableFuture<Void> logout(Player player) throws NotLoggedInException;
+
+	/**
+	 *
+	 * @param player
+	 * @return A completable future that has the logged out player
+	 */
+	CompletableFuture<LoggedUser> logout(Player player);
 }

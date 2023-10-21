@@ -6,12 +6,14 @@ import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Dependency;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
+import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
 import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import fr.eirb.caslogin.commands.CasCommand;
 import fr.eirb.caslogin.listeners.AutoLoginListener;
+import fr.eirb.caslogin.listeners.RoleUpdaterListener;
 import fr.eirb.caslogin.login.LoginDatabase;
 import fr.eirb.caslogin.login.LoginHandler;
 import fr.eirb.caslogin.configuration.ConfigurationManager;
@@ -25,6 +27,8 @@ import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 
 import java.nio.file.Path;
+import java.util.Collection;
+import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 @Plugin(
@@ -79,6 +83,8 @@ public class CasLogin {
 		registerListeners();
 		hookLuckperms();
 		createLoginHandler();
+		// Load cache
+		loginHandler.getLoggedUsers();
 		logger.info("Plugin successfully loaded!");
 	}
 
@@ -98,6 +104,7 @@ public class CasLogin {
 
 	private void registerHandlers() {
 		proxy.getEventManager().register(this, new AutoLoginListener());
+		proxy.getEventManager().register(this, new RoleUpdaterListener());
 	}
 
 	public static void resetEntrypoints() {
