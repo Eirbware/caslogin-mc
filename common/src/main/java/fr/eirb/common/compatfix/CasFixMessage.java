@@ -1,5 +1,7 @@
 package fr.eirb.common.compatfix;
 
+import java.io.Serializable;
+import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
 public class CasFixMessage {
@@ -34,5 +36,9 @@ public class CasFixMessage {
 		return String.format(FORMAT,
 				trueUUID.toString(),
 				falseUUID.toString());
+	}
+
+	public byte[] toByteArray(){
+		return StandardCharsets.UTF_8.encode(this.toString()).array();
 	}
 }

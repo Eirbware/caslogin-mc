@@ -14,6 +14,7 @@ import com.velocitypowered.api.proxy.server.RegisteredServer;
 import fr.eirb.caslogin.commands.CasCommand;
 import fr.eirb.caslogin.listeners.AutoLoginListener;
 import fr.eirb.caslogin.listeners.RoleUpdaterListener;
+import fr.eirb.caslogin.listeners.SendMessageForFixesListener;
 import fr.eirb.caslogin.listeners.UpdateServerFieldsListener;
 import fr.eirb.caslogin.login.LoginDatabase;
 import fr.eirb.caslogin.login.LoginHandler;
@@ -42,7 +43,6 @@ import java.util.logging.Logger;
 )
 public class CasLogin {
 
-	public static final ChannelIdentifier CAS_FIX_CHANNEL = MinecraftChannelIdentifier.from(fr.eirb.common.compatfix.Constants.CAS_FIX_CHANNEL);
 	private static CasLogin INSTANCE;
 	private final Path pluginDir;
 	@Inject
@@ -93,6 +93,7 @@ public class CasLogin {
 		proxy.getEventManager().register(this, new AutoLoginListener());
 		proxy.getEventManager().register(this, new RoleUpdaterListener());
 		proxy.getEventManager().register(this, new UpdateServerFieldsListener());
+		proxy.getEventManager().register(this, new SendMessageForFixesListener());
 	}
 
 	private void registerDatabases() {

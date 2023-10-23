@@ -38,7 +38,7 @@ class ConnectorImpl implements Connector {
 
 	@Override
 	public CompletableFuture<ConnectionRequestBuilder.Result> connect() {
-		if(server == null)
+		if (server == null)
 			return CompletableFuture.failedFuture(new IllegalArgumentException("No server specified"));
 		if (identity != null) {
 			GameProfileUtils.setToGameProfile(player.getGameProfile(), identity.getFakeGameProfile());
@@ -46,8 +46,13 @@ class ConnectorImpl implements Connector {
 		return player.createConnectionRequest(server)
 				.connect()
 				.handle((result, throwable) -> {
-					if(throwable != null){
-						player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_disconnected_no_reason")));
+					if (throwable != null) {
+						if (result != null && result.getReasonComponent().isPresent())
+							player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_disconnected"))
+									.append(result.getReasonComponent().get()));
+						else if (result != null && result.getReasonComponent().isEmpty()) {
+							player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_disconnected_no_reason")));
+						}
 						return new ConnectionRequestBuilder.Result() {
 							@Override
 							public ConnectionRequestBuilder.Status getStatus() {
@@ -68,9 +73,9 @@ class ConnectorImpl implements Connector {
 					return result;
 				})
 				.whenComplete((result, throwable) -> {
-					if(throwable != null || !result.isSuccessful())
+					if (throwable != null || !result.isSuccessful())
 						return;
-					if(this.identity != null)
+					if (this.identity != null)
 						CasLogin.get().getProxy().getEventManager().fire(new LoginEvent(player, this.identity));
 				});
 	}
