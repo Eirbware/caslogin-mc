@@ -1,5 +1,6 @@
 package fr.eirb.caslogin.commands;
 
+import com.google.common.base.Charsets;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
@@ -12,17 +13,16 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import fr.eirb.caslogin.CasLogin;
-import fr.eirb.caslogin.api.LoggedUser;
-import fr.eirb.caslogin.exceptions.login.*;
-import fr.eirb.caslogin.manager.ConfigurationManager;
-import fr.eirb.caslogin.manager.LoginManager;
-import fr.eirb.caslogin.utils.ApiUtils;
+import fr.eirb.caslogin.api.model.LoggedUser;
+import fr.eirb.caslogin.configuration.ConfigurationManager;
+import fr.eirb.caslogin.events.LogoutEvent;
+import fr.eirb.caslogin.exceptions.login.NotLoggedInException;
+import fr.eirb.caslogin.proxy.connection.Connector;
 import fr.eirb.caslogin.utils.PlayerUtils;
+import fr.eirb.caslogin.utils.ProxyUtils;
+import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 
-import java.util.Optional;
-import java.util.UUID;
 import java.util.function.Consumer;
 
 public final class CasCommand {
@@ -32,6 +32,12 @@ public final class CasCommand {
 				.then(loginCommand(proxy))
 				.then(logoutCommand(proxy))
 				.then(configCommand())
+				.then(LiteralArgumentBuilder.
+						<CommandSource>literal("test")
+						.executes(context -> {
+							System.out.println(proxy.getPlayer("skhalifa"));
+							return 1;
+						}))
 				.build();
 		return new BrigadierCommand(rootNode);
 	}
@@ -44,6 +50,7 @@ public final class CasCommand {
 						.requires(source -> source.hasPermission("cas.config.reload"))
 						.executes(context -> {
 							ConfigurationManager.reloadConfig();
+							CasLogin.get().getLoginHandler().getLoggedUsers();
 							context.getSource().sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("admin.config.reload")));
 							return Command.SINGLE_SUCCESS;
 						})
@@ -56,21 +63,11 @@ public final class CasCommand {
 				// Requires that the source is a player AND is on the Limbo server! Else no login!!!
 				.requires(CasCommand::isSourceAPlayerInLimbo)
 				.executes(context -> {
-					Player player = (Player) context.getSource();
-					String loginUrl;
-					try {
-						loginUrl = ApiUtils.getLoginUrl(player);
-					} catch (CouldNotGenerateCSRFTokenException e) {
-						player.sendMessage(MiniMessage
-								.miniMessage()
-								.deserialize(ConfigurationManager.getLang("user.errors.could_not_generate_csrf")));
+					if (!(context.getSource() instanceof Player player))
 						return 0;
-					}
-					player.sendMessage(MiniMessage
-							.miniMessage()
-							.deserialize(String.format(ConfigurationManager.getLang("user.login.url_message"), loginUrl, loginUrl)));
-					LoginManager.pollLogin(player, 300, 3)
-							.thenAccept(loginPlayer(player, proxy));
+					CasLogin.get().getLoginHandler()
+							.login(player)
+							.thenAccept(PlayerUtils.logPlayer(player));
 					return Command.SINGLE_SUCCESS;
 				});
 	}
@@ -86,13 +83,15 @@ public final class CasCommand {
 								.deserialize("<red>Console cannot use this command without arguments</red>"));
 						return 0;
 					}
-					try {
-						RegisteredServer entrypointServer = CasLogin.getEntrypointServer();
-						LoginManager.logout(player);
-						player.createConnectionRequest(entrypointServer).fireAndForget();
-					} catch (NotLoggedInException e) {
-						throw new RuntimeException(e);
-					}
+					RegisteredServer entrypointServer = CasLogin.getEntrypointServer();
+					CasLogin.get().getLoginHandler()
+							.logout(player)
+							.thenAccept(loggedUser -> {
+								proxy.getEventManager().fire(new LogoutEvent(player, loggedUser));
+								PlayerUtils.restoreGameProfile(player);
+								player.createConnectionRequest(entrypointServer).fireAndForget();
+							});
+
 					return Command.SINGLE_SUCCESS;
 				})
 				.then(logoutPlayerAdminCommand(proxy));
@@ -103,32 +102,32 @@ public final class CasCommand {
 				.<CommandSource, String>argument("login", StringArgumentType.word())
 				.requires(source -> source.hasPermission("caslogin.admin.logout.player"))
 				.suggests(((context, builder) -> {
-					for (var user : LoginManager.getLoggedUsers()) {
-						builder.suggest(user.getUser().getLogin());
-					}
+//					for (var user : LoginManager.getLoggedUsers()) {
+//						builder.suggest(user.getUser().getLogin());
+//					}
 					return builder.buildFuture();
 				}))
 				.executes(ctx -> {
 					String inputtedLogin = ctx.getArgument("login", String.class);
-					var optionalUser = LoginManager.getLoggedUserByLogin(inputtedLogin);
-					if (optionalUser.isEmpty()) {
-						ctx.getSource().sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("admin.errors.not_logged_in")));
-						return 0;
-					}
-					LoggedUser user = optionalUser.get();
-					try {
-						LoginManager.logout(user);
-					} catch (NotLoggedInException e) {
-						throw new IllegalStateException(e);
-					}
-					proxy.getPlayer(user.getUuid())
-							.ifPresent(player ->
-									player.disconnect(MiniMessage
-											.miniMessage()
-											.deserialize(ConfigurationManager.getLang("user.logout.force"))));
-					ctx.getSource().sendMessage(MiniMessage
-							.miniMessage()
-							.deserialize(ConfigurationManager.getLang("admin.logout"), Placeholder.unparsed("user", inputtedLogin)));
+//					var optionalUser = LoginManager.getLoggedUserByLogin(inputtedLogin);
+//					if (optionalUser.isEmpty()) {
+//						ctx.getSource().sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("admin.errors.not_logged_in")));
+//						return 0;
+//					}
+//					LoggedUser user = optionalUser.get();
+//					try {
+//						LoginManager.logout(user);
+//					} catch (NotLoggedInException e) {
+//						throw new IllegalStateException(e);
+//					}
+//					proxy.getPlayer(user.getUuid())
+//							.ifPresent(player ->
+//									player.disconnect(MiniMessage
+//											.miniMessage()
+//											.deserialize(ConfigurationManager.getLang("user.logout.force"))));
+//					ctx.getSource().sendMessage(MiniMessage
+//							.miniMessage()
+//							.deserialize(ConfigurationManager.getLang("admin.logout"), Placeholder.unparsed("user", inputtedLogin)));
 					return Command.SINGLE_SUCCESS;
 				});
 	}
@@ -145,31 +144,8 @@ public final class CasCommand {
 			if (loggedUser == null) {
 				return;
 			}
-			LoginManager.moveLoggedPlayer(player, proxy, loggedUser);
+//			LoginManager.moveLoggedPlayer(player, proxy, loggedUser);
 		};
 	}
-
-//	.then(RequiredArgumentBuilder
-//				  .<CommandSource, String>argument("authCode", StringArgumentType.word())
-//			.executes(context -> {
-//		if (!(context.getSource() instanceof Player player))
-//			return -1;
-//		String authCode = context.getArgument("authCode", String.class);
-//		try {
-//			LoggedUser loggedUser = LoginManager.logPlayer(player, authCode);
-//			assert loggedUser != null;
-//		} catch (LoginAlreadyTakenException e) {
-//			player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.login_taken")));
-//		} catch (InvalidAuthCodeException e) {
-//			player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.invalid_auth_code")));
-//		} catch (AuthCodeExpiredException e) {
-//			player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.auth_code_expired")));
-//		} catch (InvalidTokenException e) {
-//			player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.invalid_token")));
-//		} catch (NoAuthCodeForUuidException e) {
-//			player.sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.no_auth_code_for_uuid")));
-//		}
-//		return Command.SINGLE_SUCCESS;
-//	})
 
 }

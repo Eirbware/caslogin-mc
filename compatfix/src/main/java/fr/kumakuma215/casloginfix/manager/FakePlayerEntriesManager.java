@@ -2,11 +2,9 @@ package fr.kumakuma215.casloginfix.manager;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.wrappers.EnumWrappers;
-import com.comphenix.protocol.wrappers.PlayerInfoData;
-import com.comphenix.protocol.wrappers.WrappedChatComponent;
-import com.comphenix.protocol.wrappers.WrappedGameProfile;
+import com.comphenix.protocol.wrappers.*;
 import fr.kumakuma215.casloginfix.CasLoginFix;
+import fr.kumakuma215.casloginfix.FakePlayer;
 import fr.kumakuma215.casloginfix.exceptions.NoFakePlayerException;
 import org.bukkit.GameMode;
 import org.bukkit.entity.Player;
@@ -14,14 +12,15 @@ import org.bukkit.entity.Player;
 import java.util.*;
 
 public class FakePlayerEntriesManager {
-	private final HashMap<UUID, UUID> falseToTrueUUIDMap;
+
+	private final HashMap<UUID, UUID> falseUUIDToTrueUUID;
 
 	public FakePlayerEntriesManager() {
-		falseToTrueUUIDMap = new HashMap<>();
+		falseUUIDToTrueUUID = new HashMap<>();
 	}
 
 	public void registerPlayer(UUID trueUUID, UUID falseUUID) {
-		falseToTrueUUIDMap.put(falseUUID, trueUUID);
+		falseUUIDToTrueUUID.put(falseUUID, trueUUID);
 		sendFakePlayerEntry(Objects.requireNonNull(CasLoginFix.INSTANCE.getServer().getPlayer(falseUUID)));
 	}
 
@@ -30,15 +29,16 @@ public class FakePlayerEntriesManager {
 	}
 
 	private PlayerInfoData createFakeInfoData(Player player, GameMode newGamemode) {
-		if (!falseToTrueUUIDMap.containsKey(player.getUniqueId()))
+		if (!falseUUIDToTrueUUID.containsKey(player.getUniqueId()))
 			throw new RuntimeException("DIDNT CHECK PLAYER CONTAIN BEFORE CREATEINFODATA");
-		UUID trueUUID = falseToTrueUUIDMap.get(player.getUniqueId());
+		UUID trueUUID = falseUUIDToTrueUUID.get(player.getUniqueId());
+		WrappedGameProfile profile = WrappedGameProfile.fromPlayer(player);
 		return new PlayerInfoData(
 				trueUUID,
 				0,
 				false,
 				EnumWrappers.NativeGameMode.fromBukkit(newGamemode),
-				new WrappedGameProfile(trueUUID, player.getName()),
+				profile,
 				WrappedChatComponent.fromText(player.getName())
 		);
 	}
@@ -48,19 +48,43 @@ public class FakePlayerEntriesManager {
 		sendFakePlayerInfoPacket(player, data, EnumSet.of(EnumWrappers.PlayerInfoAction.ADD_PLAYER, EnumWrappers.PlayerInfoAction.UPDATE_LISTED, EnumWrappers.PlayerInfoAction.UPDATE_GAME_MODE));
 	}
 
-	private void sendFakePlayerInfoPacket(Player player, PlayerInfoData data, EnumSet<EnumWrappers.PlayerInfoAction> actions){
+	private void sendFakePlayerInfoPacket(Player player, PlayerInfoData data, EnumSet<EnumWrappers.PlayerInfoAction> actions) {
 		PacketContainer packetToSend = CasLoginFix.getProtocolManager().createPacket(PacketType.Play.Server.PLAYER_INFO);
 		packetToSend.getPlayerInfoActions().write(0, actions);
 		packetToSend.getPlayerInfoDataLists().write(1, Collections.singletonList(data));
 		CasLoginFix.getProtocolManager().sendServerPacket(player, packetToSend);
-
-
 	}
 
 	public void updateGamemode(Player player, GameMode newGamemode) throws NoFakePlayerException {
-		if(!falseToTrueUUIDMap.containsKey(player.getUniqueId()))
+		if (!falseUUIDToTrueUUID.containsKey(player.getUniqueId()))
 			throw new NoFakePlayerException();
 		PlayerInfoData data = createFakeInfoData(player, newGamemode);
 		sendFakePlayerInfoPacket(player, data, EnumSet.of(EnumWrappers.PlayerInfoAction.UPDATE_GAME_MODE));
+	}
+
+	public void refreshSkin(Player player) throws NoFakePlayerException {
+		if (!falseUUIDToTrueUUID.containsKey(player.getUniqueId()))
+			throw new NoFakePlayerException();
+		removeFakePlayerEntry(player);
+		sendFakePlayerEntry(player);
+	}
+
+	public void refreshSkin(UUID uuid) throws NoFakePlayerException {
+		if (!falseUUIDToTrueUUID.containsKey(uuid))
+			throw new NoFakePlayerException();
+		Player player = CasLoginFix.INSTANCE.getServer().getPlayer(uuid);
+		assert player != null;
+		removeFakePlayerEntry(player);
+		sendFakePlayerEntry(player);
+	}
+
+	private void removeFakePlayerEntry(Player player) {
+		PacketContainer packet = CasLoginFix.getProtocolManager().createPacket(PacketType.Play.Server.PLAYER_INFO_REMOVE);
+		packet.getUUIDLists().write(0, Collections.singletonList(falseUUIDToTrueUUID.get(player.getUniqueId())));
+		CasLoginFix.getProtocolManager().sendServerPacket(player, packet);
+	}
+
+	public UUID getTrueUUID(Player p) {
+		return falseUUIDToTrueUUID.get(p.getUniqueId());
 	}
 }
