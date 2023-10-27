@@ -3,7 +3,6 @@ package fr.eirb.caslogin.proxy.connection;
 import com.velocitypowered.api.proxy.ConnectionRequestBuilder;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
-import com.velocitypowered.api.util.GameProfile;
 import fr.eirb.caslogin.api.model.LoggedUser;
 import org.jetbrains.annotations.NotNull;
 

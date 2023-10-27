@@ -6,20 +6,23 @@ import com.velocitypowered.api.proxy.Player;
 import fr.eirb.caslogin.CasLogin;
 import fr.eirb.caslogin.api.body.*;
 import fr.eirb.caslogin.api.model.LoggedUser;
+import fr.eirb.caslogin.configuration.ConfigurationManager;
 import fr.eirb.caslogin.exceptions.api.APIException;
 import fr.eirb.caslogin.exceptions.api.Errors;
 import fr.eirb.caslogin.exceptions.login.AlreadyLoggingInException;
 import fr.eirb.caslogin.exceptions.login.CouldNotGenerateCSRFTokenException;
 import fr.eirb.caslogin.exceptions.login.LoginTimeoutException;
 import fr.eirb.caslogin.exceptions.login.NotLoggedInException;
-import fr.eirb.caslogin.configuration.ConfigurationManager;
 import fr.eirb.caslogin.utils.PlayerUtils;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.asynchttpclient.*;
 
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 
 class APILoginHandlerImpl implements LoginHandler {
 	private static final Set<Player> loggingPlayer = Collections.synchronizedSet(new HashSet<>());
@@ -63,12 +66,9 @@ class APILoginHandlerImpl implements LoginHandler {
 				});
 	}
 
-	private CompletableFuture<LoggedUser> logout(Player player, LoggedUser loggedUser) {
+	@Override
+	public CompletableFuture<LoggedUser> logout(LoggedUser loggedUser) {
 		return CompletableFuture.supplyAsync(() -> {
-			if(player != null) {
-				PlayerUtils.restoreGameProfile(player);
-				player.disconnect(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.logout.force")));
-			}
 			try {
 				ApiUtils.logout(loggedUser);
 				return loggedUser;
@@ -88,13 +88,7 @@ class APILoginHandlerImpl implements LoginHandler {
 	@Override
 	public CompletableFuture<LoggedUser> logout(Player player) {
 		return getLoggedUserFromPlayerOrThrow(player)
-				.thenCompose(loggedUser -> logout(player, loggedUser));
-	}
-
-	@Override
-	public CompletableFuture<LoggedUser> logout(LoggedUser loggedUser) {
-		Player player = CasLogin.get().getProxy().getPlayer(loggedUser.getFakeUserUUID()).orElse(null);
-		return logout(player, loggedUser);
+				.thenCompose(this::logout);
 	}
 
 	private CompletableFuture<LoggedUser> pollLogin(Player player, int timeoutSeconds, long intervalMS) {

@@ -6,19 +6,16 @@ import com.velocitypowered.api.event.proxy.ProxyInitializeEvent;
 import com.velocitypowered.api.plugin.Dependency;
 import com.velocitypowered.api.plugin.Plugin;
 import com.velocitypowered.api.plugin.annotation.DataDirectory;
-import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
-import com.velocitypowered.api.proxy.messages.ChannelIdentifier;
-import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import fr.eirb.caslogin.commands.CasCommand;
+import fr.eirb.caslogin.configuration.ConfigurationManager;
 import fr.eirb.caslogin.listeners.AutoLoginListener;
 import fr.eirb.caslogin.listeners.RoleUpdaterListener;
 import fr.eirb.caslogin.listeners.SendMessageForFixesListener;
 import fr.eirb.caslogin.listeners.UpdateServerFieldsListener;
 import fr.eirb.caslogin.login.LoginDatabase;
 import fr.eirb.caslogin.login.LoginHandler;
-import fr.eirb.caslogin.configuration.ConfigurationManager;
 import fr.eirb.caslogin.login.LoginHandlerFactory;
 import fr.eirb.caslogin.login.MemoryLoginDatabase;
 import fr.eirb.caslogin.role.RoleManager;
@@ -29,8 +26,6 @@ import net.luckperms.api.LuckPerms;
 import net.luckperms.api.LuckPermsProvider;
 
 import java.nio.file.Path;
-import java.util.Collection;
-import java.util.function.Supplier;
 import java.util.logging.Logger;
 
 @Plugin(

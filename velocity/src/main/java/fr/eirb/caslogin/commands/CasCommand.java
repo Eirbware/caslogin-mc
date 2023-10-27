@@ -1,6 +1,5 @@
 package fr.eirb.caslogin.commands;
 
-import com.google.common.base.Charsets;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
@@ -13,21 +12,14 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import fr.eirb.caslogin.CasLogin;
-import fr.eirb.caslogin.api.model.LoggedUser;
 import fr.eirb.caslogin.configuration.ConfigurationManager;
 import fr.eirb.caslogin.events.LogoutEvent;
-import fr.eirb.caslogin.exceptions.login.NotLoggedInException;
-import fr.eirb.caslogin.login.LoginDatabase;
-import fr.eirb.caslogin.proxy.connection.Connector;
 import fr.eirb.caslogin.utils.PlayerUtils;
-import fr.eirb.caslogin.utils.ProxyUtils;
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 
 import java.util.Optional;
 import java.util.concurrent.CompletionException;
-import java.util.function.Consumer;
 
 public final class CasCommand {
 	public static BrigadierCommand createCasCommand(final ProxyServer proxy) {
@@ -127,14 +119,19 @@ public final class CasCommand {
 							.thenAccept(loggedUser -> {
 								CasLogin.get().getLoginHandler().logout(loggedUser)
 										.thenAccept(loggedUser1 -> {
-											proxy.getPlayer(loggedUser1.getUuid())
-													.ifPresent(player ->
+											Optional<Player> optionalPlayer = proxy.getPlayer(loggedUser1.getFakeUserUUID());
+											CasLogin.get().getProxy().getEventManager().fire(new LogoutEvent(optionalPlayer.orElse(null), loggedUser1))
+													.thenAccept(unused -> {
+														optionalPlayer.ifPresent(player -> {
+															PlayerUtils.restoreGameProfile(player);
 															player.disconnect(MiniMessage
 																	.miniMessage()
-																	.deserialize(ConfigurationManager.getLang("user.logout.force"))));
-											ctx.getSource().sendMessage(MiniMessage
-													.miniMessage()
-													.deserialize(ConfigurationManager.getLang("admin.logout"), Placeholder.unparsed("user", inputtedLogin)));
+																	.deserialize(ConfigurationManager.getLang("user.logout.force")));
+														});
+														ctx.getSource().sendMessage(MiniMessage
+																.miniMessage()
+																.deserialize(ConfigurationManager.getLang("admin.logout"), Placeholder.unparsed("user", inputtedLogin)));
+													});
 										});
 							})
 							.exceptionally(throwable -> {
@@ -150,15 +147,6 @@ public final class CasCommand {
 			return false;
 		return PlayerUtils.isPlayerInLimbo(player);
 
-	}
-
-	private static Consumer<LoggedUser> loginPlayer(Player player, ProxyServer proxy) {
-		return (loggedUser) -> {
-			if (loggedUser == null) {
-				return;
-			}
-//			LoginManager.moveLoggedPlayer(player, proxy, loggedUser);
-		};
 	}
 
 }
