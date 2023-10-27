@@ -6,9 +6,7 @@ import com.velocitypowered.api.proxy.Player;
 import fr.eirb.caslogin.api.model.LoggedUser;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 
 public class MemoryLoginDatabase implements LoginDatabase {
@@ -17,6 +15,16 @@ public class MemoryLoginDatabase implements LoginDatabase {
 	@Override
 	public CompletableFuture<Optional<UUID>> getByValue(LoggedUser value) {
 		return CompletableFuture.completedFuture(Optional.ofNullable(loggedUserMap.inverse().get(value)));
+	}
+
+	@Override
+	public CompletableFuture<Set<UUID>> keys() {
+		return CompletableFuture.completedFuture(loggedUserMap.keySet());
+	}
+
+	@Override
+	public CompletableFuture<Collection<LoggedUser>> values() {
+		return CompletableFuture.completedFuture(loggedUserMap.values());
 	}
 
 	@Override

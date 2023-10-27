@@ -17,12 +17,16 @@ import fr.eirb.caslogin.api.model.LoggedUser;
 import fr.eirb.caslogin.configuration.ConfigurationManager;
 import fr.eirb.caslogin.events.LogoutEvent;
 import fr.eirb.caslogin.exceptions.login.NotLoggedInException;
+import fr.eirb.caslogin.login.LoginDatabase;
 import fr.eirb.caslogin.proxy.connection.Connector;
 import fr.eirb.caslogin.utils.PlayerUtils;
 import fr.eirb.caslogin.utils.ProxyUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 
+import java.util.Optional;
+import java.util.concurrent.CompletionException;
 import java.util.function.Consumer;
 
 public final class CasCommand {
@@ -101,33 +105,42 @@ public final class CasCommand {
 		return RequiredArgumentBuilder
 				.<CommandSource, String>argument("login", StringArgumentType.word())
 				.requires(source -> source.hasPermission("caslogin.admin.logout.player"))
-				.suggests(((context, builder) -> {
-//					for (var user : LoginManager.getLoggedUsers()) {
-//						builder.suggest(user.getUser().getLogin());
-//					}
-					return builder.buildFuture();
-				}))
+				.suggests(((context, builder) -> CasLogin.get().getLoginDatabase()
+						.values()
+						.thenAccept(loggedUsers -> {
+							for (var user : loggedUsers) {
+								builder.suggest(user.getUser().getLogin());
+							}
+						})
+						.thenCompose(unused -> builder.buildFuture())))
 				.executes(ctx -> {
 					String inputtedLogin = ctx.getArgument("login", String.class);
-//					var optionalUser = LoginManager.getLoggedUserByLogin(inputtedLogin);
-//					if (optionalUser.isEmpty()) {
-//						ctx.getSource().sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("admin.errors.not_logged_in")));
-//						return 0;
-//					}
-//					LoggedUser user = optionalUser.get();
-//					try {
-//						LoginManager.logout(user);
-//					} catch (NotLoggedInException e) {
-//						throw new IllegalStateException(e);
-//					}
-//					proxy.getPlayer(user.getUuid())
-//							.ifPresent(player ->
-//									player.disconnect(MiniMessage
-//											.miniMessage()
-//											.deserialize(ConfigurationManager.getLang("user.logout.force"))));
-//					ctx.getSource().sendMessage(MiniMessage
-//							.miniMessage()
-//							.deserialize(ConfigurationManager.getLang("admin.logout"), Placeholder.unparsed("user", inputtedLogin)));
+					CasLogin.get().getLoginDatabase()
+							.getUUIDFromUserByLogin(inputtedLogin)
+							.thenCompose(optionalUUID -> {
+								if (optionalUUID.isEmpty()) {
+									ctx.getSource().sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("admin.errors.not_logged_in")));
+									throw new CompletionException(null);
+								}
+								return CasLogin.get().getLoginDatabase().get(optionalUUID.get()).thenApply(Optional::get);
+							})
+							.thenAccept(loggedUser -> {
+								CasLogin.get().getLoginHandler().logout(loggedUser)
+										.thenAccept(loggedUser1 -> {
+											proxy.getPlayer(loggedUser1.getUuid())
+													.ifPresent(player ->
+															player.disconnect(MiniMessage
+																	.miniMessage()
+																	.deserialize(ConfigurationManager.getLang("user.logout.force"))));
+											ctx.getSource().sendMessage(MiniMessage
+													.miniMessage()
+													.deserialize(ConfigurationManager.getLang("admin.logout"), Placeholder.unparsed("user", inputtedLogin)));
+										});
+							})
+							.exceptionally(throwable -> {
+								ctx.getSource().sendMessage(MiniMessage.miniMessage().deserialize("<red>Internal error</red>"));
+								return null;
+							});
 					return Command.SINGLE_SUCCESS;
 				});
 	}

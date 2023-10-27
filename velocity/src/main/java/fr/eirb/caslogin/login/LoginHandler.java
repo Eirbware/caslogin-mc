@@ -24,4 +24,11 @@ public interface LoginHandler {
 	 * @return A completable future that has the logged out player
 	 */
 	CompletableFuture<LoggedUser> logout(Player player);
+
+	/**
+	 *
+	 * @param player
+	 * @return A completable future that has the logged out player
+	 */
+	CompletableFuture<LoggedUser> logout(LoggedUser user);
 }

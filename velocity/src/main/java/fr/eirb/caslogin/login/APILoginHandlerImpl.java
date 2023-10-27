@@ -63,26 +63,38 @@ class APILoginHandlerImpl implements LoginHandler {
 				});
 	}
 
+	private CompletableFuture<LoggedUser> logout(Player player, LoggedUser loggedUser) {
+		return CompletableFuture.supplyAsync(() -> {
+			if(player != null) {
+				PlayerUtils.restoreGameProfile(player);
+				player.disconnect(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.logout.force")));
+			}
+			try {
+				ApiUtils.logout(loggedUser);
+				return loggedUser;
+			} catch (APIException e) {
+				if (e.error == Errors.USER_NOT_LOGGED_IN) {
+					throw new CompletionException(new NotLoggedInException(loggedUser));
+				} else {
+					throw new IllegalStateException(e);
+				}
+			}
+		}).thenApply(user -> {
+			CasLogin.get().getLoginDatabase().remove(loggedUser.getUuid());
+			return user;
+		});
+	}
+
 	@Override
 	public CompletableFuture<LoggedUser> logout(Player player) {
 		return getLoggedUserFromPlayerOrThrow(player)
-				.thenCompose((loggedUser -> CompletableFuture.supplyAsync(() -> {
-					PlayerUtils.restoreGameProfile(player);
-					try {
-						ApiUtils.logout(loggedUser);
-						return loggedUser;
-					} catch (APIException e) {
-						if (e.error == Errors.USER_NOT_LOGGED_IN) {
-							throw new CompletionException(new NotLoggedInException(player));
-						} else {
-							throw new IllegalStateException(e);
-						}
-					}
-				})))
-				.thenApply(loggedUser -> {
-					CasLogin.get().getLoginDatabase().remove(player.getUniqueId());
-					return loggedUser;
-				});
+				.thenCompose(loggedUser -> logout(player, loggedUser));
+	}
+
+	@Override
+	public CompletableFuture<LoggedUser> logout(LoggedUser loggedUser) {
+		Player player = CasLogin.get().getProxy().getPlayer(loggedUser.getFakeUserUUID()).orElse(null);
+		return logout(player, loggedUser);
 	}
 
 	private CompletableFuture<LoggedUser> pollLogin(Player player, int timeoutSeconds, long intervalMS) {
