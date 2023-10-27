@@ -1,41 +1,33 @@
 user:
   login:
-    url_message: "<gray>Please login <blue><click:open_url:'%s'>Here</click></blue><br><gray>(%s)</gray><br>You will be automatically authenticated</gray>"
-    success: "<green>You have been successfully logged in</green><br><gray>Sending you to the server...</gray>"
+    url_message: "<gray>Veuillez vous connecter en cliquant sur ce lien <blue><click:open_url:'%s'>%s</click></blue><br>Vous serez automatiquement authentifié</gray>"
+    success: "<green>Vous avez bien été authentifié!</green><br><gray>Envoi sur le serveur...</gray>"
   logout:
-    success: "<green>You have been successfully logged out</green>"
-    force: "<red>You have been logged out by an admin.</red>"
+    success: "<green>Vous venez bien de vous déconnecter</green>"
+    force: "<red>Vous avez été déconnecté par un admin.</red>"
   errors:
-    not_logged_in: "<red>You are not logged in!</red>"
-    already_logged_in: "<red>You are already logged in!</red>"
-    login_taken: "<red>This user is already logged in!</red>"
-    login_timeout: "<red>Timed out. Please try again.<red>"
+    not_logged_in: "<red>Vous n'êtes pas connecté!</red>"
+    already_logged_in: "<red>Vous êtes déjà connecté!</red>"
+    login_taken: "<red>Cet utilisateur est déjà connecté!</red>"
+    login_timeout: "<red>Timed out. Veuillez réessayer<red>"
     ask_login: "<red>Veuillez vous connecter avec la commande</red> <gold>/cas login</gold>"
-    invalid_auth_code: "<red>Invalid auth code</red>"
-    auth_code_expired: "<red>Auth code expired. Please try again"
-    invalid_token: "<red>Could not authenticate you. Please try again"
-    no_auth_code_for_uuid: "<red>Please do <gold>/cas login</gold> first.</red>"
-    user_disconnected_no_reason: "<red>You have been disconnected from the server</red>"
-    user_disconnected: "<red>You have been disconnected from the server for : </red>"
-    could_not_generate_csrf: "<red>Could not generate a valid CSRF token. Please try again later...</red>"
-  banned: "<red>You have been banned by an administrator.</red>"
+    invalid_token: "<red>Impossible de vous authentifier. Veuillez réessayer</red>"
+    user_disconnected_no_reason: "<red>Vous avez été déconnecté du serveur</red>"
+    user_disconnected: "<red>Vous avez été déconnecté du serveur pour la raison suivante : </red>"
+    could_not_generate_csrf: "<red>Impossible de générer un token CSRF. Veuillez réessayer plus tard...</red>"
+  banned: "<red>Vous avez été banni.</red>"
 
 
 admin:
-  logout: "<green>You have successfully logged out the player</green> <gold><user></gold>"
-  ban: "<green>You have successfully banned the user</green> <gold><user></gold> <green>!</green>"
-  unban: "<green>You have successfully unbanned the user</green> <gold><user></gold> <green>!</green>"
-  add_admin: "<green>You successfully added</green> <gold><user></gold> <green>to the administrators' list!</green>"
-  remove_admin: "<green>You successfully removed</green> <gold><user></gold> <green>from the administrators' list!</green>"
+  logout: "<green>Vous avez bien déconnecté le joueur </green><gold><user></gold>"
+  ban: "<green>Vous avez bien banni le joueur </green><gold><user></gold> <green>!</green>"
+  unban: "<green>Vous avez bien débanni le joueur </green><gold><user></gold> <green>!</green>"
   config:
-    reload: "<green>You have successfully reloaded the configuration.</green>"
+    reload: "<green>Vous avez bien rechargé la configuration.</green>"
 
   errors:
-    not_logged_in: "<red>This user is not logged in!</red>"
-    already_banned: "<red>The user</red> <gold><user></gold> <red>is already banned.</red>"
-    not_banned: "<red>The user</red> <gold><user></gold> <red>is not banned.</red>"
-    not_admin: "<red>The user</red> <gold><user></gold> <red>is not an administrator.</red>"
-    already_admin: "<red>The user</red> <gold><user></gold> <red>is already an administrator.</red>"
-
-not_enough_permissions: "<red>Not enough permissions.</red>"
-player_exclusive: "<red>This command can only be executed by a player.</red>"
+    not_logged_in: "<red>Cet utilisateur n'est pas connecté!</red>"
+    already_banned: "<red>L'utilisateur </red><gold><user></gold><red> est déjà banni.</red>"
+    not_banned: "<red>L'utilisateur </red><gold><user></gold><red> n'est pas banni.</red>"
+not_enough_permissions: "<red>Permissions insuffisantes.</red>"
+player_exclusive: "<red>Cette commande ne peut être exécutée que par un joueur.</red>"
