@@ -18,6 +18,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.asynchttpclient.*;
 
 import java.io.IOException;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -83,6 +84,16 @@ class APILoginHandlerImpl implements LoginHandler {
 			CasLogin.get().getLoginDatabase().remove(loggedUser.getUuid());
 			return user;
 		});
+	}
+
+	@Override
+	public CompletableFuture<Void> ban(LoggedUser user) {
+		return null;
+	}
+
+	@Override
+	public CompletableFuture<Void> tempBan(LoggedUser user, Duration duration) {
+		return null;
 	}
 
 	@Override

@@ -1,10 +1,12 @@
 package fr.eirb.caslogin.commands;
 
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.velocitypowered.api.command.BrigadierCommand;
 import com.velocitypowered.api.command.CommandSource;
@@ -18,6 +20,7 @@ import fr.eirb.caslogin.utils.PlayerUtils;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletionException;
 
@@ -27,15 +30,37 @@ public final class CasCommand {
 				.<CommandSource>literal("cas")
 				.then(loginCommand(proxy))
 				.then(logoutCommand(proxy))
+				.then(banCommand(proxy))
 				.then(configCommand())
-				.then(LiteralArgumentBuilder.
-						<CommandSource>literal("test")
-						.executes(context -> {
-							System.out.println(proxy.getPlayer("skhalifa"));
-							return 1;
-						}))
 				.build();
 		return new BrigadierCommand(rootNode);
+	}
+
+	private static ArgumentBuilder<CommandSource, ?> banCommand(ProxyServer proxy) {
+		return LiteralArgumentBuilder
+				.<CommandSource>literal("ban")
+				.requires(source -> source.hasPermission("cas.ban"))
+				.then(RequiredArgumentBuilder
+						.<CommandSource, String>argument("login", StringArgumentType.word())
+						.suggests(suggestAllLoggedPlayers())
+						.executes(context -> {
+							if(!context.getSource().hasPermission("cas.ban.def")) {
+								context.getSource().sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("not_enough_permissions")));
+								return -1;
+							}
+							//Ban def
+							return Command.SINGLE_SUCCESS;
+						})
+						.then(RequiredArgumentBuilder
+								.<CommandSource, Integer>argument("duration", IntegerArgumentType.integer(1))
+								.requires(source -> source.hasPermission("cas.ban.temp"))
+								.then(RequiredArgumentBuilder.<CommandSource, String>argument("timeUnit", StringArgumentType.word())
+										.executes(context -> {
+											//Temp ban
+											return Command.SINGLE_SUCCESS;
+										}))
+						)
+				);
 	}
 
 	private static ArgumentBuilder<CommandSource, ?> configCommand() {
@@ -93,18 +118,22 @@ public final class CasCommand {
 				.then(logoutPlayerAdminCommand(proxy));
 	}
 
+	private static SuggestionProvider<CommandSource> suggestAllLoggedPlayers() {
+		return (context, builder) -> CasLogin.get().getLoginDatabase()
+				.values()
+				.thenAccept(loggedUsers -> {
+					for (var user : loggedUsers) {
+						builder.suggest(user.getUser().getLogin());
+					}
+				})
+				.thenCompose(unused -> builder.buildFuture());
+	}
+
 	private static ArgumentBuilder<CommandSource, ?> logoutPlayerAdminCommand(ProxyServer proxy) {
 		return RequiredArgumentBuilder
 				.<CommandSource, String>argument("login", StringArgumentType.word())
-				.requires(source -> source.hasPermission("caslogin.admin.logout.player"))
-				.suggests(((context, builder) -> CasLogin.get().getLoginDatabase()
-						.values()
-						.thenAccept(loggedUsers -> {
-							for (var user : loggedUsers) {
-								builder.suggest(user.getUser().getLogin());
-							}
-						})
-						.thenCompose(unused -> builder.buildFuture())))
+				.requires(source -> source.hasPermission("cas.logout.force"))
+				.suggests(suggestAllLoggedPlayers())
 				.executes(ctx -> {
 					String inputtedLogin = ctx.getArgument("login", String.class);
 					CasLogin.get().getLoginDatabase()
@@ -146,7 +175,6 @@ public final class CasCommand {
 		if (!(source instanceof Player player))
 			return false;
 		return PlayerUtils.isPlayerInLimbo(player);
-
 	}
 
 }
