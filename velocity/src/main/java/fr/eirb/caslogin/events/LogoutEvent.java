@@ -1,7 +1,7 @@
 package fr.eirb.caslogin.events;
 
 import com.velocitypowered.api.proxy.Player;
-import fr.eirb.caslogin.api.model.LoggedUser;
+import fr.eirb.caslogin.model.LoggedUser;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

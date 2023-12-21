@@ -9,6 +9,7 @@ import fr.kumakuma215.casloginfix.listeners.UpdateFakePlayer;
 import fr.kumakuma215.casloginfix.manager.FakePlayerEntriesManager;
 import net.skinsrestorer.api.SkinsRestorerProvider;
 import net.skinsrestorer.api.event.SkinApplyEvent;
+import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public final class CasLoginFix extends JavaPlugin {

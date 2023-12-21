@@ -1,4 +1,4 @@
-package fr.eirb.caslogin.api.model;
+package fr.eirb.caslogin.model;
 
 import com.google.common.base.Objects;
 import com.velocitypowered.api.util.GameProfile;

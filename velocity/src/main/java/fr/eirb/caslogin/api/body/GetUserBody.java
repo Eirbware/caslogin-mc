@@ -1,6 +1,6 @@
 package fr.eirb.caslogin.api.body;
 
-import fr.eirb.caslogin.api.model.LoggedUser;
+import fr.eirb.caslogin.model.LoggedUser;
 
 public class GetUserBody {
 	private LoggedUser user;

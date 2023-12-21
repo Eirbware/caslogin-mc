@@ -8,7 +8,7 @@ import com.velocitypowered.api.proxy.messages.MinecraftChannelIdentifier;
 import com.velocitypowered.api.util.GameProfile;
 import com.velocitypowered.api.util.UuidUtils;
 import fr.eirb.caslogin.CasLogin;
-import fr.eirb.caslogin.api.model.LoggedUser;
+import fr.eirb.caslogin.model.LoggedUser;
 import fr.eirb.caslogin.utils.PlayerUtils;
 import fr.eirb.common.compatfix.CasFixMessage;
 

@@ -1,7 +1,7 @@
 package fr.eirb.caslogin.role.impl;
 
 import com.velocitypowered.api.proxy.Player;
-import fr.eirb.caslogin.api.model.LoggedUser;
+import fr.eirb.caslogin.model.LoggedUser;
 import fr.eirb.caslogin.role.RoleManager;
 
 public class DummyRoleManager implements RoleManager {

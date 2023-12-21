@@ -3,7 +3,7 @@ package fr.eirb.caslogin.utils;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.util.GameProfile;
-import fr.eirb.caslogin.api.model.LoggedUser;
+import fr.eirb.caslogin.model.LoggedUser;
 
 import java.lang.reflect.Field;
 import java.util.Map;
@@ -73,7 +73,7 @@ public final class ProxyUtils {
 		var connectionsByName = getConnectionsByName(server);
 
 		connectionsByUuid.remove(trueIdentity.getId());
-		connectionsByName.remove(trueIdentity.getName());
+		connectionsByName.remove(trueIdentity.getName().toLowerCase());
 		connectionsByUuid.put(user.getFakeUserUUID(), connectedPlayer);
 		connectionsByName.put(user.getUser().getLogin(), connectedPlayer);
 	}
@@ -89,7 +89,7 @@ public final class ProxyUtils {
 		var connectionsByName = getConnectionsByName(server);
 
 		connectionsByUuid.put(trueIdentity.getId(), connectedPlayer);
-		connectionsByName.put(trueIdentity.getName(), connectedPlayer);
+		connectionsByName.put(trueIdentity.getName().toLowerCase(), connectedPlayer);
 		connectionsByUuid.remove(user.getFakeUserUUID());
 		connectionsByName.remove(user.getUser().getLogin());
 	}

@@ -22,6 +22,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 public final class CasCommand {
@@ -31,9 +32,14 @@ public final class CasCommand {
 				.then(loginCommand(proxy))
 				.then(logoutCommand(proxy))
 				.then(banCommand(proxy))
+//				.then(pardonCommand(proxy))
 				.then(configCommand())
 				.build();
 		return new BrigadierCommand(rootNode);
+	}
+
+	private static ArgumentBuilder<CommandSource, ?> pardonCommand(ProxyServer proxy) {
+		return null;
 	}
 
 	private static ArgumentBuilder<CommandSource, ?> banCommand(ProxyServer proxy) {
@@ -48,7 +54,14 @@ public final class CasCommand {
 								context.getSource().sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("not_enough_permissions")));
 								return -1;
 							}
-							//Ban def
+							String login = context.getArgument("login", String.class);
+							CasLogin.get().getLoginDatabase().getUUIDFromUserByLogin(login)
+									.thenCompose(optionalUUID -> optionalUUID.isEmpty()
+											? CompletableFuture.completedFuture(Optional.empty())
+											: CasLogin.get().getLoginDatabase().get(optionalUUID.get()))
+									.thenAccept(optionalLoggedUser -> {
+
+									});
 							return Command.SINGLE_SUCCESS;
 						})
 						.then(RequiredArgumentBuilder

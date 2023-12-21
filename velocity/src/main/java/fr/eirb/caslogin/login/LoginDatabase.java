@@ -1,7 +1,7 @@
 package fr.eirb.caslogin.login;
 
 import fr.eirb.caslogin.AsyncBiMap;
-import fr.eirb.caslogin.api.model.LoggedUser;
+import fr.eirb.caslogin.model.LoggedUser;
 
 import java.util.Optional;
 import java.util.UUID;

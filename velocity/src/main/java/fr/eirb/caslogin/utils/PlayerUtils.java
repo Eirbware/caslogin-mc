@@ -7,7 +7,7 @@ import com.velocitypowered.api.event.connection.PostLoginEvent;
 import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.util.GameProfile;
 import fr.eirb.caslogin.CasLogin;
-import fr.eirb.caslogin.api.model.LoggedUser;
+import fr.eirb.caslogin.model.LoggedUser;
 import fr.eirb.caslogin.configuration.ConfigurationManager;
 import fr.eirb.caslogin.events.LoginEvent;
 import fr.eirb.caslogin.proxy.connection.Connector;

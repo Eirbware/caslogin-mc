@@ -2,7 +2,7 @@ package fr.eirb.caslogin.login;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import fr.eirb.caslogin.api.model.LoggedUser;
+import fr.eirb.caslogin.model.LoggedUser;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;

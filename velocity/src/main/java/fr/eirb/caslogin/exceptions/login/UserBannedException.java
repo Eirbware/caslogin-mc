@@ -1,7 +1,7 @@
 package fr.eirb.caslogin.exceptions.login;
 
 import com.velocitypowered.api.proxy.Player;
-import fr.eirb.caslogin.api.model.LoggedUser;
+import fr.eirb.caslogin.model.LoggedUser;
 
 public class UserBannedException extends LoginException{
 	public UserBannedException(Player player, LoggedUser cause) {
