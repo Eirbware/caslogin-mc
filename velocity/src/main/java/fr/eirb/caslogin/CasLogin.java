@@ -18,6 +18,7 @@ import fr.eirb.caslogin.login.LoginDatabase;
 import fr.eirb.caslogin.login.LoginHandler;
 import fr.eirb.caslogin.login.LoginHandlerFactory;
 import fr.eirb.caslogin.login.MemoryLoginDatabase;
+import fr.eirb.caslogin.model.LoggedUser;
 import fr.eirb.caslogin.role.RoleManager;
 import fr.eirb.caslogin.role.impl.DummyRoleManager;
 import fr.eirb.caslogin.role.impl.LuckPermsRoleManager;
@@ -79,7 +80,6 @@ public class CasLogin {
 		hookLuckperms();
 		createLoginHandler();
 		// Load cache
-		loginHandler.getLoggedUsers();
 		logger.info("Plugin successfully loaded!");
 	}
 
@@ -96,7 +96,7 @@ public class CasLogin {
 	}
 
 	private void createLoginHandler() {
-		loginHandler = switch(ConfigurationManager.getLoginHandlerType()){
+		loginHandler = switch (ConfigurationManager.getLoginHandlerType()) {
 			case API -> LoginHandlerFactory.getAPILoginHandler();
 		};
 	}
@@ -142,5 +142,17 @@ public class CasLogin {
 
 	public LoginDatabase getLoginDatabase() {
 		return loginDatabase;
+	}
+
+	public void refresh() {
+		ConfigurationManager.reloadConfig();
+		resetEntrypoints();
+		loginHandler
+				.getLoggedUsers()
+				.thenAccept(loggedUsers -> {
+					for (LoggedUser user : loggedUsers) {
+						loginDatabase.put(user.getUuid(), user);
+					}
+				});
 	}
 }

@@ -2,10 +2,7 @@ package fr.eirb.caslogin.model;
 
 import com.google.common.base.Objects;
 
-public class CasUser {
-	private String login;
-	private String ecole;
-	private Role[] roles;
+public record CasUser(String login, String ecole, Role[] roles) {
 	public String getLogin(){
 		return login;
 	}

@@ -7,9 +7,7 @@ import com.velocitypowered.api.util.UuidUtils;
 import java.util.Collections;
 import java.util.UUID;
 
-public class LoggedUser {
-	private CasUser user;
-	private String uuid;
+public record LoggedUser(CasUser user, String uuid) {
 
 	public CasUser getUser(){
 		return user;

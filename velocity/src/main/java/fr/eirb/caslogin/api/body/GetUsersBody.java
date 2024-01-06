@@ -1,13 +1,15 @@
 package fr.eirb.caslogin.api.body;
 
-import fr.eirb.caslogin.model.LoggedUser;
+import fr.eirb.caslogin.model.Role;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public class GetUsersBody {
-	private List<LoggedUser> users;
+	public record CompositeUser(String login, String ecole, Role[] roles, @Nullable String uuid){};
+	private List<CompositeUser> users;
 
-	public List<LoggedUser> getUsers() {
+	public List<CompositeUser> getCompositeUsers() {
 		return users;
 	}
 }

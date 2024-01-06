@@ -106,3 +106,4 @@ build
 .gradle/
 gradle/
 .idea/
+**/bin/**
