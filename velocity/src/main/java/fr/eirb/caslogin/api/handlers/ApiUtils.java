@@ -3,6 +3,7 @@ package fr.eirb.caslogin.api.handlers;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 import com.velocitypowered.api.proxy.Player;
+import fr.eirb.caslogin.CasLogin;
 import fr.eirb.caslogin.api.body.*;
 import fr.eirb.caslogin.configuration.ConfigurationManager;
 import fr.eirb.caslogin.exceptions.api.APIException;
@@ -131,6 +132,7 @@ final class ApiUtils {
 			Gson gsonInstance = new Gson();
 			return gsonInstance.fromJson(resp.getResponseBody(), GetUserBody.class).getUser();
 		} catch (IOException | ExecutionException | InterruptedException | JsonSyntaxException e) {
+			CasLogin.get().getLogger().severe("Error on ApiUtils.getLoggedUser");
 			throw new RuntimeException(e);
 		}
 	}

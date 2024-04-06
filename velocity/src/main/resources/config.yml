@@ -5,3 +5,4 @@ logged_entrypoint_server: paper
 loginHandlerType: API
 loginPollTimeoutSeconds: 300
 loginPollIntervalMS: 1000
+onlineMode: true

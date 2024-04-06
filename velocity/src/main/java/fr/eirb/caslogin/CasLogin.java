@@ -10,14 +10,8 @@ import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import fr.eirb.caslogin.commands.CasCommand;
 import fr.eirb.caslogin.configuration.ConfigurationManager;
-import fr.eirb.caslogin.listeners.AutoLoginListener;
-import fr.eirb.caslogin.listeners.RoleUpdaterListener;
-import fr.eirb.caslogin.listeners.SendMessageForFixesListener;
-import fr.eirb.caslogin.listeners.UpdateServerFieldsListener;
-import fr.eirb.caslogin.login.LoginDatabase;
-import fr.eirb.caslogin.login.LoginHandler;
-import fr.eirb.caslogin.login.LoginHandlerFactory;
-import fr.eirb.caslogin.login.MemoryLoginDatabase;
+import fr.eirb.caslogin.listeners.*;
+import fr.eirb.caslogin.login.*;
 import fr.eirb.caslogin.model.LoggedUser;
 import fr.eirb.caslogin.role.RoleManager;
 import fr.eirb.caslogin.role.impl.DummyRoleManager;
@@ -73,6 +67,8 @@ public class CasLogin {
 		logger.info("Loading plugin...");
 		INSTANCE = this;
 		ConfigurationManager.loadConfig(pluginDir);
+		if(!ConfigurationManager.getOnlineMode())
+			logger.info("Offline mode activated");
 		resetEntrypoints();
 		registerCommands();
 		registerDatabases();
@@ -85,7 +81,11 @@ public class CasLogin {
 
 	private void registerListeners() {
 		proxy.getEventManager().register(this, new PlayerUtils());
-		proxy.getEventManager().register(this, new AutoLoginListener());
+		if(ConfigurationManager.getOnlineMode())
+			proxy.getEventManager().register(this, new AutoLoginListener());
+		if(!ConfigurationManager.getOnlineMode()) {
+			proxy.getEventManager().register(this, new AutoLogoutListener());
+		}
 		proxy.getEventManager().register(this, new RoleUpdaterListener());
 		proxy.getEventManager().register(this, new UpdateServerFieldsListener());
 		proxy.getEventManager().register(this, new SendMessageForFixesListener());

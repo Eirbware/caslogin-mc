@@ -34,27 +34,24 @@ public final class PlayerUtils {
 	}
 
 	public static Consumer<LoggedUser> logPlayer(Player player) {
-		return (loggedUser) -> {
-			CasLogin.get().getProxy().getEventManager()
-					.fire(new LoginEvent(player, loggedUser))
-					.thenAccept(loginEvent -> {
-						Component message = MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.login.success"));
-						player.sendMessage(message);
-						Connector.get(player).to(loginEvent.server()).as(loggedUser)
-								.connect()
-								.whenComplete((result, throwable) -> {
-									if (throwable != null || !result.isSuccessful()) {
-										Component disconnectMessage = result.getReasonComponent().isEmpty()
-												? MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_disconnected_no_reason"))
-												: MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_disconnected"));
-										if (result.getReasonComponent().isPresent())
-											disconnectMessage = disconnectMessage.append(result.getReasonComponent().get());
-										player.sendMessage(disconnectMessage);
-									}
-								});
-					});
-
-		};
+		return (loggedUser) -> CasLogin.get().getProxy().getEventManager()
+				.fire(new LoginEvent(player, loggedUser))
+				.thenAccept(loginEvent -> {
+					Component message = MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.login.success"));
+					player.sendMessage(message);
+					Connector.get(player).to(loginEvent.server()).as(loggedUser)
+							.connect()
+							.whenComplete((result, throwable) -> {
+								if (throwable != null || !result.isSuccessful()) {
+									Component disconnectMessage = result.getReasonComponent().isEmpty()
+											? MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_disconnected_no_reason"))
+											: MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("user.errors.user_disconnected"));
+									if (result.getReasonComponent().isPresent())
+										disconnectMessage = disconnectMessage.append(result.getReasonComponent().get());
+									player.sendMessage(disconnectMessage);
+								}
+							});
+				});
 	}
 
 	public static GameProfile getTrueIdentity(Player player) {

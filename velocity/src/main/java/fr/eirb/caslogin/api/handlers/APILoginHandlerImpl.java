@@ -57,8 +57,9 @@ public class APILoginHandlerImpl implements LoginHandler {
 		return CasLogin.get().getLoginDatabase()
 				.get(PlayerUtils.getTrueIdentity(player).getId())
 				.thenCompose(optionalLoggedUser -> {
-					if (optionalLoggedUser.isEmpty())
+					if (optionalLoggedUser.isEmpty()) {
 						return CompletableFuture.failedFuture(new CompletionException(new NotLoggedInException(player)));
+					}
 					LoggedUser loggedUser = optionalLoggedUser.get();
 					return CompletableFuture.completedFuture(loggedUser);
 				});
