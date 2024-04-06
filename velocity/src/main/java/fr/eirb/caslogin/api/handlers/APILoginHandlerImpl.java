@@ -28,15 +28,12 @@ import java.util.concurrent.TimeUnit;
 public class APILoginHandlerImpl implements LoginHandler {
 	private static final Set<Player> loggingPlayer = Collections.synchronizedSet(new HashSet<>());
 
+
 	@Override
 	public CompletableFuture<List<LoggedUser>> getLoggedUsers() {
 		return CompletableFuture.supplyAsync(() -> {
 			try {
-				List<LoggedUser> users = ApiUtils.getLoggedUsers();
-				for (LoggedUser user : users) {
-					CasLogin.get().getLoginDatabase().put(user.getUuid(), user);
-				}
-				return users;
+				return ApiUtils.getLoggedUsers();
 			} catch (APIException e) {
 				throw new IllegalStateException(e);
 			}
@@ -101,7 +98,7 @@ public class APILoginHandlerImpl implements LoginHandler {
 							loggingPlayer.add(player);
 							CasLogin.get().getLogger().info(String.format("Starting logging poll for player '%s'", player.getUsername()));
 							long counter = 0;
-							while (counter < timeoutMs) {
+							while (counter < timeoutMs && player.isActive()) {
 								LoggedUser user;
 								try {
 									user = ApiUtils.getLoggedUser(player.getUniqueId());

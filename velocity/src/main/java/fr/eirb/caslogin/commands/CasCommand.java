@@ -14,6 +14,7 @@ import com.velocitypowered.api.proxy.Player;
 import com.velocitypowered.api.proxy.ProxyServer;
 import com.velocitypowered.api.proxy.server.RegisteredServer;
 import fr.eirb.caslogin.CasLogin;
+import fr.eirb.caslogin.api.handlers.APIBanHandlerImpl;
 import fr.eirb.caslogin.configuration.ConfigurationManager;
 import fr.eirb.caslogin.events.LogoutEvent;
 import fr.eirb.caslogin.utils.PlayerUtils;
@@ -50,8 +51,10 @@ public final class CasCommand {
 						.<CommandSource, String>argument("login", StringArgumentType.word())
 						.suggests(suggestAllLoggedPlayers())
 						.executes(context -> {
-							if(!context.getSource().hasPermission("cas.ban.def")) {
-								context.getSource().sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("not_enough_permissions")));
+							if (!context.getSource().hasPermission("cas.ban.def")) {
+								context.getSource().sendMessage(MiniMessage
+										.miniMessage()
+										.deserialize(ConfigurationManager.getLang("not_enough_permissions")));
 								return -1;
 							}
 							String login = context.getArgument("login", String.class);
@@ -59,8 +62,19 @@ public final class CasCommand {
 									.thenCompose(optionalUUID -> optionalUUID.isEmpty()
 											? CompletableFuture.completedFuture(Optional.empty())
 											: CasLogin.get().getLoginDatabase().get(optionalUUID.get()))
-									.thenAccept(optionalLoggedUser -> {
-
+									.thenCompose(optionalLoggedUser -> {
+										if (optionalLoggedUser.isEmpty()) {
+											context.getSource().sendMessage(MiniMessage.miniMessage().deserialize("bitch"));
+											return CompletableFuture.failedFuture(new IllegalArgumentException());
+										}
+										return new APIBanHandlerImpl().banUser(null, optionalLoggedUser.get().getUser(), null, null);
+									})
+									.whenComplete((unused, throwable) -> {
+										if(throwable != null){
+											throwable.printStackTrace();
+											return;
+										}
+										System.out.println("Yay");
 									});
 							return Command.SINGLE_SUCCESS;
 						})
@@ -83,8 +97,7 @@ public final class CasCommand {
 				.then(LiteralArgumentBuilder.<CommandSource>literal("reload")
 						.requires(source -> source.hasPermission("cas.config.reload"))
 						.executes(context -> {
-							ConfigurationManager.reloadConfig();
-							CasLogin.get().getLoginHandler().getLoggedUsers();
+							CasLogin.get().refresh();
 							context.getSource().sendMessage(MiniMessage.miniMessage().deserialize(ConfigurationManager.getLang("admin.config.reload")));
 							return Command.SINGLE_SUCCESS;
 						})
