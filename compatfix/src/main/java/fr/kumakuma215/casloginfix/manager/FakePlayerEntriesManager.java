@@ -31,8 +31,13 @@ public class FakePlayerEntriesManager {
 	private PlayerInfoData createFakeInfoData(Player player, GameMode newGamemode) {
 		if (!falseUUIDToFakePlayer.containsKey(player.getUniqueId()))
 			throw new RuntimeException("DIDNT CHECK PLAYER CONTAIN BEFORE CREATEINFODATA");
-		UUID trueUUID = falseUUIDToFakePlayer.get(player.getUniqueId()).trueUUID();
+		FakePlayer fakePlayer = falseUUIDToFakePlayer.get(player.getUniqueId());
+		UUID trueUUID = fakePlayer.trueUUID();
 		WrappedGameProfile profile = WrappedGameProfile.fromPlayer(player);
+		if (fakePlayer.texture() != null) {
+			profile.getProperties().clear();
+			profile.getProperties().put(FakePlayer.TEXTURE_PROPERTY_NAME, fakePlayer.texture());
+		}
 		return new PlayerInfoData(
 				trueUUID,
 				0,
