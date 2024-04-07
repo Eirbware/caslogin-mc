@@ -6,7 +6,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class GetUsersBody {
-	public record CompositeUser(String login, String ecole, Role[] roles, @Nullable String uuid){};
+	public record CompositeUser(String login, String ecole, String diplome, Role[] roles, @Nullable String uuid){};
 	private List<CompositeUser> users;
 
 	public List<CompositeUser> getCompositeUsers() {

@@ -31,7 +31,9 @@ public class SendMessageForFixesListener {
 						if (serverConnection.getServer().getServerInfo().equals(CasLogin.getEntrypointServer().getServerInfo()))
 							return;
 						UUID trueUUID = UuidUtils.generateOfflinePlayerUuid(trueIdentity.getName());
-						serverConnection.sendPluginMessage(CAS_FIX_CHANNEL, new CasFixMessage(trueUUID, loggedUser.getFakeUserUUID(), trueIdentity.getName()).toByteArray());
+						serverConnection.sendPluginMessage(CAS_FIX_CHANNEL,
+								new CasFixMessage(trueUUID, loggedUser.getFakeUserUUID(), trueIdentity.getName(), loggedUser.user().diplome())
+										.toByteArray());
 					});
 				})
 				.exceptionally(throwable -> {

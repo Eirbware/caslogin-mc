@@ -57,7 +57,7 @@ public class MemoryLoginDatabase implements LoginDatabase {
 
 	@Override
 	public CompletableFuture<Void> logoutUserByLogin(String login) {
-		Optional<LoggedUser> user = loggedUserMap.values().stream().filter(loggedUser -> loggedUser.getUser().getLogin().equals(login)).findFirst();
+		Optional<LoggedUser> user = loggedUserMap.values().stream().filter(loggedUser -> loggedUser.user().login().equals(login)).findFirst();
 		if(user.isEmpty())
 			return CompletableFuture.failedFuture(new NoSuchElementException());
 		loggedUserMap.inverse().remove(user.get());
@@ -66,7 +66,7 @@ public class MemoryLoginDatabase implements LoginDatabase {
 
 	@Override
 	public CompletableFuture<Optional<UUID>> getUUIDFromUserByLogin(String login) {
-		Optional<LoggedUser> user = loggedUserMap.values().stream().filter(loggedUser -> loggedUser.getUser().getLogin().equals(login)).findFirst();
+		Optional<LoggedUser> user = loggedUserMap.values().stream().filter(loggedUser -> loggedUser.user().login().equals(login)).findFirst();
 		if(user.isEmpty())
 			return CompletableFuture.failedFuture(new NoSuchElementException());
 		return CompletableFuture.completedFuture(Optional.ofNullable(loggedUserMap.inverse().get(user.get())));

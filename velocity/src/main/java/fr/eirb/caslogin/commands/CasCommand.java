@@ -67,7 +67,7 @@ public final class CasCommand {
 											context.getSource().sendMessage(MiniMessage.miniMessage().deserialize("bitch"));
 											return CompletableFuture.failedFuture(new IllegalArgumentException());
 										}
-										return new APIBanHandlerImpl().banUser(null, optionalLoggedUser.get().getUser(), null, null);
+										return new APIBanHandlerImpl().banUser(null, optionalLoggedUser.get().user(), null, null);
 									})
 									.whenComplete((unused, throwable) -> {
 										if(throwable != null){
@@ -149,7 +149,7 @@ public final class CasCommand {
 				.values()
 				.thenAccept(loggedUsers -> {
 					for (var user : loggedUsers) {
-						builder.suggest(user.getUser().getLogin());
+						builder.suggest(user.user().login());
 					}
 				})
 				.thenCompose(unused -> builder.buildFuture());

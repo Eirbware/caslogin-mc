@@ -126,7 +126,7 @@ public class APILoginHandlerImpl implements LoginHandler {
 						.thenCompose(loggedUser -> CasLogin.get().getLoginDatabase()
 								.put(player.getUniqueId(), loggedUser)
 								.thenAccept(ignored -> {
-									CasLogin.get().getLogger().info(String.format("Player '%s' logged as '%s'.", player.getUsername(), loggedUser.getUser().getLogin()));
+									CasLogin.get().getLogger().info(String.format("Player '%s' logged as '%s'.", player.getUsername(), loggedUser.user().login()));
 									loggingPlayer.remove(player);
 								})
 								.thenApply(unused -> loggedUser)

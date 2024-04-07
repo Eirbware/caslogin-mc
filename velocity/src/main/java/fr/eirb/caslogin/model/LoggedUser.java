@@ -9,20 +9,16 @@ import java.util.UUID;
 
 public record LoggedUser(CasUser user, String uuid) {
 
-	public CasUser getUser(){
-		return user;
-	}
-
 	public UUID getUuid(){
 		return UUID.fromString(uuid);
 	}
 
 	public UUID getFakeUserUUID(){
-		return UuidUtils.generateOfflinePlayerUuid(getUser().getLogin());
+		return UuidUtils.generateOfflinePlayerUuid(this.user.login());
 	}
 
 	public GameProfile getFakeGameProfile(){
-		return new GameProfile(getFakeUserUUID(), user.getLogin(), Collections.emptyList());
+		return new GameProfile(getFakeUserUUID(), user.login(), Collections.emptyList());
 	}
 
 	@Override

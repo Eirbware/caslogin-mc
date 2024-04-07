@@ -24,7 +24,7 @@ public class LuckPermsRoleManager implements RoleManager {
 
 	// THIS IS BLOCKING! SHOULD NOT BE USED OUTSIDE ALREADY ASYNC CALLBACK
 	private List<Group> getRolesAsGroupsOfUser(LoggedUser loggedUser) {
-		return Arrays.stream(loggedUser.getUser().getRoles())
+		return Arrays.stream(loggedUser.user().roles())
 				.map(role -> role.getGroup(api))
 				.map(CompletableFuture::join)
 				.filter(Optional::isPresent)

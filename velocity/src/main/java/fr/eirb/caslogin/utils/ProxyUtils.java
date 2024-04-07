@@ -75,7 +75,7 @@ public final class ProxyUtils {
 		connectionsByUuid.remove(trueIdentity.getId());
 		connectionsByName.remove(trueIdentity.getName().toLowerCase());
 		connectionsByUuid.put(user.getFakeUserUUID(), connectedPlayer);
-		connectionsByName.put(user.getUser().getLogin(), connectedPlayer);
+		connectionsByName.put(user.user().login(), connectedPlayer);
 	}
 
 	public static void removeLoggedUserFromProxy(ProxyServer server, Player player, LoggedUser user) {
@@ -91,6 +91,6 @@ public final class ProxyUtils {
 		connectionsByUuid.put(trueIdentity.getId(), connectedPlayer);
 		connectionsByName.put(trueIdentity.getName().toLowerCase(), connectedPlayer);
 		connectionsByUuid.remove(user.getFakeUserUUID());
-		connectionsByName.remove(user.getUser().getLogin());
+		connectionsByName.remove(user.user().login());
 	}
 }

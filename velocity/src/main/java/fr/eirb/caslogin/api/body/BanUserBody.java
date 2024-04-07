@@ -15,8 +15,8 @@ public class BanUserBody {
 	final Long expires;
 
 	public BanUserBody(@Nullable CasUser banner, CasUser banned, @Nullable String reason, @Nullable Duration banDuration) {
-		this.banner = banner == null ? null : banner.getLogin();
-		this.banned = banned.getLogin();
+		this.banner = banner == null ? null : banner.login();
+		this.banned = banned.login();
 		this.reason = reason;
 		Date now = new Date();
 		this.timestamp = now.getTime();

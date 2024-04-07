@@ -2,18 +2,18 @@ package fr.eirb.caslogin.model;
 
 import com.google.common.base.Objects;
 
-public record CasUser(String login, String ecole, Role[] roles) {
-	public String getLogin(){
-		return login;
-	}
-
-	public String getEcole() {
-		return ecole;
-	}
-
-	public Role[] getRoles() {
-		return roles;
-	}
+public record CasUser(String login, String ecole, String diplome, Role[] roles) {
+//	public String getLogin(){
+//		return login;
+//	}
+//
+//	public String getEcole() {
+//		return ecole;
+//	}
+//
+//	public Role[] getRoles() {
+//		return roles;
+//	}
 
 	@Override
 	public boolean equals(Object o) {

@@ -111,7 +111,7 @@ final class ApiUtils {
 			Request req = getAuthorizedRequest()
 					.setUrl(getLogoutURL(loggedUser))
 					.setMethod("POST")
-					.setBody(String.format("{\"user\": \"%s\"}", loggedUser.getUser().getLogin()))
+					.setBody(String.format("{\"user\": \"%s\"}", loggedUser.user().login()))
 					.build();
 			Response resp = client.executeRequest(req).get();
 			if (resp.getStatusCode() != 200) {
@@ -153,7 +153,7 @@ final class ApiUtils {
 					.stream()
 					.filter(u -> u.uuid() != null)
 					.map(u -> new LoggedUser(
-							new CasUser(u.login(), u.ecole(), u.roles()),
+							new CasUser(u.login(), u.ecole(), u.diplome(), u.roles()),
 							u.uuid()
 					))
 					.toList();
@@ -167,7 +167,7 @@ final class ApiUtils {
 			return getCompositeUsers(client)
 					.stream()
 					.map(u ->
-							new CasUser(u.login(), u.ecole(), u.roles())
+							new CasUser(u.login(), u.ecole(), u.diplome(), u.roles())
 					)
 					.toList();
 		} catch (IOException | ExecutionException | InterruptedException | JsonSyntaxException e) {

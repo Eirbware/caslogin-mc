@@ -17,6 +17,7 @@ public class PluginMessageListener implements org.bukkit.plugin.messaging.Plugin
 		ByteBuffer buff = ByteBuffer.wrap(message);
 		String result = String.valueOf(Charsets.UTF_8.decode(buff));
 		CasFixMessage casFixMessage = new CasFixMessage(result);
+		CasLoginFix.INSTANCE.getLogger().info("Received fix message : '" + casFixMessage + "'");
 		CasLoginFix.getFakePlayerEntriesManager().registerPlayer(new FakePlayer(casFixMessage), casFixMessage.getFalseUUID());
 		if(!CasLoginFix.INSTANCE.hasSkinRestorer())
 			return;

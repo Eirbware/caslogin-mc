@@ -11,7 +11,7 @@ public class NotLoggedInException extends LoginException{
 	}
 
 	public NotLoggedInException(LoggedUser cause){
-		super("User '" + cause.getUser().getLogin() + "'is not logged in!");
+		super("User '" + cause.user().login() + "'is not logged in!");
 	}
 
 }
