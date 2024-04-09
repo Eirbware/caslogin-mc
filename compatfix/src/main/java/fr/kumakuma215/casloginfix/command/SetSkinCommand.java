@@ -66,7 +66,7 @@ public class SetSkinCommand implements CommandExecutor {
 			return false;
 		}
 		String url = String.format("%s/merge?url=%s&accessory=jacket", ConfigurationManager.getSkinApiUrl(), urlArg);
-		runAsyncSetSkin(player, urlArg, "<red>Invalid URL");
+		runAsyncSetSkin(player, url, "<red>Invalid URL");
 		return true;
 	}
 
