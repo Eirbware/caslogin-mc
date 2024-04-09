@@ -15,6 +15,8 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -65,8 +67,10 @@ public class SetSkinCommand implements CommandExecutor {
 			player.sendRichMessage("<red>Invalid URL format!");
 			return false;
 		}
+		urlArg = URLEncoder.encode(urlArg, StandardCharsets.UTF_8);
 		String url = String.format("%s/merge?url=%s&accessory=jacket", ConfigurationManager.getSkinApiUrl(), urlArg);
-		runAsyncSetSkin(player, url, "<red>Invalid URL");
+		player.sendRichMessage("<gray>Setting your skin...");
+		runAsyncSetSkin(player, url, "<red>Couldn't fetch skin. Maybe it's not a valid URL or it took too long to fetch...");
 		return true;
 	}
 
@@ -75,12 +79,10 @@ public class SetSkinCommand implements CommandExecutor {
 		if (ValidationUtil.invalidMinecraftUsername(playerNameArg)) {
 			player.sendRichMessage("<red>Invalid player name");
 		}
-		player.sendRichMessage("<gray>Setting your skin...");
 		String url = String.format("%s/merge?user=%s&accessory=jacket", ConfigurationManager.getSkinApiUrl(), playerNameArg);
-		runAsyncSetSkin(
-				player,
-				url,
-				"<red>Unknown player name");
+		player.sendRichMessage("<gray>Setting your skin...");
+
+		runAsyncSetSkin(player, url, "<red>Couldn't fetch skin. Maybe it's not a valid minecraft name or it took too long to fetch...");
 		return true;
 	}
 }
