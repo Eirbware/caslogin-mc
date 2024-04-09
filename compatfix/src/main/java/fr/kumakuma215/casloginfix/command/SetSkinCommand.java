@@ -65,6 +65,7 @@ public class SetSkinCommand implements CommandExecutor {
 			player.sendRichMessage("<red>Invalid URL format!");
 			return false;
 		}
+		String url = String.format("%s/merge?url=%s&accessory=jacket", ConfigurationManager.getSkinApiUrl(), urlArg);
 		runAsyncSetSkin(player, urlArg, "<red>Invalid URL");
 		return true;
 	}
@@ -76,7 +77,6 @@ public class SetSkinCommand implements CommandExecutor {
 		}
 		player.sendRichMessage("<gray>Setting your skin...");
 		String url = String.format("%s/merge?user=%s&accessory=jacket", ConfigurationManager.getSkinApiUrl(), playerNameArg);
-		System.out.println(url);
 		runAsyncSetSkin(
 				player,
 				url,
