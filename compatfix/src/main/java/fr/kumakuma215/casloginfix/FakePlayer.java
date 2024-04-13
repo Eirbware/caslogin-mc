@@ -2,6 +2,7 @@ package fr.kumakuma215.casloginfix;
 
 import com.comphenix.protocol.wrappers.WrappedSignedProperty;
 import fr.eirb.common.compatfix.CasFixMessage;
+import fr.kumakuma215.casloginfix.utils.CasUtils;
 
 import java.util.Objects;
 import java.util.UUID;
@@ -39,6 +40,10 @@ public final class FakePlayer {
 
 	public String diplome() {
 		return diplome;
+	}
+
+	public String getAccessory(){
+		return CasUtils.getAccessoryFromDiploma(diplome);
 	}
 
 	public WrappedSignedProperty texture() {

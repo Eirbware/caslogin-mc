@@ -1,5 +1,7 @@
 package fr.kumakuma215.casloginfix.command;
 
+import fr.kumakuma215.casloginfix.CasLoginFix;
+import fr.kumakuma215.casloginfix.FakePlayer;
 import fr.kumakuma215.casloginfix.config.ConfigurationManager;
 import fr.kumakuma215.casloginfix.utils.ValidationUtil;
 import net.skinsrestorer.api.SkinsRestorer;
@@ -25,6 +27,10 @@ public class SetSkinCommand implements CommandExecutor {
 	public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 		if (!(sender instanceof Player player)) {
 			sender.sendRichMessage("<red>This command is only for players");
+			return false;
+		}
+		if(CasLoginFix.getFakePlayerEntriesManager().getFakePlayer(player) == null){
+			sender.sendRichMessage("<red>Internal error! No fake player associated. Please report to an admin!!!");
 			return false;
 		}
 		if (args.length != 2) {
@@ -68,7 +74,8 @@ public class SetSkinCommand implements CommandExecutor {
 			return false;
 		}
 		urlArg = URLEncoder.encode(urlArg, StandardCharsets.UTF_8);
-		String url = String.format("%s/merge?url=%s&accessory=jacket", ConfigurationManager.getSkinApiUrl(), urlArg);
+		FakePlayer fp = CasLoginFix.getFakePlayerEntriesManager().getFakePlayer(player);
+		String url = String.format("%s/merge?url=%s&accessory=%s", ConfigurationManager.getSkinApiUrl(), urlArg, , fp.getAccessory());
 		player.sendRichMessage("<gray>Setting your skin...");
 		runAsyncSetSkin(player, url, "<red>Couldn't fetch skin. Maybe it's not a valid URL or it took too long to fetch...");
 		return true;
@@ -79,7 +86,8 @@ public class SetSkinCommand implements CommandExecutor {
 		if (ValidationUtil.invalidMinecraftUsername(playerNameArg)) {
 			player.sendRichMessage("<red>Invalid player name");
 		}
-		String url = String.format("%s/merge?user=%s&accessory=jacket", ConfigurationManager.getSkinApiUrl(), playerNameArg);
+		FakePlayer fp = CasLoginFix.getFakePlayerEntriesManager().getFakePlayer(player);
+		String url = String.format("%s/merge?user=%s&accessory=%s", ConfigurationManager.getSkinApiUrl(), playerNameArg, fp.getAccessory());
 		player.sendRichMessage("<gray>Setting your skin...");
 
 		runAsyncSetSkin(player, url, "<red>Couldn't fetch skin. Maybe it's not a valid minecraft name or it took too long to fetch...");
