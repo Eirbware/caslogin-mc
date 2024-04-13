@@ -75,7 +75,7 @@ public class SetSkinCommand implements CommandExecutor {
 		}
 		urlArg = URLEncoder.encode(urlArg, StandardCharsets.UTF_8);
 		FakePlayer fp = CasLoginFix.getFakePlayerEntriesManager().getFakePlayer(player);
-		String url = String.format("%s/merge?url=%s&accessory=%s", ConfigurationManager.getSkinApiUrl(), urlArg, , fp.getAccessory());
+		String url = String.format("%s/merge?url=%s&accessory=%s", ConfigurationManager.getSkinApiUrl(), urlArg, fp.getAccessory());
 		player.sendRichMessage("<gray>Setting your skin...");
 		runAsyncSetSkin(player, url, "<red>Couldn't fetch skin. Maybe it's not a valid URL or it took too long to fetch...");
 		return true;
