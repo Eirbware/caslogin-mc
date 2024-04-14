@@ -20,23 +20,42 @@ import org.jetbrains.annotations.NotNull;
 
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SetSkinCommand implements CommandExecutor {
+
+	private static final ConcurrentHashMap<UUID, Date> lastUsedCommand = new ConcurrentHashMap<>();
+
 	@Override
 	public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
 		if (!(sender instanceof Player player)) {
 			sender.sendRichMessage("<red>This command is only for players");
-			return false;
+			return true;
 		}
-		if(CasLoginFix.getFakePlayerEntriesManager().getFakePlayer(player) == null){
+		if (CasLoginFix.getFakePlayerEntriesManager().getFakePlayer(player) == null) {
 			sender.sendRichMessage("<red>Internal error! No fake player associated. Please report to an admin!!!");
-			return false;
+			return true;
 		}
 		if (args.length != 2) {
 			sender.sendRichMessage("<red>This command only accepts 2 arguments!");
 			return false;
+		}
+		if(lastUsedCommand.containsKey(player.getUniqueId())){
+			var then = lastUsedCommand.get(player.getUniqueId());
+			var now = new Date();
+			Duration diff = Duration.between(then.toInstant(), now.toInstant());
+			Duration cooldown = Duration.ofMinutes(1);
+			if(diff.compareTo(cooldown) < 0) {
+				Duration remaining = cooldown.minus(diff);
+				player.sendRichMessage("<red>Command on cooldown. Please wait " + remaining.toMinutes() + "m" + remaining.toSecondsPart() + "s");
+				return true;
+			}
 		}
 		if (args[0].equals("player")) {
 			return playerSubCommand(player, command, label, args);
@@ -61,7 +80,10 @@ public class SetSkinCommand implements CommandExecutor {
 		SkinUtils.runAsyncSetSkin(
 				player,
 				url,
-				unused -> player.sendRichMessage("<green>Your skin has been set!"),
+				unused -> {
+					lastUsedCommand.put(player.getUniqueId(), new Date());
+					player.sendRichMessage("<green>Your skin has been set!");
+					},
 				unused -> player.sendRichMessage("<red>Couldn't fetch skin. Maybe it's not a valid URL or it took too long to fetch...")
 		);
 		return true;
@@ -79,7 +101,10 @@ public class SetSkinCommand implements CommandExecutor {
 		SkinUtils.runAsyncSetSkin(
 				player,
 				url,
-				unused -> player.sendRichMessage("<green>Your skin has been set!"),
+				unused -> {
+					lastUsedCommand.put(player.getUniqueId(), new Date());
+					player.sendRichMessage("<green>Your skin has been set!");
+				},
 				unused -> player.sendRichMessage("<red>Couldn't fetch skin. Maybe it's not a valid minecraft name or it took too long to fetch...")
 		);
 		return true;
