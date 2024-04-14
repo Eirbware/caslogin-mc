@@ -1,6 +1,7 @@
 package fr.eirb.caslogin.role.impl;
 
 import com.velocitypowered.api.proxy.Player;
+import com.velocitypowered.api.util.GameProfile;
 import fr.eirb.caslogin.model.LoggedUser;
 import fr.eirb.caslogin.role.RoleManager;
 import fr.eirb.caslogin.utils.PlayerUtils;
@@ -78,7 +79,10 @@ public class LuckPermsRoleManager implements RoleManager {
 
 	@Override
 	public void removePlayerData(Player player) {
-		api.getUserManager().loadUser(PlayerUtils.getTrueIdentity(player).getId())
+		GameProfile trueIdentity = PlayerUtils.getTrueIdentity(player);
+		if(trueIdentity == null)
+			return;
+		api.getUserManager().loadUser(trueIdentity.getId())
 				.thenAccept(user -> {
 					user.data().clear();
 					api.getUserManager().saveUser(user);

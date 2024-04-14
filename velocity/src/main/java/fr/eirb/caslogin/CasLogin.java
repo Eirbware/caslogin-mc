@@ -81,6 +81,7 @@ public class CasLogin {
 
 	private void registerListeners() {
 		proxy.getEventManager().register(this, new PlayerUtils());
+		proxy.getEventManager().register(this, new AvoidDoublePlayersListener());
 		if(ConfigurationManager.getOnlineMode())
 			proxy.getEventManager().register(this, new AutoLoginListener());
 		if(!ConfigurationManager.getOnlineMode()) {
