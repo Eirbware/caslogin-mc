@@ -102,4 +102,8 @@ public final class ProxyUtils {
 		connectionsByUuid.remove(user.getFakeUserUUID());
 		connectionsByName.remove(user.user().login());
 	}
+
+	public static void clearUsername(String name) {
+		shadowedPlayerNames.remove(name);
+	}
 }
