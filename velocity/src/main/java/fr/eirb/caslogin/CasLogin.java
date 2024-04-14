@@ -67,7 +67,7 @@ public class CasLogin {
 		logger.info("Loading plugin...");
 		INSTANCE = this;
 		ConfigurationManager.loadConfig(pluginDir);
-		if(!ConfigurationManager.getOnlineMode())
+		if(!getProxy().getConfiguration().isOnlineMode())
 			logger.info("Offline mode activated");
 		resetEntrypoints();
 		registerCommands();
@@ -82,9 +82,9 @@ public class CasLogin {
 	private void registerListeners() {
 		proxy.getEventManager().register(this, new PlayerUtils());
 		proxy.getEventManager().register(this, new AvoidDoublePlayersListener());
-		if(ConfigurationManager.getOnlineMode())
+		if(proxy.getConfiguration().isOnlineMode())
 			proxy.getEventManager().register(this, new AutoLoginListener());
-		if(!ConfigurationManager.getOnlineMode()) {
+		if(!proxy.getConfiguration().isOnlineMode()) {
 			proxy.getEventManager().register(this, new AutoLogoutListener());
 		}
 		proxy.getEventManager().register(this, new RoleUpdaterListener());

@@ -59,9 +59,6 @@ public class ConfigurationManager {
 			throw new NoSuchLoginHandler(type);
 		}
 	}
-	public static boolean getOnlineMode(){
-		return pluginConfig.getNode("onlineMode").getBoolean();
-	}
 
 	private static class ConfigurationUtils {
 		public static void tryCreatePluginConfigDir(Path pluginDir){
