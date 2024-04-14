@@ -3,6 +3,7 @@ package fr.kumakuma215.casloginfix.command;
 import fr.kumakuma215.casloginfix.CasLoginFix;
 import fr.kumakuma215.casloginfix.FakePlayer;
 import fr.kumakuma215.casloginfix.config.ConfigurationManager;
+import fr.kumakuma215.casloginfix.utils.SkinUtils;
 import fr.kumakuma215.casloginfix.utils.ValidationUtil;
 import net.skinsrestorer.api.SkinsRestorer;
 import net.skinsrestorer.api.SkinsRestorerProvider;
@@ -47,26 +48,6 @@ public class SetSkinCommand implements CommandExecutor {
 		return false;
 	}
 
-	private void runAsyncSetSkin(Player player, String input, String failMessage) {
-		CompletableFuture.runAsync(() -> {
-			SkinsRestorer api = SkinsRestorerProvider.get();
-			PlayerStorage playerStorage = api.getPlayerStorage();
-			SkinApplier<Player> skinApplier = api.getSkinApplier(Player.class);
-			try {
-				Optional<InputDataResult> optional = api.getSkinStorage().findOrCreateSkinData(input);
-				if (optional.isEmpty()) {
-					player.sendRichMessage(failMessage);
-					return;
-				}
-				playerStorage.setSkinIdOfPlayer(player.getUniqueId(), optional.get().getIdentifier());
-				skinApplier.applySkin(player, optional.get().getProperty());
-				player.sendRichMessage("<green>Your skin has been set!");
-			} catch (DataRequestException | MineSkinException e) {
-				player.sendRichMessage(failMessage);
-			}
-		});
-	}
-
 	private boolean urlSubCommand(Player player, Command command, String label, String[] args) {
 		String urlArg = args[1];
 		if (!ValidationUtil.validSkinUrl(urlArg)) {
@@ -77,7 +58,12 @@ public class SetSkinCommand implements CommandExecutor {
 		FakePlayer fp = CasLoginFix.getFakePlayerEntriesManager().getFakePlayer(player);
 		String url = String.format("%s/merge?url=%s&accessory=%s", ConfigurationManager.getSkinApiUrl(), urlArg, fp.getAccessory());
 		player.sendRichMessage("<gray>Setting your skin...");
-		runAsyncSetSkin(player, url, "<red>Couldn't fetch skin. Maybe it's not a valid URL or it took too long to fetch...");
+		SkinUtils.runAsyncSetSkin(
+				player,
+				url,
+				unused -> player.sendRichMessage("<green>Your skin has been set!"),
+				unused -> player.sendRichMessage("<red>Couldn't fetch skin. Maybe it's not a valid URL or it took too long to fetch...")
+		);
 		return true;
 	}
 
@@ -90,7 +76,12 @@ public class SetSkinCommand implements CommandExecutor {
 		String url = String.format("%s/merge?user=%s&accessory=%s", ConfigurationManager.getSkinApiUrl(), playerNameArg, fp.getAccessory());
 		player.sendRichMessage("<gray>Setting your skin...");
 
-		runAsyncSetSkin(player, url, "<red>Couldn't fetch skin. Maybe it's not a valid minecraft name or it took too long to fetch...");
+		SkinUtils.runAsyncSetSkin(
+				player,
+				url,
+				unused -> player.sendRichMessage("<green>Your skin has been set!"),
+				unused -> player.sendRichMessage("<red>Couldn't fetch skin. Maybe it's not a valid minecraft name or it took too long to fetch...")
+		);
 		return true;
 	}
 }

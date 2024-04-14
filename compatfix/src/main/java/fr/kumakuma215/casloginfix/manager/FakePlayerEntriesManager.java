@@ -89,6 +89,10 @@ public class FakePlayerEntriesManager {
 		CasLoginFix.getProtocolManager().sendServerPacket(player, packet);
 	}
 
+	public void deleteFakePlayer(Player player){
+		falseUUIDToFakePlayer.remove(player.getUniqueId());
+	}
+
 	public FakePlayer getFakePlayer(Player p) {
 		return falseUUIDToFakePlayer.get(p.getUniqueId());
 	}

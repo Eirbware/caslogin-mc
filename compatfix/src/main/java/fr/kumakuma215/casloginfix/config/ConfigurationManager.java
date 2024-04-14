@@ -29,6 +29,10 @@ public class ConfigurationManager {
 		return pluginConfig.getString("skinApiUrl");
 	}
 
+	public static String getSteveSkinUrl() {
+		return getSkinApiUrl() + "/skins/steve";
+	}
+
 	private static class ConfigurationUtils {
 		public static void tryCreatePluginConfigDir(File pluginDir) {
 			if (!pluginDir.exists()) {

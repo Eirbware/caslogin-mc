@@ -27,29 +27,34 @@ public class UpdateFakePlayer implements Listener {
 		}
 	}
 
-	private static SkinIdentifier getSkinIdOfPremiumPlayer(SkinsRestorer api, String username) throws MineSkinException, DataRequestException {
-		SkinStorage skinStorage = api.getSkinStorage();
-		InputDataResult result = skinStorage.findOrCreateSkinData(username).orElseThrow();
-		return result.getIdentifier();
-	}
+//	private static SkinIdentifier getSkinIdOfPremiumPlayer(SkinsRestorer api, String username) throws MineSkinException, DataRequestException {
+//		SkinStorage skinStorage = api.getSkinStorage();
+//		InputDataResult result = skinStorage.findOrCreateSkinData(username).orElseThrow();
+//		return result.getIdentifier();
+//	}
+
+//	@EventHandler
+//	public void onPlayerJoin(PlayerJoinEvent ev) throws MineSkinException {
+//		if(!CasLoginFix.INSTANCE.hasSkinRestorer())
+//			return;
+//		try {
+//			FakePlayer fakePlayer = CasLoginFix.getFakePlayerEntriesManager().getFakePlayer(ev.getPlayer());
+//			if(fakePlayer == null)
+//				return;
+//			SkinsRestorer api = SkinsRestorerProvider.get();
+//			var optionalSkinProperty = api.getPlayerStorage().getSkinOfPlayer(ev.getPlayer().getUniqueId());
+//			if(optionalSkinProperty.isEmpty()){
+//				api.getPlayerStorage().setSkinIdOfPlayer(ev.getPlayer().getUniqueId(), getSkinIdOfPremiumPlayer(api, fakePlayer.trueName()));
+//				api.getSkinApplier(Player.class).applySkin(ev.getPlayer());
+//			}
+//			CasLoginFix.getFakePlayerEntriesManager().refreshSkin(ev.getPlayer().getUniqueId());
+//		} catch (DataRequestException | NoFakePlayerException e) {
+//			throw new RuntimeException(e);
+//		}
+//	}
 
 	@EventHandler
-	public void onPlayerJoin(PlayerJoinEvent ev) throws MineSkinException {
-		if(!CasLoginFix.INSTANCE.hasSkinRestorer())
-			return;
-		try {
-			FakePlayer fakePlayer = CasLoginFix.getFakePlayerEntriesManager().getFakePlayer(ev.getPlayer());
-			if(fakePlayer == null)
-				return;
-			SkinsRestorer api = SkinsRestorerProvider.get();
-			var optionalSkinProperty = api.getPlayerStorage().getSkinOfPlayer(ev.getPlayer().getUniqueId());
-			if(optionalSkinProperty.isEmpty()){
-				api.getPlayerStorage().setSkinIdOfPlayer(ev.getPlayer().getUniqueId(), getSkinIdOfPremiumPlayer(api, fakePlayer.trueName()));
-				api.getSkinApplier(Player.class).applySkin(ev.getPlayer());
-			}
-			CasLoginFix.getFakePlayerEntriesManager().refreshSkin(ev.getPlayer().getUniqueId());
-		} catch (DataRequestException | NoFakePlayerException e) {
-			throw new RuntimeException(e);
-		}
+	public void onPlayerLeave(PlayerQuitEvent ev){
+		CasLoginFix.getFakePlayerEntriesManager().deleteFakePlayer(ev.getPlayer());
 	}
 }
