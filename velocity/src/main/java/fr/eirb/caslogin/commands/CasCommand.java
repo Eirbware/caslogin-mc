@@ -32,7 +32,7 @@ public final class CasCommand {
 				.<CommandSource>literal("cas")
 				.then(loginCommand(proxy))
 				.then(logoutCommand(proxy))
-				.then(banCommand(proxy))
+//				.then(banCommand(proxy))
 //				.then(pardonCommand(proxy))
 				.then(configCommand())
 				.build();

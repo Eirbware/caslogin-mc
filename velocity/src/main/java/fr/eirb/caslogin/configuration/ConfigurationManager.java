@@ -2,8 +2,8 @@ package fr.eirb.caslogin.configuration;
 
 import fr.eirb.caslogin.CasLogin;
 import fr.eirb.caslogin.exceptions.configuration.NoSuchLoginHandler;
-import ninja.leaping.configurate.ConfigurationNode;
-import ninja.leaping.configurate.yaml.YAMLConfigurationLoader;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.yaml.YamlConfigurationLoader;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,28 +31,28 @@ public class ConfigurationManager {
 	}
 
 	public static String getLang(String path){
-		return langConfig.getNode((Object[]) path.split("\\.")).getString();
+		return langConfig.node((Object[]) path.split("\\.")).getString();
 	}
 	public static String getAuthServer(){
-		return pluginConfig.getNode("auth_server").getString();
+		return pluginConfig.node("auth_server").getString();
 	}
 	public static String getApiKey(){
-		return pluginConfig.getNode("api_key").getString();
+		return pluginConfig.node("api_key").getString();
 	}
 	public static String getEntrypointServerName() {
-		return pluginConfig.getNode("entrypoint_server").getString();
+		return pluginConfig.node("entrypoint_server").getString();
 	}
 	public static String getLoggedEntrypointServer() {
-		return pluginConfig.getNode("logged_entrypoint_server").getString();
+		return pluginConfig.node("logged_entrypoint_server").getString();
 	}
 	public static int getLoginPollTimeoutSeconds(){
-		return pluginConfig.getNode("loginPollTimeoutSeconds").getInt();
+		return pluginConfig.node("loginPollTimeoutSeconds").getInt();
 	}
 	public static long getLoginPollIntervalMS(){
-		return pluginConfig.getNode("loginPollIntervalMS").getLong();
+		return pluginConfig.node("loginPollIntervalMS").getLong();
 	}
 	public static LoginHandlerTypes getLoginHandlerType() throws NoSuchLoginHandler{
-		String type = pluginConfig.getNode("loginHandlerType").getString();
+		String type = pluginConfig.node("loginHandlerType").getString();
 		try {
 			return LoginHandlerTypes.valueOf(type);
 		}catch(IllegalArgumentException ex){
@@ -83,7 +83,7 @@ public class ConfigurationManager {
 				}
 			}
 			try {
-				return YAMLConfigurationLoader.builder().setFile(configFile.toFile()).build().load();
+				return YamlConfigurationLoader.builder().file(configFile.toFile()).build().load();
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
